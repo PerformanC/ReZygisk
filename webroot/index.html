@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta name="viewport" content="initial-scale=1, width=device-width" />
+    <meta name="viewport" content="viewport-fit=cover" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script src="js/theme.js" type="module"></script>
+    <script src="js/list/module.js" type="module"></script>
+    <script src="js/list/settings.js" type="module"></script>
+    <script src="js/list/lang.js" type="module"></script>
+    <script src="js/main.js" type="module"></script>
+    <script src="js/modal/lang.js" type="module"></script>
+    <link rel="stylesheet" href="css/index.css">
+  </head>
+  <body id="main_body">
+    <!-- INFO: Loading screen -->
+    <div id="loading_screen" class="full_screen">
+      <div class="loader"></div>
+    </div>
+    
+    <!-- INFO: Modal list -->
+    <div id="lang_modal" class="full_screen" style="display: none;">
+      <div id="lang_modal_close" class="close_icon" style="margin-top: 20px; margin-left: 20px;">
+        <img src="assets/close.svg">
+      </div>
+      <div style="padding-left: 25px;">
+        <h1 id="lang_modal_title">Choose your new language</h1>
+      </div>
+      <div id="lang_modal_list" style="padding-left: 25px; padding-right: 25px;">
+        <!-- N/A -->
+      </div>
+    </div>
+
+    <!-- INFO: Headers -->
+    <div class="header">
+      <div>ReZygisk</div>
+      <div style="display: flex; align-items: center;">
+        <div id="lang_switcher">
+          <img src="assets/lang.svg">
+        </div>
+        <div id="theme_switcher" style="margin-left: 10px;">
+          <img src="assets/dark.svg">
+        </div>
+      </div>
+    </div>
+
+    <div style="padding: 40px 0px;"></div>
+
+    <!-- INFO: Info card -->
+    <div id="info_card" class="bright card">
+      <div class="brightc content" style="display: flex; align-items: center;">
+        <div id="rezygisk_icon_state" class="brightc">
+          <img class="brightc" src="assets/mark.svg">
+        </div>
+        <div id="rezygisk_state" class="brightc content lock" style="font-size: 1.2em; padding-bottom: 4px; padding-left: 5px;">
+          ReZygisk is at an unknown state!
+        </div>
+      </div>
+      <div class="brightc content">
+        <div id="version_info_title" class="brightc lock" style="font-size: 1.1em">Version</div>
+        <div class="brightc desc lockd" id="version_code" style="font-size: 0.9em; margin-top: 3px;">Unknown</div>
+      </div>
+      <div class="brightc content">
+        <div id="root_info_title" class="brightc lock" style="font-size: 1.1em">Root Implementation</div>
+        <div class="brightc desc lockd" id="root_impl" style="font-size: 0.9em; margin-top: 3px;">Unknown</div>
+      </div>
+      <div class="brightc content">
+        <div class="brightc lock" style="font-size: 1.1em">Zygote64</div>
+        <div class="brightc desc lockd" id="zygote32_status" style="font-size: 0.9em; margin-top: 3px;">Unknown</div>
+      </div>
+      <div class="brightc content lock">
+        <div class="brightc lock" style="font-size: 1.1em">Zygote32</div>
+        <div class="brightc desc lockd" id="zygote64_status" style="font-size: 0.9em; margin-top: 3px;">Unknown</div>
+      </div>
+    </div>
+
+    <!-- INFO: Module list card -->
+    <div id="modules_card" class="dim card list" style="display: none;">
+      <!-- INFO: Module list card header -->
+      <div id="modules_header" class="dimc liste">
+        <div class="dimc" style="font-size: 1.2em; display: flex; align-items: center;">
+          <div id="modules_list_icon" class="dimc">
+            <img class="dimc" src="assets/module.svg">
+          </div>
+          <div id="module_card_title" class="dimc" style="padding-bottom: 4px; padding-left: 5px;">Modules</div>
+        </div>
+
+        <div class="dimc">
+          <div id="module_expand_icon" class="dimc expander" style="max-height: 24px;">
+            <img class="dimc" src="assets/expand.svg">
+          </div>
+        </div>
+      </div>
+
+      <!-- INFO: Module list card body -->
+      <div id="modules_list" class="dimc" style="width: 100%;">
+        <!-- N/A -->
+      </div>
+    </div>
+
+    <!-- INFO: Settings card -->
+    <div id="rezygisk_settings" class="dim card list" style="display: none;">
+      <!-- INFO: Settings card header -->
+      <div id="settings_header" class="dimc" style="align-items: center; display: flex; justify-content: space-between; padding-bottom: 10px;">
+        <div class="dimc" style="align-items: center; display: flex;">
+          <div class="dimc" id="setting_icon">
+            <img class="dimc" src="assets/settings.svg">
+          </div>
+          <div id="settings_card_title" class="dimc content" style="padding-left: 5px; font-size: 1.2em;">
+            Settings
+          </div>
+        </div>
+
+        <div class="dimc">
+          <div id="settings_expand_icon" class="dimc expander" style="margin-bottom: 4px; max-height: 24px;">
+            <img class="dimc" src="assets/expand.svg">
+          </div>
+        </div>
+      </div>
+      <!-- INFO: Settings card body (Daemon32) -->
+      <div class="small_card">
+        <div class="small_card_bg content" style="font-size: 1.1em; padding-left: 5px; padding-top: 6px; padding-bottom: 14px;">Daemon (32 bit)</div>
+        <div class="small_card_bg content button_list">
+          <div id="daemon32_stop_button" class="center button">Stop</div>
+          <div id="daemon32_start_button" class="center button">Start</div>
+          <div id="daemon32_exit_button" class="center button">Exit</div>
+        </div>
+      </div>
+      <!-- INFO: Settings card body (Daemon64) -->
+      <div class="small_card" style="margin-top: 15px;">
+        <div class="small_card_bg content" style="font-size: 1.1em; padding-left: 5px; padding-top: 6px; padding-bottom: 14px;">Daemon (64 bit)</div>
+        <div class="small_card_bg content button_list">
+          <div id="daemon64_stop_button" class="center button">Stop</div>
+          <div id="daemon64_start_button" class="center button">Start</div>
+          <div id="daemon64_exit_button" class="center button">Exit</div>
+        </div>
+      </div>
+    </div>
+
+  </body>
+</html>

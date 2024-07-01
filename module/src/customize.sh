@@ -110,6 +110,38 @@ mv "$TMPDIR/sepolicy.rule" "$MODPATH"
 mkdir "$MODPATH/bin"
 mkdir "$MODPATH/lib"
 mkdir "$MODPATH/lib64"
+mkdir "$MODPATH/webroot"
+
+ui_print "- Extracting webroot"
+extract "$ZIPFILE" 'webroot/index.html' "$MODPATH/webroot" true
+
+extract "$ZIPFILE" 'webroot/js/main.js' "$MODPATH/webroot/js" true
+extract "$ZIPFILE" 'webroot/js/kernelsu.js' "$MODPATH/webroot/js" true
+extract "$ZIPFILE" 'webroot/js/theme.js' "$MODPATH/webroot/js" true
+extract "$ZIPFILE" 'webroot/js/language.js' "$MODPATH/webroot/js" true
+
+extract "$ZIPFILE" 'webroot/js/list/module.js' "$MODPATH/webroot/js/list" true
+extract "$ZIPFILE" 'webroot/js/list/settings.js' "$MODPATH/webroot/js/list" true
+extract "$ZIPFILE" 'webroot/js/list/lang.js' "$MODPATH/webroot/js/list" true
+
+extract "$ZIPFILE" 'webroot/js/lang/en_US.js' "$MODPATH/webroot/js/lang" true
+extract "$ZIPFILE" 'webroot/js/lang/vi_VN.js' "$MODPATH/webroot/js/lang" true
+extract "$ZIPFILE" 'webroot/js/lang/index.js' "$MODPATH/webroot/js/lang" true
+
+extract "$ZIPFILE" 'webroot/js/modal/lang.js' "$MODPATH/webroot/js/modal" true
+
+extract "$ZIPFILE" 'webroot/css/index.css' "$MODPATH/webroot/css" true
+
+extract "$ZIPFILE" 'webroot/assets/mark.svg' "$MODPATH/webroot/assets" true
+extract "$ZIPFILE" 'webroot/assets/tick.svg' "$MODPATH/webroot/assets" true
+extract "$ZIPFILE" 'webroot/assets/warn.svg' "$MODPATH/webroot/assets" true
+extract "$ZIPFILE" 'webroot/assets/light.svg' "$MODPATH/webroot/assets" true
+extract "$ZIPFILE" 'webroot/assets/dark.svg' "$MODPATH/webroot/assets" true
+extract "$ZIPFILE" 'webroot/assets/module.svg' "$MODPATH/webroot/assets" true
+extract "$ZIPFILE" 'webroot/assets/expand.svg' "$MODPATH/webroot/assets" true
+extract "$ZIPFILE" 'webroot/assets/settings.svg' "$MODPATH/webroot/assets" true
+extract "$ZIPFILE" 'webroot/assets/close.svg' "$MODPATH/webroot/assets" true
+extract "$ZIPFILE" 'webroot/assets/lang.svg' "$MODPATH/webroot/assets" true
 
 if [ "$ARCH" = "x86" ] || [ "$ARCH" = "x64" ]; then
   ui_print "- Extracting x86 libraries"

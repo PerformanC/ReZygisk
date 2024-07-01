@@ -86,6 +86,9 @@ androidComponents.onVariants { variant ->
         into("lib") {
             from(project(":loader").layout.buildDirectory.file("intermediates/stripped_native_libs/$variantLowered/out/lib"))
         }
+        into("webroot") {
+            from("${rootProject.projectDir}/webroot")
+        }
 
         val root = moduleDir.get()
 
@@ -160,6 +163,35 @@ androidComponents.onVariants { variant ->
                             root.file("bin/$abi64/zygiskd").asFile
                         )
                     )
+                    set.add(Pair(root.file("webroot/index.html").asFile, null))
+
+                    set.add(Pair(root.file("webroot/js/main.js").asFile, null))
+                    set.add(Pair(root.file("webroot/js/kernelsu.js").asFile, null))
+                    set.add(Pair(root.file("webroot/js/theme.js").asFile, null))
+                    set.add(Pair(root.file("webroot/js/language.js").asFile, null))
+
+                    set.add(Pair(root.file("webroot/js/list/module.js").asFile, null))
+                    set.add(Pair(root.file("webroot/js/list/settings.js").asFile, null))
+                    set.add(Pair(root.file("webroot/js/list/lang.js").asFile, null))
+
+                    set.add(Pair(root.file("webroot/js/lang/en_US.js").asFile, null))
+                    set.add(Pair(root.file("webroot/js/lang/vi_VN.js").asFile, null))
+                    set.add(Pair(root.file("webroot/js/lang/index.js").asFile, null))
+
+                    set.add(Pair(root.file("webroot/js/modal/lang.js").asFile, null))
+
+                    set.add(Pair(root.file("webroot/css/index.css").asFile, null))
+                    
+                    set.add(Pair(root.file("webroot/assets/mark.svg").asFile, null))
+                    set.add(Pair(root.file("webroot/assets/tick.svg").asFile, null))
+                    set.add(Pair(root.file("webroot/assets/warn.svg").asFile, null))
+                    set.add(Pair(root.file("webroot/assets/light.svg").asFile, null))
+                    set.add(Pair(root.file("webroot/assets/dark.svg").asFile, null))
+                    set.add(Pair(root.file("webroot/assets/module.svg").asFile, null))
+                    set.add(Pair(root.file("webroot/assets/expand.svg").asFile, null))
+                    set.add(Pair(root.file("webroot/assets/settings.svg").asFile, null))
+                    set.add(Pair(root.file("webroot/assets/close.svg").asFile, null))
+                    set.add(Pair(root.file("webroot/assets/lang.svg").asFile, null))
                     sig.initSign(privKey)
                     set.forEach { it.first.sha(it.second) }
                     val signFile = root.file(name).asFile
