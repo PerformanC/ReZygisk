@@ -80,7 +80,7 @@ androidComponents.onVariants { variant ->
             filter<FixCrLfFilter>("eol" to FixCrLfFilter.CrLf.newInstance("lf"))
         }
         into("bin") {
-            from(project(":zygiskd").layout.buildDirectory.file("rustJniLibs/android"))
+            from(project(":zygiskd").layout.buildDirectory.getAsFile().get())
             include("**/zygiskd")
         }
         into("lib") {
