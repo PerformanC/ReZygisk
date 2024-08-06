@@ -25,27 +25,27 @@ pub const SYSTEM_SERVER_STARTED: i32 = 10;
 #[derive(Debug, Eq, PartialEq, TryFromPrimitive)]
 #[repr(u8)]
 pub enum DaemonSocketAction {
-    PingHeartbeat,
-    RequestLogcatFd,
-    GetProcessFlags,
-    GetInfo,
-    ReadModules,
-    RequestCompanionSocket,
-    GetModuleDir,
-    ZygoteRestart,
-    SystemServerStarted,
+  PingHeartbeat,
+  RequestLogcatFd,
+  GetProcessFlags,
+  GetInfo,
+  ReadModules,
+  RequestCompanionSocket,
+  GetModuleDir,
+  ZygoteRestart,
+  SystemServerStarted
 }
 
 // Zygisk process flags
 bitflags! {
-    #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
-    pub struct ProcessFlags: u32 {
-        const PROCESS_GRANTED_ROOT = 1 << 0;
-        const PROCESS_ON_DENYLIST = 1 << 1;
-        const PROCESS_IS_MANAGER = 1 << 28;
-        const PROCESS_ROOT_IS_APATCH = 1 << 27;
-        const PROCESS_ROOT_IS_KSU = 1 << 29;
-        const PROCESS_ROOT_IS_MAGISK = 1 << 30;
-        const PROCESS_IS_SYSUI = 1 << 31;
-    }
+  #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
+  pub struct ProcessFlags: u32 {
+    const PROCESS_GRANTED_ROOT = 1 << 0;
+    const PROCESS_ON_DENYLIST = 1 << 1;
+    const PROCESS_IS_MANAGER = 1 << 28;
+    const PROCESS_ROOT_IS_APATCH = 1 << 27;
+    const PROCESS_ROOT_IS_KSU = 1 << 29;
+    const PROCESS_ROOT_IS_MAGISK = 1 << 30;
+    const PROCESS_IS_SYSUI = 1 << 31;
+  }
 }
