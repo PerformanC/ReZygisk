@@ -228,6 +228,8 @@ struct SocketHandler : public EventHandler {
             tracing_state = TRACING;
           }
 
+          setenv("ZYGISK_ENABLED", "1", 1);
+
           updateStatus();
 
           break;
@@ -250,6 +252,8 @@ struct SocketHandler : public EventHandler {
 
           tracing_state = EXITING;
           strcpy(monitor_stop_reason, "user requested");
+
+          setenv("ZYGISK_ENABLED", "0", 1);
 
           updateStatus();
           loop.Stop();
