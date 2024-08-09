@@ -84,6 +84,20 @@ int main(int argc, char **argv) {
 
     printf("Is the daemon running: %s\n", info.running ? "yes" : "no");
 
+    if (info.modules->modules_count != 0) {
+      printf("Modules: %zu\n", info.modules->modules_count);
+
+      for (size_t i = 0; i < info.modules->modules_count; i++) {
+        printf(" - %s\n", info.modules->modules[i]);
+
+        free(info.modules->modules[i]);
+      }
+
+      free(info.modules->modules);
+    } else {
+      printf("Modules: N/A\n");
+    }
+
     return 0;
   } else {
     printf(

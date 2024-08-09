@@ -49,7 +49,13 @@ enum zygote_root_impl {
   ZYGOTE_ROOT_IMPL_MAGISK
 };
 
+struct zygote_modules {
+  char **modules;
+  size_t modules_count;
+};
+
 struct zygote_info {
+  struct zygote_modules *modules;
   enum zygote_root_impl root_impl;
   pid_t pid;
   bool running;

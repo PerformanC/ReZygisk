@@ -283,6 +283,12 @@ fn handle_daemon_action(
 
           let pid = unsafe { libc::getpid() };
           stream.write_u32(pid as u32)?;
+
+          stream.write_usize(context.modules.len())?;
+
+          for module in context.modules.iter() {
+              stream.write_string(&module.name)?;
+          }
         }
         DaemonSocketAction::ReadModules => {
             stream.write_usize(context.modules.len())?;

@@ -1,0 +1,93 @@
+{
+  "langName": "简体中文 (中国)",
+  "global": {
+    "unknown": "未知"
+  },
+  "modal": {
+    "logs": {
+      "header": "错误日志",
+      "placeholder": "暂时没有错误日志"
+    }
+  },
+  "smallPage": {
+    "language": {
+      "header": "选择语言"
+    },
+    "theme": {
+      "header": "选择主题风格",
+      "dark": "暗色",
+      "light": "浅色",
+      "system": "跟随系统设置"
+    }
+  },
+  "page": {
+    "home": {
+      "header": "主页",
+      "status": {
+        "unknown": "未知",
+        "notWorking": "未运行",
+        "ok": "运行中",
+        "partially": "部分运行"
+      },
+      "info": {
+        "version": "版本",
+        "root": "Root实现",
+        "zygote": {
+          "injected": "已注入",
+          "notInjected": "注入失败",
+          "unknown": "未知"
+        }
+      }
+    },
+    "modules": {
+      "header": "模块",
+      "notAvaliable": "目前没有模块使用Zygisk",
+      "arch": "架构: "
+    },
+    "action": {
+      "header": "操作",
+      "daemonButton": {
+        "start": "启动",
+        "stop": "停止",
+        "pause": "暂停"
+      },
+      "monitor": {
+        "32": "监视器 (32位)",
+        "64": "监视器 (64位)"
+      },
+      "status": {
+        "unknown": "未知",
+        "notWorking": "未运行",
+        "ok": "运行中"
+      }
+    },
+    "settings": {
+      "header": "设置",
+      "font": {
+        "header": "使用系统字体",
+        "description": "此选项将在此应用中启用系统字体。可能与FlipFont不兼容。"
+      },
+      "theme": {
+        "header": "主题",
+        "description": "选择Web界面的主题风格"
+      },
+      "language": {
+        "header": "语言",
+        "description": "切换不同的语言"
+      },
+      "logs": {
+        "header": "错误日志",
+        "description": "浏览记录下来的所有错误日志"
+      },
+      "credits": {
+        "module": "模块开发者",
+        "original": "源模块开发者",
+        "web": "Web界面开发者"
+      },
+      "license": {
+        "module": "模块开源许可",
+        "web": "Web界面开源许可"
+      }
+    }
+  }
+}
