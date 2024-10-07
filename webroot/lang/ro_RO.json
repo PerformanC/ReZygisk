@@ -1,33 +1,33 @@
 {
-  "langName": "Română (România)",
+  "langName": "Română",
   "global": {
     "unknown": "Necunoscut"
   },
   "modal": {
     "logs": {
-      "header": "Error History",
-      "placeholder": "No error log recorded here!"
+      "header": "Jurnal erori",
+      "placeholder": "Nu a fost înregistrat niciun jurnal de erori aici!"
     }
   },
   "smallPage": {
     "language": {
-      "header": "Alegeți limba prestabilită"
+      "header": "Alege limba implicită"
     },
     "theme": {
-      "header": "Choose your new theme",
-      "dark": "Dark",
-      "light": "Light",
-      "system": "System Based"
+      "header": "Alege tema",
+      "dark": "Întunecată",
+      "light": "Luminoasă",
+      "system": "Bazată pe sistem"
     }
   },
   "page": {
     "home": {
-      "header": "Home",
+      "header": "Acasă",
       "status": {
-        "unknown": "Unknown",
-        "notWorking": "Not Working",
-        "ok": "Working",
-        "partially": "Partially Working"
+        "unknown": "Necunoscut",
+        "notWorking": "Nu funcționează",
+        "ok": "Funcționează",
+        "partially": "Funcționează parțial"
       },
       "info": {
         "version": "Versiune",
@@ -41,52 +41,52 @@
     },
     "modules": {
       "header": "Module",
-      "notAvaliable": "No modules using Zygisk here.",
+      "notAvaliable": "Nu există module care să folosească Zygisk.",
       "arch": "Arhitectură: "
     },
     "action": {
-      "header": "Àkcia",
+      "header": "Acțiune",
       "daemonButton": {
-        "start": "Start",
-        "stop": "Stop",
-        "pause": "Pause"
+        "start": "Pornire",
+        "stop": "Oprire",
+        "pause": "Pauză"
       },
       "monitor": {
-        "32": "Monitor (32 bit)",
-        "64": "Monitor (64 bit)"
+        "32": "Monitorizare (32 bit)",
+        "64": "Monitorizare (64 bit)"
       },
       "status": {
-        "unknown": "Unknown",
-        "notWorking": "Not Working",
-        "ok": "Working"
+        "unknown": "Necunoscut",
+        "notWorking": "Nu funcționează",
+        "ok": "Funcționează"
       }
     },
     "settings": {
       "header": "Setări",
       "font": {
-        "header": "Enable system font",
-        "description": "This option will enable system font in current WebUI. NOTE: May not be compatible with FlipFont"
+        "header": "Activează fontul de sistem",
+        "description": "Această opțiune va activa fontul de sistem în WebUI actual. NOTĂ: Este posibil să nu fie compatibil cu FlipFont"
       },
       "theme": {
-        "header": "System theme",
-        "description": "Choose your system theme for current WebUI"
+        "header": "Tema de sistem",
+        "description": "Alege tema sistemului pentru WebUI actual"
       },
       "language": {
-        "header": "Change language",
-        "description": "Change to your new language"
+        "header": "Schimbă limba",
+        "description": "Alege limbă"
       },
       "logs": {
-        "header": "Error History",
-        "description": "View all of your error log"
+        "header": "Jurnal erori",
+        "description": "Vizualizează tot jurnalul de erori"
       },
       "credits": {
-        "module": "Module Developer",
-        "original": "Original Module Developer",
-        "web": "WebUI Developer"
+        "module": "Dezvoltator modul",
+        "original": "Dezvoltatorul modulului original",
+        "web": "Dezvoltator WebUI"
       },
       "license": {
-        "module": "Module License",
-        "web": "WebUI License"
+        "module": "Liceță Modul",
+        "web": "Licență WebUI"
       }
     }
   }
