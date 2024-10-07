@@ -100,7 +100,12 @@ bool inject_on_main(int pid, const char *lib_path) {
     For arm32 compatibility, we set the last bit to the same as the entry address
   */
 
-  uintptr_t break_addr = (-0x05ec1cff & ~1) | ((uintptr_t)entry_addr & 1);
+  /* INFO: (-0x0F & ~1) is a value below zero, while the one after "|"
+            is an unsigned (must be 0 or greater) value, so we must
+            cast the second value to signed long (intptr_t) to avoid
+            undefined behavior.
+  */
+  uintptr_t break_addr = (uintptr_t)((intptr_t)(-0x0F & ~1) | (intptr_t)((uintptr_t)entry_addr & 1));
   if (!write_proc(pid, (uintptr_t)addr_of_entry_addr, &break_addr, sizeof(break_addr))) return false;
 
   ptrace(PTRACE_CONT, pid, 0, 0);
@@ -110,7 +115,7 @@ bool inject_on_main(int pid, const char *lib_path) {
   if (WIFSTOPPED(status) && WSTOPSIG(status) == SIGSEGV) {
     if (!get_regs(pid, regs)) return false;
 
-    if (static_cast<uintptr_t>(regs.REG_IP & ~1) != (break_addr & ~1)) {
+    if (((int)regs.REG_IP & ~1) != ((int)break_addr & ~1)) {
       LOGE("stopped at unknown addr %p", (void *) regs.REG_IP);
 
       return false;
@@ -184,8 +189,14 @@ bool inject_on_main(int pid, const char *lib_path) {
       }
 
       /* NOTICE: C++ -> C */
-      char *err = (char *)malloc(dlerror_len + 1);
-      read_proc(pid, (uintptr_t) dlerror_str_addr, err, dlerror_len);
+      char *err = (char *)malloc((dlerror_len + 1) * sizeof(char));
+      if (err == NULL) {
+        LOGE("malloc err");
+
+        return false;
+      }
+
+      read_proc(pid, dlerror_str_addr, err, dlerror_len + 1);
 
       LOGE("dlerror info %s", err);
 

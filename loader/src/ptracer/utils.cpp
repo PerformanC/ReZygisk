@@ -313,7 +313,11 @@ void *find_func_addr(std::vector<MapInfo> &local_info, std::vector<MapInfo> &rem
 
 /* WARNING: C++ keyword */
 void align_stack(struct user_regs_struct &regs, long preserve) {
-  regs.REG_SP = (regs.REG_SP - preserve) & ~0xf;
+  /* INFO: ~0xf is a negative value, and REG_SP is unsigned,
+            so we must cast REG_SP to signed type before subtracting
+            then cast back to unsigned type.
+  */
+  regs.REG_SP = (uintptr_t)((intptr_t)(regs.REG_SP - preserve) & ~0xf);
 }
 
 /* WARNING: C++ keyword */
