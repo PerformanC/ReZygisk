@@ -1,0 +1,93 @@
+{
+  "langName": "Deutsch",
+  "global": {
+    "unknown": "Unbekannt"
+  },
+  "modal": {
+    "logs": {
+      "header": "Fehlerhistorie",
+      "placeholder": "Es wurde kein Fehler festgestellt!"
+    }
+  },
+  "smallPage": {
+    "language": {
+      "header": "Neue Sprache wählen"
+    },
+    "theme": {
+      "header": "Neues Theme wählen",
+      "dark": "Dunkel",
+      "light": "Hell",
+      "system": "System Basiert"
+    }
+  },
+  "page": {
+    "home": {
+      "header": "Startseite",
+      "status": {
+        "unknown": "Unbekannt",
+        "notWorking": "Funktioniert nicht",
+        "ok": "Funktioniert",
+        "partially": "Funktioniert zum Teil"
+      },
+      "info": {
+        "version": "Version",
+        "root": "Root Implementierung",
+        "zygote": {
+          "injected": "Injiziert",
+          "notInjected": "Nicht Injiziert",
+          "unknown": "Unbekannt"
+        }
+      }
+    },
+    "modules": {
+      "header": "Module",
+      "notAvaliable": "Kein Modul nutzt Zygisk.",
+      "arch": "Architektur: "
+    },
+    "action": {
+      "header": "Aktion",
+      "daemonButton": {
+        "start": "Start",
+        "stop": "Stopp",
+        "pause": "Pause"
+      },
+      "monitor": {
+        "32": "Monitor (32 Bit)",
+        "64": "Monitor (64 Bit)"
+      },
+      "status": {
+        "unknown": "Unbekannt",
+        "notWorking": "Funktioniert nicht",
+        "ok": "Funktioniert"
+      }
+    },
+    "settings": {
+      "header": "Einstellungen",
+      "font": {
+        "header": "Systemschriftart aktivieren",
+        "description": "Diese Option aktiviert die Systemschriftart in der aktuellen WebUI. HINWEIS: Möglicherweise nicht kompatibel mit FlipFont"
+      },
+      "theme": {
+        "header": "System Theme",
+        "description": "Wählen Sie Ihr System-Theme für die aktuelle WebUI"
+      },
+      "language": {
+        "header": "Sprache auswählen",
+        "description": "Wechsel zu deiner neuen Sprache"
+      },
+      "logs": {
+        "header": "Fehler Verlauf",
+        "description": "Zeige den Fehler Verlauf"
+      },
+      "credits": {
+        "module": "Modul Entwickler",
+        "original": "Original Modul Entwickler",
+        "web": "WebUI Entwickler"
+      },
+      "license": {
+        "module": "Modul Lizenz",
+        "web": "WebUI Lizenz"
+      }
+    }
+  }
+}

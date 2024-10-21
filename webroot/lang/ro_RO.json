@@ -1,0 +1,93 @@
+{
+  "langName": "Română",
+  "global": {
+    "unknown": "Necunoscut"
+  },
+  "modal": {
+    "logs": {
+      "header": "Jurnal erori",
+      "placeholder": "Nu a fost înregistrat niciun jurnal de erori aici!"
+    }
+  },
+  "smallPage": {
+    "language": {
+      "header": "Alege limba implicită"
+    },
+    "theme": {
+      "header": "Alege tema",
+      "dark": "Întunecată",
+      "light": "Luminoasă",
+      "system": "Bazată pe sistem"
+    }
+  },
+  "page": {
+    "home": {
+      "header": "Acasă",
+      "status": {
+        "unknown": "Necunoscut",
+        "notWorking": "Nu funcționează",
+        "ok": "Funcționează",
+        "partially": "Funcționează parțial"
+      },
+      "info": {
+        "version": "Versiune",
+        "root": "Implementare Root",
+        "zygote": {
+          "injected": "Injectat",
+          "notInjected": "Neinjectat",
+          "unknown": "Necunoscut"
+        }
+      }
+    },
+    "modules": {
+      "header": "Module",
+      "notAvaliable": "Nu există module care să folosească Zygisk.",
+      "arch": "Arhitectură: "
+    },
+    "action": {
+      "header": "Acțiune",
+      "daemonButton": {
+        "start": "Pornire",
+        "stop": "Oprire",
+        "pause": "Pauză"
+      },
+      "monitor": {
+        "32": "Monitorizare (32 bit)",
+        "64": "Monitorizare (64 bit)"
+      },
+      "status": {
+        "unknown": "Necunoscut",
+        "notWorking": "Nu funcționează",
+        "ok": "Funcționează"
+      }
+    },
+    "settings": {
+      "header": "Setări",
+      "font": {
+        "header": "Activează fontul de sistem",
+        "description": "Această opțiune va activa fontul de sistem în WebUI actual. NOTĂ: Este posibil să nu fie compatibil cu FlipFont"
+      },
+      "theme": {
+        "header": "Tema de sistem",
+        "description": "Alege tema sistemului pentru WebUI actual"
+      },
+      "language": {
+        "header": "Schimbă limba",
+        "description": "Alege limbă"
+      },
+      "logs": {
+        "header": "Jurnal erori",
+        "description": "Vizualizează tot jurnalul de erori"
+      },
+      "credits": {
+        "module": "Dezvoltator modul",
+        "original": "Dezvoltatorul modulului original",
+        "web": "Dezvoltator WebUI"
+      },
+      "license": {
+        "module": "Liceță Modul",
+        "web": "Licență WebUI"
+      }
+    }
+  }
+}

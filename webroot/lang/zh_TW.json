@@ -1,0 +1,93 @@
+{
+  "langName": "繁體中文 (中國台灣)",
+  "global": {
+    "unknown": "未知"
+  },
+  "modal": {
+    "logs": {
+      "header": "Error History",
+      "placeholder": "No error log recorded here!"
+    }
+  },
+  "smallPage": {
+    "language": {
+      "header": "選擇你的語言"
+    },
+    "theme": {
+      "header": "Choose your new theme",
+      "dark": "Dark",
+      "light": "Light",
+      "system": "System Based"
+    }
+  },
+  "page": {
+    "home": {
+      "header": "Home",
+      "status": {
+        "unknown": "Unknown",
+        "notWorking": "Not Working",
+        "ok": "Working",
+        "partially": "Partially Working"
+      },
+      "info": {
+        "version": "版本",
+        "root": "Root實現",
+        "zygote": {
+          "injected": "已註入",
+          "notInjected": "注入失敗",
+          "unknown": "未知"
+        }
+      }
+    },
+    "modules": {
+      "header": "模塊",
+      "notAvaliable": "No modules using Zygisk here.",
+      "arch": "架構: "
+    },
+    "action": {
+      "header": "Action",
+      "daemonButton": {
+        "start": "啟動",
+        "stop": "停止",
+        "pause": "Pause"
+      },
+      "monitor": {
+        "32": "Monitor (32 bit)",
+        "64": "Monitor (64 bit)"
+      },
+      "status": {
+        "unknown": "Unknown",
+        "notWorking": "Not Working",
+        "ok": "Working"
+      }
+    },
+    "settings": {
+      "header": "設定",
+      "font": {
+        "header": "Enable system font",
+        "description": "This option will enable system font in current WebUI. NOTE: May not be compatible with FlipFont"
+      },
+      "theme": {
+        "header": "System theme",
+        "description": "Choose your system theme for current WebUI"
+      },
+      "language": {
+        "header": "Change language",
+        "description": "Change to your new language"
+      },
+      "logs": {
+        "header": "Error History",
+        "description": "View all of your error log"
+      },
+      "credits": {
+        "module": "Module Developer",
+        "original": "Original Module Developer",
+        "web": "WebUI Developer"
+      },
+      "license": {
+        "module": "Module License",
+        "web": "WebUI License"
+      }
+    }
+  }
+}

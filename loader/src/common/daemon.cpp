@@ -1,4 +1,5 @@
 #include <linux/un.h>
+#include <linux/limits.h>
 #include <sys/socket.h>
 #include <unistd.h>
 
@@ -143,7 +144,6 @@ namespace zygiskd {
     }
 
     void GetInfo(struct zygote_info *info) {
-      /* TODO: Optimize and avoid re-connect twice here */
       int fd = Connect(1);
 
       if (fd != -1) {
