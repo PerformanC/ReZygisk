@@ -34,20 +34,6 @@ jobs:
         with:
           gradle-home-cache-cleanup: true
 
-      - name: Setup rust-cache
-        uses: Swatinem/rust-cache@v2
-        with:
-          workspaces: zygiskd/src -> ../build/intermediates/rust
-          cache-targets: false
-          
-      - name: Setup Rust
-        run: |
-          rustup override set nightly
-          rustup target add aarch64-linux-android
-          rustup target add x86_64-linux-android
-          rustup target add i686-linux-android
-          rustup target add armv7-linux-androideabi
-
       - name: Set up ccache
         uses: hendrikmuhs/ccache-action@v1.2
         with:
@@ -74,12 +60,6 @@ jobs:
           debugName=`ls module/build/outputs/release/ReZygisk-v*-debug.zip | awk -F '(/|.zip)' '{print $5}'` && echo "debugName=$debugName" >> $GITHUB_OUTPUT
           unzip module/build/outputs/release/ReZygisk-v*-release.zip -d zksu-release
           unzip module/build/outputs/release/ReZygisk-v*-debug.zip -d zksu-debug
-          releaseSymbolName="SYMBOLS-$releaseName.zip"
-          debugSymbolName="SYMBOLS-$debugName.zip"
-          echo "releaseSymbolName=$releaseSymbolName" >> $GITHUB_OUTPUT
-          echo "debugSymbolName=$debugSymbolName" >> $GITHUB_OUTPUT
-          zip -r $releaseSymbolName zygiskd/build/symbols/release
-          zip -r $debugSymbolName zygiskd/build/symbols/debug
 
       - name: Upload release
         uses: actions/upload-artifact@v4
@@ -92,16 +72,3 @@ jobs:
         with:
           name: ${{ steps.prepareArtifact.outputs.debugName }}
           path: "./zksu-debug/*"
-
-      - name: Upload release symbols
-        uses: actions/upload-artifact@v4
-        with:
-          name: ${{ steps.prepareArtifact.outputs.releaseName }}-symbols
-          path: "zygiskd/build/symbols/release"
-
-      - name: Upload debug symbols
-        uses: actions/upload-artifact@v4
-        with:
-          name: ${{ steps.prepareArtifact.outputs.debugName }}-symbols
-          path: "zygiskd/build/symbols/debug"
- 

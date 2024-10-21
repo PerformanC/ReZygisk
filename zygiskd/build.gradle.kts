@@ -1,6 +1,21 @@
-plugins {
-    alias(libs.plugins.agp.lib)
-    alias(libs.plugins.rust.android)
+import java.nio.file.Paths
+import org.gradle.internal.os.OperatingSystem
+
+fun getLatestNDKPath(): String {
+  val android_home = System.getenv("ANDROID_HOME")
+  if (android_home == null) {
+    throw Exception("ANDROID_HOME not set")
+  }
+
+  val ndkPath = android_home + "/ndk"
+
+  val ndkDir = Paths.get(ndkPath)
+  if (!ndkDir.toFile().exists()) {
+    throw Exception("NDK not found at $ndkPath")
+  }
+
+  val ndkVersion = ndkDir.toFile().listFiles().filter { it.isDirectory }.map { it.name }.sorted().last()
+  return ndkPath + "/" + ndkVersion
 }
 
 val minAPatchVersion: Int by rootProject.extra
@@ -11,60 +26,95 @@ val verCode: Int by rootProject.extra
 val verName: String by rootProject.extra
 val commitHash: String by rootProject.extra
 
-android.buildFeatures {
-    androidResources = false
-    buildConfig = false
+val CStandardFlags = arrayOf(
+  "-D_GNU_SOURCE", "-std=c99", "-Wpedantic", "-Wall", "-Wextra", "-Werror",
+  "-Wformat", "-Wuninitialized", "-Wshadow", "-Wno-zero-length-array", 
+  "-Wno-fixed-enum-extension", "-Iroot_impl", "-llog",
+  "-DMIN_APATCH_VERSION=$minAPatchVersion",
+  "-DMIN_KSU_VERSION=$minKsuVersion",
+  "-DMAX_KSU_VERSION=$maxKsuVersion",
+  "-DMIN_MAGISK_VERSION=$minMagiskVersion",
+  "-DZKSU_VERSION=\"$verName\""
+)
+
+val CFlagsRelease = arrayOf(
+  "-Wl,--strip-all", "-flto=thin", "-Ofast"
+)
+
+val CFlagsDebug = arrayOf(
+  "-g", "-O0"
+)
+
+val Files = arrayOf(
+  "root_impl/apatch.c",
+  "root_impl/common.c",
+  "root_impl/kernelsu.c",
+  "root_impl/magisk.c",
+  "companion.c",
+  "dl.c",
+  "main.c",
+  "utils.c",
+  "zygiskd.c"
+)
+
+task("buildAndStrip") {
+  group = "build"
+  description = "Build the native library and strip the debug symbols."
+
+  val isDebug = gradle.startParameter.taskNames.any { it.lowercase().contains("debug") }
+  doLast {
+    val ndkPath = getLatestNDKPath()
+
+    val aarch64Compiler = Paths.get(ndkPath, "toolchains", "llvm", "prebuilt", "linux-x86_64", "bin", "aarch64-linux-android34-clang").toString()
+    val armv7aCompiler = Paths.get(ndkPath, "toolchains", "llvm", "prebuilt", "linux-x86_64", "bin", "armv7a-linux-androideabi34-clang").toString()
+    val x86Compiler = Paths.get(ndkPath, "toolchains", "llvm", "prebuilt", "linux-x86_64", "bin", "i686-linux-android34-clang").toString()
+    val x86_64Compiler = Paths.get(ndkPath, "toolchains", "llvm", "prebuilt", "linux-x86_64", "bin", "x86_64-linux-android34-clang").toString()
+
+    if (!Paths.get(aarch64Compiler).toFile().exists()) {
+      throw Exception("aarch64 compiler not found at $aarch64Compiler")
+    }
+
+    if (!Paths.get(armv7aCompiler).toFile().exists()) {
+      throw Exception("armv7a compiler not found at $armv7aCompiler")
+    }
+
+    if (!Paths.get(x86Compiler).toFile().exists()) {
+      throw Exception("x86 compiler not found at $x86Compiler")
+    }
+
+    if (!Paths.get(x86_64Compiler).toFile().exists()) {
+      throw Exception("x86_64 compiler not found at $x86_64Compiler")
+    }
+
+    val Files = Files.map { Paths.get(project.projectDir.toString(), "src", it).toString() }.toTypedArray()
+
+    val buildDir = getLayout().getBuildDirectory().getAsFile().get()
+    buildDir.mkdirs()
+
+    val aarch64OutputDir = Paths.get(buildDir.toString(), "arm64-v8a").toFile()
+    val armv7aOutputDir = Paths.get(buildDir.toString(), "armeabi-v7a").toFile()
+    val x86OutputDir = Paths.get(buildDir.toString(), "x86").toFile()
+    val x86_64OutputDir = Paths.get(buildDir.toString(), "x86_64").toFile()
+
+    aarch64OutputDir.mkdirs()
+    armv7aOutputDir.mkdirs()
+    x86OutputDir.mkdirs()
+    x86_64OutputDir.mkdirs()
+
+    val compileArgs = (if (isDebug) CFlagsDebug else CFlagsRelease) + CStandardFlags
+
+    exec {
+      commandLine(aarch64Compiler, "-o", Paths.get(aarch64OutputDir.toString(), "zygiskd").toString(), *compileArgs, *Files)
+    }
+    exec {
+      commandLine(armv7aCompiler, "-o", Paths.get(armv7aOutputDir.toString(), "zygiskd").toString(), *compileArgs, *Files)
+    }
+    exec {
+      commandLine(x86Compiler, "-o", Paths.get(x86OutputDir.toString(), "zygiskd").toString(), *compileArgs, *Files)
+    }
+    exec {
+      commandLine(x86_64Compiler, "-o", Paths.get(x86_64OutputDir.toString(), "zygiskd").toString(), *compileArgs, *Files)
+    }
+  }
 }
 
-cargo {
-    module = "."
-    pythonCommand = "python3"
-    libname = "zygiskd"
-    targetIncludes = arrayOf("zygiskd")
-    targets = listOf("arm64", "arm", "x86", "x86_64")
-    targetDirectory = "build/intermediates/rust"
-    val isDebug = gradle.startParameter.taskNames.any { it.toLowerCase().contains("debug") }
-    profile = if (isDebug) "debug" else "release"
-    exec = { spec, _ ->
-        spec.environment("ANDROID_NDK_HOME", android.ndkDirectory.path)
-        spec.environment("MIN_APATCH_VERSION", minAPatchVersion)
-        spec.environment("MIN_KSU_VERSION", minKsuVersion)
-        spec.environment("MAX_KSU_VERSION", maxKsuVersion)
-        spec.environment("MIN_MAGISK_VERSION", minMagiskVersion)
-        spec.environment("ZKSU_VERSION", "$verName-$verCode-$commitHash-$profile")
-    }
-}
-
-afterEvaluate {
-    task<Task>("buildAndStrip") {
-        dependsOn(":zygiskd:cargoBuild")
-        val isDebug = gradle.startParameter.taskNames.any { it.toLowerCase().contains("debug") }
-        doLast {
-            val dir = File(buildDir, "rustJniLibs/android")
-            val prebuilt = File(android.ndkDirectory, "toolchains/llvm/prebuilt").listFiles()!!.first()
-            val binDir = File(prebuilt, "bin")
-            val symbolDir = File(buildDir, "symbols/${if (isDebug) "debug" else "release"}")
-            symbolDir.mkdirs()
-            val suffix = if (prebuilt.name.contains("windows")) ".exe" else ""
-            val strip = File(binDir, "llvm-strip$suffix")
-            val objcopy = File(binDir, "llvm-objcopy$suffix")
-            dir.listFiles()!!.forEach {
-                if (!it.isDirectory) return@forEach
-                val symbolPath = File(symbolDir, "${it.name}/zygiskd.debug")
-                symbolPath.parentFile.mkdirs()
-                exec {
-                    workingDir = it
-                    commandLine(objcopy, "--only-keep-debug", "zygiskd", symbolPath)
-                }
-                exec {
-                    workingDir = it
-                    commandLine(strip, "--strip-all", "zygiskd")
-                }
-                exec {
-                    workingDir = it
-                    commandLine(objcopy, "--add-gnu-debuglink", symbolPath, "zygiskd")
-                }
-            }
-        }
-    }
-}
