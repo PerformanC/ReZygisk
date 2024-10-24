@@ -76,4 +76,4 @@ It is mandatory to follow PerformanC's [Contribution Guidelines](https://github.
 
 ## License
 
-ReZygisk is licensed majority under GPL, by Dr-TSNG, but also by BSD 2-Clause License for re-written code. You can read more about it on [Open Source Initiative](https://opensource.org/licenses/BSD-2-Clause).
+ReZygisk is licensed majoritaly under GPL, by Dr-TSNG, but also AGPL 3.0, by The PerformanC Organization, for re-written code. You can read more about it on [Open Source Initiative](https://opensource.org/licenses/AGPL-3.0).
