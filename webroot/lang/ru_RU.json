@@ -1,0 +1,94 @@
+{
+  "langName": "Русский (Россия)",
+  "global": {
+    "unknown": "Неизвестно"
+  },
+  "smallPage": {
+    "language": {
+      "header": "Выберите ваш новый язык"
+    },
+    "theme": {
+      "header": "Выберите свою новую тему",
+      "dark": "Темная",
+      "light": "Светлая",
+      "system": "На основе системной темы"
+    },
+    "errorh": {
+      "buttons": {
+        "copy": "COPY",
+        "clear": "CLEAR ALL LOGS"
+      },
+      "header": "Error History",
+      "placeholder": "No error log recorded here!"
+    }
+  },
+  "page": {
+    "home": {
+      "header": "Главная",
+      "status": {
+        "unknown": "Неизвестно",
+        "notWorking": "Не работает",
+        "ok": "Работает",
+        "partially": "Частично работает"
+      },
+      "info": {
+        "version": "Версия",
+        "root": "Root реализация",
+        "zygote": {
+          "injected": "Инъецировано",
+          "notInjected": "Не инъецировано",
+          "unknown": "Неизвестно"
+        }
+      }
+    },
+    "modules": {
+      "header": "Модули",
+      "notAvaliable": "Здесь нет модулей, использующих Zygisk.",
+      "arch": "Архитектура: "
+    },
+    "actions": {
+      "header": "Действие",
+      "monitorButton": {
+        "start": "Начать",
+        "stop": "Стоп",
+        "pause": "Пауза"
+      },
+      "monitor": "Мониторинг",
+      "status": {
+        "tracing": "Tracing",
+        "stopping": "Stopping",
+        "stopped": "Stopped",
+        "exiting": "Exiting",
+        "unknown": "Unknown"
+      }
+    },
+    "settings": {
+      "header": "Настройки",
+      "font": {
+        "header": "Включить системный шрифт",
+        "description": "Эта опция включит системный шрифт в текущем WebUI. \nПРИМЕЧАНИЕ: Может быть несовместимо с FlipFont"
+      },
+      "theme": {
+        "header": "Системная тема",
+        "description": "Выберите вашу системную тему для текущего WebUI"
+      },
+      "language": {
+        "header": "Сменить язык",
+        "description": "Измените на ваш новый язык"
+      },
+      "logs": {
+        "header": "История ошибок",
+        "description": "Просмотреть весь журнал ваших ошибок"
+      },
+      "credits": {
+        "module": "Разработчик модуля",
+        "original": "Разработчик оригинального модуля",
+        "web": "Разработчик WebUI"
+      },
+      "license": {
+        "module": "Лицензия модуля",
+        "web": "Лицензия WebUI"
+      }
+    }
+  }
+}

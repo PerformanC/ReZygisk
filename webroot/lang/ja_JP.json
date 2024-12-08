@@ -1,0 +1,94 @@
+{
+  "langName": "日本語 (日本)",
+  "global": {
+    "unknown": "不明"
+  },
+  "smallPage": {
+    "language": {
+      "header": "言語を選択してください"
+    },
+    "theme": {
+      "header": "Choose your new theme",
+      "dark": "Dark",
+      "light": "Light",
+      "system": "System Based"
+    },
+    "errorh": {
+      "buttons": {
+        "copy": "COPY",
+        "clear": "CLEAR ALL LOGS"
+      },
+      "header": "Error History",
+      "placeholder": "No error log recorded here!"
+    }
+  },
+  "page": {
+    "home": {
+      "header": "Home",
+      "status": {
+        "unknown": "Unknown",
+        "notWorking": "Not Working",
+        "ok": "Working",
+        "partially": "Partially Working"
+      },
+      "info": {
+        "version": "バージョン",
+        "root": "root権限実装",
+        "zygote": {
+          "injected": "改変完了",
+          "notInjected": "未改変",
+          "unknown": "不明"
+        }
+      }
+    },
+    "modules": {
+      "header": "モジュール",
+      "notAvaliable": "No modules using Zygisk here.",
+      "arch": "アーキテクチャー: "
+    },
+    "actions": {
+      "header": "Action",
+      "monitorButton": {
+        "start": "スタート",
+        "stop": "ストップ",
+        "pause": "Pause"
+      },
+      "monitor": "Monitor",
+      "status": {
+        "tracing": "Tracing",
+        "stopping": "Stopping",
+        "stopped": "Stopped",
+        "exiting": "Exiting",
+        "unknown": "Unknown"
+      }
+    },
+    "settings": {
+      "header": "設定",
+      "font": {
+        "header": "Enable system font",
+        "description": "This option will enable system font in current WebUI. NOTE: May not be compatible with FlipFont"
+      },
+      "theme": {
+        "header": "System theme",
+        "description": "Choose your system theme for current WebUI"
+      },
+      "language": {
+        "header": "Change language",
+        "description": "Change to your new language"
+      },
+      "logs": {
+        "header": "Error History",
+        "description": "View all of your error log"
+      },
+      "credits": {
+        "module": "Module Developer",
+        "original": "Original Module Developer",
+        "web": "WebUI Developer"
+      },
+      "license": {
+        "module": "Module License",
+        "web": "WebUI License"
+      }
+    }
+  }
+}
