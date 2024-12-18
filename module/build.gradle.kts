@@ -86,6 +86,9 @@ androidComponents.onVariants { variant ->
         into("lib") {
             from(project(":loader").layout.buildDirectory.file("intermediates/stripped_native_libs/$variantLowered/out/lib"))
         }
+        into("webroot") {
+            from("${rootProject.projectDir}/webroot")
+        }
 
         val root = moduleDir.get()
 
@@ -159,6 +162,73 @@ androidComponents.onVariants { variant ->
                             root.file("bin/$abi64/zygiskd").asFile
                         )
                     )
+                    set.add(Pair(root.file("webroot/index.html").asFile, null))
+
+                    set.add(Pair(root.file("webroot/js/main.js").asFile, null))
+                    set.add(Pair(root.file("webroot/js/kernelsu.js").asFile, null))
+                    set.add(Pair(root.file("webroot/js/language.js").asFile, null))
+                    set.add(Pair(root.file("webroot/js/restoreError.js").asFile, null))
+                    set.add(Pair(root.file("webroot/js/navbar.js").asFile, null))
+                    set.add(Pair(root.file("webroot/js/monitorActions.js").asFile, null))
+                    set.add(Pair(root.file("webroot/js/errorCatcher.js").asFile, null))
+                    set.add(Pair(root.file("webroot/js/browserRedirect.js").asFile, null))
+                    set.add(Pair(root.file("webroot/js/errorScreen.js").asFile, null))
+                    set.add(Pair(root.file("webroot/js/smallPageDesabler.js").asFile, null))
+
+                    set.add(Pair(root.file("webroot/js/translate/actions.js").asFile, null))
+                    set.add(Pair(root.file("webroot/js/translate/home.js").asFile, null))
+                    set.add(Pair(root.file("webroot/js/translate/modules.js").asFile, null))
+                    set.add(Pair(root.file("webroot/js/translate/settings.js").asFile, null))
+
+                    set.add(Pair(root.file("webroot/js/themes/amoled.js").asFile, null))
+                    set.add(Pair(root.file("webroot/js/themes/dark.js").asFile, null))
+                    set.add(Pair(root.file("webroot/js/themes/darkNavbar.js").asFile, null))
+                    set.add(Pair(root.file("webroot/js/themes/light.js").asFile, null))
+                    set.add(Pair(root.file("webroot/js/themes/lightNavbar.js").asFile, null))
+                    set.add(Pair(root.file("webroot/js/themes/lightIcon.js").asFile, null))
+                    set.add(Pair(root.file("webroot/js/themes/monochrome.js").asFile, null))
+
+                    set.add(Pair(root.file("webroot/js/switcher/fontChanger.js").asFile, null))
+
+                    set.add(Pair(root.file("webroot/lang/en_US.json").asFile, null))
+                    set.add(Pair(root.file("webroot/lang/ja_JP.json").asFile, null))
+                    set.add(Pair(root.file("webroot/lang/pt_BR.json").asFile, null))
+                    set.add(Pair(root.file("webroot/lang/ro_RO.json").asFile, null))
+                    set.add(Pair(root.file("webroot/lang/ru_RU.json").asFile, null))
+                    set.add(Pair(root.file("webroot/lang/vi_VN.json").asFile, null))
+                    set.add(Pair(root.file("webroot/lang/zh_CN.json").asFile, null))
+                    set.add(Pair(root.file("webroot/lang/zh_TW.json").asFile, null))
+
+                    set.add(Pair(root.file("webroot/js/smallPage/language.js").asFile, null))
+                    set.add(Pair(root.file("webroot/js/smallPage/theme.js").asFile, null))
+                    set.add(Pair(root.file("webroot/js/smallPage/errorHistory.js").asFile, null))
+
+                    set.add(Pair(root.file("webroot/css/index.css").asFile, null))
+                    set.add(Pair(root.file("webroot/css/icons.css").asFile, null))
+                    set.add(Pair(root.file("webroot/css/error.css").asFile, null))
+
+                    set.add(Pair(root.file("webroot/fonts/poppins.ttf").asFile, null))
+                    set.add(Pair(root.file("webroot/fonts/header.css").asFile, null))
+                    
+                    set.add(Pair(root.file("webroot/assets/mark.svg").asFile, null))
+                    set.add(Pair(root.file("webroot/assets/tick.svg").asFile, null))
+                    set.add(Pair(root.file("webroot/assets/warn.svg").asFile, null))
+                    set.add(Pair(root.file("webroot/assets/module.svg").asFile, null))
+                    set.add(Pair(root.file("webroot/assets/expand.svg").asFile, null))
+                    set.add(Pair(root.file("webroot/assets/settings.svg").asFile, null))
+                    set.add(Pair(root.file("webroot/assets/close.svg").asFile, null))
+                    set.add(Pair(root.file("webroot/assets/content.svg").asFile, null))
+                    set.add(Pair(root.file("webroot/assets/error.svg").asFile, null))
+                    set.add(Pair(root.file("webroot/assets/action.svg").asFile, null))
+                    set.add(Pair(root.file("webroot/assets/home.svg").asFile, null))
+                    set.add(Pair(root.file("webroot/assets/delete.svg").asFile, null))
+                    set.add(Pair(root.file("webroot/assets/ec-icon.svg").asFile, null))
+                    set.add(Pair(root.file("webroot/assets/back.svg").asFile, null))
+
+                    set.add(Pair(root.file("webroot/assets_light/action.svg").asFile, null))
+                    set.add(Pair(root.file("webroot/assets_light/home.svg").asFile, null))
+                    set.add(Pair(root.file("webroot/assets_light/settings.svg").asFile, null))
+                    set.add(Pair(root.file("webroot/assets_light/module.svg").asFile, null))
                     sig.initSign(privKey)
                     set.forEach { it.first.sha(it.second) }
                     val signFile = root.file(name).asFile

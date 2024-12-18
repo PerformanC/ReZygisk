@@ -110,6 +110,59 @@ mv "$TMPDIR/sepolicy.rule" "$MODPATH"
 mkdir "$MODPATH/bin"
 mkdir "$MODPATH/lib"
 mkdir "$MODPATH/lib64"
+mkdir "$MODPATH/webroot"
+
+ui_print "- Extracting webroot"
+extract "$ZIPFILE" 'webroot/index.html' "$MODPATH/webroot" true
+
+extract "$ZIPFILE" 'webroot/js/main.js' "$MODPATH/webroot/js" true
+extract "$ZIPFILE" 'webroot/js/kernelsu.js' "$MODPATH/webroot/js" true
+extract "$ZIPFILE" 'webroot/js/language.js' "$MODPATH/webroot/js" true
+extract "$ZIPFILE" 'webroot/js/navbar.js' "$MODPATH/webroot/js" true
+extract "$ZIPFILE" 'webroot/js/restoreError.js' "$MODPATH/webroot/js" true
+extract "$ZIPFILE" 'webroot/js/monitorActions.js' "$MODPATH/webroot/js" true
+extract "$ZIPFILE" 'webroot/js/errorCatcher.js' "$MODPATH/webroot/js" true
+extract "$ZIPFILE" 'webroot/js/browserRedirect.js' "$MODPATH/webroot/js" true
+extract "$ZIPFILE" 'webroot/js/errorScreen.js' "$MODPATH/webroot/js" true
+extract "$ZIPFILE" 'webroot/js/smallPageDesabler.js' "$MODPATH/webroot/js" true
+
+extract "$ZIPFILE" 'webroot/js/translate/home.js' "$MODPATH/webroot/js/translate" true
+extract "$ZIPFILE" 'webroot/js/translate/actions.js' "$MODPATH/webroot/js/translate" true
+extract "$ZIPFILE" 'webroot/js/translate/modules.js' "$MODPATH/webroot/js/translate" true
+extract "$ZIPFILE" 'webroot/js/translate/settings.js' "$MODPATH/webroot/js/translate" true
+
+extract "$ZIPFILE" 'webroot/js/themes/amoled.js' "$MODPATH/webroot/js/themes" true
+extract "$ZIPFILE" 'webroot/js/themes/dark.js' "$MODPATH/webroot/js/themes" true
+extract "$ZIPFILE" 'webroot/js/themes/darkNavbar.js' "$MODPATH/webroot/js/themes" true
+extract "$ZIPFILE" 'webroot/js/themes/light.js' "$MODPATH/webroot/js/themes" true
+extract "$ZIPFILE" 'webroot/js/themes/lightNavbar.js' "$MODPATH/webroot/js/themes" true
+extract "$ZIPFILE" 'webroot/js/themes/lightIcon.js' "$MODPATH/webroot/js/themes" true
+extract "$ZIPFILE" 'webroot/js/themes/monochrome.js' "$MODPATH/webroot/js/themes" true
+
+extract "$ZIPFILE" 'webroot/js/smallPage/language.js' "$MODPATH/webroot/js/smallPage" true
+extract "$ZIPFILE" 'webroot/js/smallPage/theme.js' "$MODPATH/webroot/js/smallPage" true
+extract "$ZIPFILE" 'webroot/js/smallPage/errorHistory.js' "$MODPATH/webroot/js/smallPage" true
+
+extract "$ZIPFILE" 'webroot/js/switcher/fontChanger.js' "$MODPATH/webroot/js/switcher" true
+
+extract "$ZIPFILE" 'webroot/css/index.css' "$MODPATH/webroot/css" true
+extract "$ZIPFILE" 'webroot/css/icons.css' "$MODPATH/webroot/css" true
+extract "$ZIPFILE" 'webroot/css/error.css' "$MODPATH/webroot/css" true
+
+extract "$ZIPFILE" 'webroot/fonts/poppins.ttf' "$MODPATH/webroot/fonts" true
+extract "$ZIPFILE" 'webroot/fonts/header.css' "$MODPATH/webroot/fonts" true
+
+for lang in en_US ja_JP pt_BR ro_RO ru_RU vi_VN zh_CN zh_TW; do
+  extract "$ZIPFILE" "webroot/lang/${lang}.json" "$MODPATH/webroot/lang" true
+done
+
+for svg in mark tick warn module expand settings close content error action home delete ec-icon back; do
+  extract "$ZIPFILE" "webroot/assets/${svg}.svg" "$MODPATH/webroot/assets" true
+done
+
+for svg in module settings action home; do
+  extract "$ZIPFILE" "webroot/assets_light/${svg}.svg" "$MODPATH/webroot/assets_light" true
+done
 
 if [ "$ARCH" = "x86" ] || [ "$ARCH" = "x64" ]; then
   ui_print "- Extracting x86 libraries"
