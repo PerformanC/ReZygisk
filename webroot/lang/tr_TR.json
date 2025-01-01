@@ -1,0 +1,94 @@
+{
+  "langName": "Türkçe (Türkiye)",
+  "global": {
+    "unknown": "Bilinmiyor"
+  },
+  "smallPage": {
+    "language": {
+      "header": "Yeni dilinizi seçin"
+    },
+    "theme": {
+      "header": "Yeni temanızı seçin",
+      "dark": "Koyu",
+      "light": "Açık",
+      "system": "Sistem Tabanlı"
+    },
+    "errorh": {
+      "buttons": {
+        "copy": "KOPYALA",
+        "clear": "BÜTÜN KAYITLARI SİL"
+      },
+      "header": "Hata Geçmişi",
+      "placeholder": "Burada kaydedilmiş hata yok!"
+    }
+  },
+  "page": {
+    "home": {
+      "header": "Anasayfa",
+      "status": {
+        "unknown": "Bilinmiyor",
+        "notWorking": "Aktif Değil",
+        "ok": "Aktif",
+        "partially": "Yarı-Aktif"
+      },
+      "info": {
+        "version": "Versiyon",
+        "root": "Root İmplementasyonu",
+        "zygote": {
+          "injected": "Enjekte",
+          "notInjected": "Enjekte Değil",
+          "unknown": "Bilinmiyor"
+        }
+      }
+    },
+    "modules": {
+      "header": "Modüller",
+      "notAvaliable": "Burada Zygisk kullanan modül yok.",
+      "arch": "Mimari: "
+    },
+    "actions": {
+      "header": "Hareketler",
+      "monitorButton": {
+        "start": "Başlat",
+        "stop": "Bitir",
+        "pause": "Durdur"
+      },
+      "monitor": "Monitör",
+      "status": {
+        "tracing": "İzleniyor",
+        "stopping": "Durduluyor",
+        "stopped": "Durdu",
+        "exiting": "Çıkılıyor",
+        "unknown": "Bilinmiyor"
+      }
+    },
+    "settings": {
+      "header": "Ayarlar",
+      "font": {
+        "header": "Sistem yazı tipini aktifleştir",
+        "description": "Bu seçenek anlık WebUI (Web Arayüzü) için sistem yazıt tipini aktifleştirir. NOT: FlipFont ile uyumlu olmayabilir!"
+      },
+      "theme": {
+        "header": "Sistem Teması",
+        "description": "Anlık WebUI için sistem temanı seç"
+      },
+      "language": {
+        "header": "Dil değiştir",
+        "description": "Yeni dilini seç"
+      },
+      "logs": {
+        "header": "Hata Geçmişi",
+        "description": "Bütün hata kayıtlarını görüntüle"
+      },
+      "credits": {
+        "module": "Modül Geliştiricisi",
+        "original": "Orijinal Modül Geliştiricisi",
+        "web": "WebUI Geliştiricisi"
+      },
+      "license": {
+        "module": "Modül Lisansı",
+        "web": "WebUI Lisansı"
+      }
+    }
+  }
+}
