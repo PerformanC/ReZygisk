@@ -61,13 +61,19 @@ struct zygote_info {
   bool running;
 };
 
+enum mount_namespace_state {
+    Clean,
+    Rooted,
+    Module
+};
+
 namespace zygiskd {
 
-    struct Module {
+    struct ModuleInfo {
         std::string name;
         UniqueFd memfd;
 
-        inline explicit Module(std::string name, int memfd) : name(name), memfd(memfd) {}
+        inline explicit ModuleInfo(std::string name, int memfd) : name(name), memfd(memfd) {}
     };
 
     enum class SocketAction {
@@ -80,6 +86,7 @@ namespace zygiskd {
         GetModuleDir,
         ZygoteRestart,
         SystemServerStarted,
+        UpdateMountNamespace
     };
 
     void Init(const char *path);
@@ -90,7 +97,7 @@ namespace zygiskd {
 
     int RequestLogcatFd();
 
-    std::vector<Module> ReadModules();
+    std::vector<ModuleInfo> ReadModules();
 
     uint32_t GetProcessFlags(uid_t uid);
 
@@ -103,4 +110,6 @@ namespace zygiskd {
     void SystemServerStarted();
 
     void GetInfo(struct zygote_info *info);
+
+    std::string UpdateMountNamespace(enum mount_namespace_state mns_state);
 }

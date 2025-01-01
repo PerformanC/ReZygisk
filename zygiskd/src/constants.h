@@ -33,7 +33,8 @@ enum DaemonSocketAction {
   RequestCompanionSocket = 5,
   GetModuleDir           = 6,
   ZygoteRestart          = 7,
-  SystemServerStarted    = 8
+  SystemServerStarted    = 8,
+  GetCleanNamespace      = 9
 };
 
 enum ProcessFlags: uint32_t {
@@ -43,8 +44,7 @@ enum ProcessFlags: uint32_t {
   PROCESS_ROOT_IS_APATCH = (1u << 27),
   PROCESS_ROOT_IS_KSU = (1u << 29),
   PROCESS_ROOT_IS_MAGISK = (1u << 30),
-  PROCESS_IS_SYS_UI = (1u << 31),
-  PROCESS_IS_SYSUI = (1u << 31)
+  PROCESS_IS_FIRST_STARTED = (1u << 31)
 };
 
 enum RootImplState {
@@ -52,6 +52,12 @@ enum RootImplState {
   TooOld,
   Inexistent,
   Abnormal
+};
+
+enum MountNamespaceState {
+  Clean,
+  Rooted,
+  Module
 };
 
 #endif /* CONSTANTS_H */

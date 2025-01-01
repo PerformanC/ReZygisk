@@ -137,6 +137,36 @@ DCL_HOOK_FUNC(int, fork) {
     return (g_ctx && g_ctx->pid >= 0) ? g_ctx->pid : old_fork();
 }
 
+bool update_mnt_ns(enum mount_namespace_state mns_state, bool dry_run) {
+    std::string ns_path = zygiskd::UpdateMountNamespace(mns_state);
+    if (ns_path.empty()) {
+        PLOGE("Failed to update mount namespace");
+
+        return false;
+    }
+
+    if (dry_run) return true;
+
+    int updated_ns = open(ns_path.data(), O_RDONLY);
+    if (updated_ns == -1) {
+        PLOGE("Failed to open mount namespace [%s]", ns_path.data());
+
+        return false;
+    }
+
+    LOGD("set mount namespace to [%s] fd=[%d]\n", ns_path.data(), updated_ns);
+    if (setns(updated_ns, CLONE_NEWNS) == -1) {
+        PLOGE("Failed to set mount namespace [%s]", ns_path.data());
+        close(updated_ns);
+
+        return false;
+    }
+
+    close(updated_ns);
+
+    return true;
+}
+
 // Unmount stuffs in the process's private mount namespace
 DCL_HOOK_FUNC(int, unshare, int flags) {
     int res = old_unshare(flags);
@@ -144,22 +174,17 @@ DCL_HOOK_FUNC(int, unshare, int flags) {
         // For some unknown reason, unmounting app_process in SysUI can break.
         // This is reproducible on the official AVD running API 26 and 27.
         // Simply avoid doing any unmounts for SysUI to avoid potential issues.
-        (g_ctx->info_flags & PROCESS_IS_SYS_UI) == 0) {
+        !g_ctx->flags[SERVER_FORK_AND_SPECIALIZE] && !(g_ctx->info_flags & PROCESS_IS_FIRST_STARTED)) {
         if (g_ctx->flags[DO_REVERT_UNMOUNT]) {
-            if (g_ctx->info_flags & PROCESS_ROOT_IS_KSU) {
-                revert_unmount_ksu();
-            } else if (g_ctx->info_flags & PROCESS_ROOT_IS_APATCH){
-                revert_unmount_apatch();
-            } else if (g_ctx->info_flags & PROCESS_ROOT_IS_MAGISK) {
-                revert_unmount_magisk();
-            }
+            update_mnt_ns(Clean, false);
         }
 
-        /* Zygisksu changed: No umount app_process */
-
-        // Restore errno back to 0
-        errno = 0;
+        old_unshare(CLONE_NEWNS);
     }
+
+    /* INFO: To spoof the errno value */
+    errno = 0;
+
     return res;
 }
 
@@ -188,12 +213,15 @@ DCL_HOOK_FUNC(int, pthread_attr_setstacksize, void *target, size_t size) {
 
     if (should_unmap_zygisk) {
         unhook_functions();
+
         cached_map_infos.clear();
+
         if (should_unmap_zygisk) {
             // Because both `pthread_attr_setstacksize` and `dlclose` have the same function signature,
             // we can use `musttail` to let the compiler reuse our stack frame and thus
             // `dlclose` will directly return to the caller of `pthread_attr_setstacksize`.
-            LOGI("unmap libzygisk.so loaded at %p with size %zu", start_addr, block_size);
+            LOGD("unmap libzygisk.so loaded at %p with size %zu", start_addr, block_size);
+
             [[clang::musttail]] return munmap(start_addr, block_size);
         }
     }
@@ -591,21 +619,21 @@ void ZygiskContext::run_modules_post() {
 
     if (modules.size() > 0) {
         LOGD("modules unloaded: %zu/%zu", modules_unloaded, modules.size());
-        clean_trace("jit-cache-zygisk", modules.size(), modules_unloaded, true);
+        clean_trace("jit-cache-zygisk", modules.size(), modules_unloaded);
     }
 }
 
 /* Zygisksu changed: Load module fds */
 void ZygiskContext::app_specialize_pre() {
     flags[APP_SPECIALIZE] = true;
-    info_flags = zygiskd::GetProcessFlags(g_ctx->args.app->uid);
 
+    info_flags = zygiskd::GetProcessFlags(g_ctx->args.app->uid);
     if ((info_flags & PROCESS_ON_DENYLIST) == PROCESS_ON_DENYLIST) {
-      flags[DO_REVERT_UNMOUNT] = true;
+        flags[DO_REVERT_UNMOUNT] = true;
     }
 
     if ((info_flags & (PROCESS_IS_MANAGER | PROCESS_ROOT_IS_MAGISK)) == (PROCESS_IS_MANAGER | PROCESS_ROOT_IS_MAGISK)) {
-        LOGI("Manager process detected. Notifying that Zygisk has been enabled.");
+        LOGD("Manager process detected. Notifying that Zygisk has been enabled.");
 
         setenv("ZYGISK_ENABLED", "1", 1);
     } else {
@@ -673,8 +701,8 @@ void ZygiskContext::nativeForkSystemServer_post() {
 void ZygiskContext::nativeForkAndSpecialize_pre() {
     process = env->GetStringUTFChars(args.app->nice_name, nullptr);
     LOGV("pre forkAndSpecialize [%s]", process);
-
     flags[APP_FORK_AND_SPECIALIZE] = true;
+
     /* Zygisksu changed: No args.app->fds_to_ignore check since we are Android 10+ */
     if (logging::getfd() != -1) {
         exempted_fds.push_back(logging::getfd());
@@ -733,6 +761,7 @@ static bool hook_commit(std::vector<lsplt::MapInfo> &map_infos = cached_map_info
         return true;
     } else {
         LOGE("plt_hook failed");
+
         return false;
     }
 }
@@ -788,9 +817,6 @@ void hook_functions() {
 
     ino_t android_runtime_inode = 0;
     dev_t android_runtime_dev = 0;
-    /* TODO by ThePedroo: Implement injection via native bridge */
-    // ino_t native_bridge_inode = 0;
-    // dev_t native_bridge_dev = 0;
 
     cached_map_infos = lsplt::MapInfo::Scan();
     for (auto &map : cached_map_infos) {
@@ -823,16 +849,19 @@ static void hook_unloader() {
         if (map.path.ends_with("/libart.so")) {
             art_inode = map.inode;
             art_dev = map.dev;
+
             break;
         }
     }
 
     if (art_dev == 0 || art_inode == 0) {
         LOGE("virtual map for libart.so is not cached");
+
         return;
     } else {
         LOGD("hook_unloader called with libart.so [%zu:%lu]", art_dev, art_inode);
     }
+
     PLT_HOOK_REGISTER(art_dev, art_inode, pthread_attr_setstacksize);
     hook_commit();
 }
@@ -844,7 +873,9 @@ static void unhook_functions() {
             LOGE("Failed to register plt_hook [%s]", sym);
         }
     }
+
     delete plt_hook_list;
+
     if (!hook_commit()) {
         LOGE("Failed to restore plt_hook");
         should_unmap_zygisk = false;

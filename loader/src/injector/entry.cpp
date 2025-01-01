@@ -9,7 +9,7 @@ size_t block_size = 0;
 
 extern "C" [[gnu::visibility("default")]]
 void entry(void* addr, size_t size, const char* path) {
-    LOGI("Zygisk library injected, version %s", ZKSU_VERSION);
+    LOGD("Zygisk library injected, version %s", ZKSU_VERSION);
     start_addr = addr;
     block_size = size;
     zygiskd::Init(path);
@@ -23,7 +23,7 @@ void entry(void* addr, size_t size, const char* path) {
     logging::setfd(zygiskd::RequestLogcatFd());
 #endif
 
-    LOGI("start plt hooking");
+    LOGD("start plt hooking");
     hook_functions();
     clean_trace(path, 1, 0, false);
 }

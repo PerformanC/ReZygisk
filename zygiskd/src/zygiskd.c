@@ -47,6 +47,8 @@ enum Architecture {
 #define ZYGISKD_FILE PATH_MODULES_DIR "/zygisksu/bin/zygiskd" lp_select("32", "64")
 #define ZYGISKD_PATH "/data/adb/modules/zygisksu/bin/zygiskd" lp_select("32", "64")
 
+bool first_process = true;
+
 static enum Architecture get_arch(void) {
   char system_arch[32];
   get_property("ro.product.cpu.abi", system_arch);
@@ -502,14 +504,20 @@ void zygiskd_start(char *restrict argv[]) {
         ASSURE_SIZE_READ_BREAK("GetProcessFlags", "uid", ret, sizeof(uid));
 
         uint32_t flags = 0;
-        if (uid_is_manager(uid)) {
-          flags |= PROCESS_IS_MANAGER;
+        if (first_process) {
+          flags |= PROCESS_IS_FIRST_STARTED;
+
+          first_process = false;
         } else {
-          if (uid_granted_root(uid)) {
-            flags |= PROCESS_GRANTED_ROOT;
-          }
-          if (uid_should_umount(uid)) {
-            flags |= PROCESS_ON_DENYLIST;
+          if (uid_is_manager(uid)) {
+            flags |= PROCESS_IS_MANAGER;
+          } else {
+            if (uid_granted_root(uid)) {
+              flags |= PROCESS_GRANTED_ROOT;
+            }
+            if (uid_should_umount(uid)) {
+              flags |= PROCESS_ON_DENYLIST;
+            }
           }
         }
 
@@ -698,6 +706,25 @@ void zygiskd_start(char *restrict argv[]) {
 
           break;
         }
+
+        break;
+      }
+      case GetCleanNamespace: {
+        pid_t pid = 0;
+        ssize_t ret = read_uint32_t(client_fd, (uint32_t *)&pid);
+        ASSURE_SIZE_READ_BREAK("GetCleanNamespace", "pid", ret, sizeof(pid));
+
+        uint8_t mns_state = 0;
+        ret = read_uint8_t(client_fd, &mns_state);
+        ASSURE_SIZE_READ_BREAK("GetCleanNamespace", "mns_state", ret, sizeof(mns_state));
+
+        pid_t our_pid = getpid();
+        ret = write_uint32_t(client_fd, (uint32_t)our_pid);
+        ASSURE_SIZE_WRITE_BREAK("GetCleanNamespace", "our_pid", ret, sizeof(our_pid));
+
+        uint32_t clean_namespace_fd = (uint32_t)save_mns_fd(pid, (enum MountNamespaceState)mns_state, impl);
+        ret = write_uint32_t(client_fd, clean_namespace_fd);
+        ASSURE_SIZE_WRITE_BREAK("GetCleanNamespace", "clean_namespace_fd", ret, sizeof(clean_namespace_fd));
 
         break;
       }
