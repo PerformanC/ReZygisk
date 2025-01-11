@@ -119,7 +119,7 @@ namespace SoList  {
     for (auto iter = solist; iter; iter = iter->get_next()) {
       if (iter->get_name() && iter->get_path() && strstr(iter->get_path(), target_path)) {
         SoList::ProtectedDataGuard guard;
-        LOGI("dropping solist record for %s loaded at %s with size %zu", iter->get_name(), iter->get_path(), iter->get_size());
+        LOGV("dropping solist record for %s loaded at %s with size %zu", iter->get_name(), iter->get_path(), iter->get_size());
         if (iter->get_size() > 0) {
             iter->set_size(0);
             SoInfo::soinfo_free(iter);
@@ -136,7 +136,7 @@ namespace SoList  {
       return;
     }
     if (g_module_load_counter == NULL || g_module_unload_counter == NULL) {
-      LOGI("g_module counters not defined, skip reseting them");
+      LOGD("g_module counters not defined, skip reseting them");
       return;
     }
     auto loaded_modules = *g_module_load_counter;

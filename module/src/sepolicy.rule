@@ -1,21 +1,15 @@
-allow zygote tmpfs file *
-allow zygote appdomain_tmpfs file *
+type zygisk_file file_type
+typeattribute zygisk_file mlstrustedobject
+allow zygote zygisk_file sock_file {read write}
 
-type magisk_file file_type
-typeattribute magisk_file mlstrustedobject
-
-allow * magisk_file file *
-allow * magisk_file dir *
-allow * magisk_file fifo_file *
-allow * magisk_file chr_file *
-allow * magisk_file lnk_file *
-allow * magisk_file sock_file *
-
-allow system_server system_server process execmem
-allow zygote zygote process execmem
+allow zygote magisk lnk_file read
+allow zygote unlabeled file {read open}
+allow zygote zygote capability sys_chroot
+allow zygote su dir search
+allow zygote su {lnk_file file} read
 
 allow zygote adb_data_file dir search
-allow zygote mnt_vendor_file dir search
-allow zygote system_file dir mounton
-allow zygote labeledfs filesystem mount
-allow zygote fs_type filesystem unmount
+allow zygote zygote process execmem
+allow system_server system_server process execmem
+allow zygote tmpfs file *
+allow zygote appdomain_tmpfs file *

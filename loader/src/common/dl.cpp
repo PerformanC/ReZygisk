@@ -45,9 +45,14 @@ void* DlopenExt(const char* path, int flags) {
 }
 
 void* DlopenMem(int fd, int flags) {
-    auto info = android_dlextinfo{
+    auto info = android_dlextinfo {
         .flags = ANDROID_DLEXT_USE_LIBRARY_FD,
-        .library_fd = fd
+        .reserved_addr = NULL,
+        .reserved_size = 0,
+        .relro_fd = 0,
+        .library_fd = fd,
+        .library_fd_offset = 0,
+        .library_namespace = NULL
     };
 
     auto* handle = android_dlopen_ext("/jit-cache-zygisk", flags, &info);

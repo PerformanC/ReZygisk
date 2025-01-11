@@ -63,19 +63,6 @@ namespace zygiskd {
     return true;
   }
 
-  int RequestLogcatFd() {
-    int fd = Connect(1);
-    if (fd == -1) {
-      PLOGE("RequestLogcatFd");
-
-      return -1;
-    }
-
-    socket_utils::write_u8(fd, (uint8_t) SocketAction::RequestLogcatFd);
-
-    return fd;
-  }
-
   uint32_t GetProcessFlags(uid_t uid) {
     int fd = Connect(1);
     if (fd == -1) {
@@ -94,8 +81,8 @@ namespace zygiskd {
     return res;
   }
 
-  std::vector<Module> ReadModules() {
-    std::vector<Module> modules;
+  std::vector<ModuleInfo> ReadModules() {
+    std::vector<ModuleInfo> modules;
     int fd = Connect(1);
     if (fd == -1) {
       PLOGE("ReadModules");
@@ -259,5 +246,35 @@ namespace zygiskd {
 
       close(fd);
     } else info->running = false;
+  }
+
+  std::string UpdateMountNamespace(enum mount_namespace_state nms_state) {
+    int fd = Connect(1);
+    if (fd == -1) {
+      PLOGE("UpdateMountNamespace");
+
+      return "";
+    }
+
+    socket_utils::write_u8(fd, (uint8_t) SocketAction::UpdateMountNamespace);
+    socket_utils::write_u32(fd, getpid());
+    socket_utils::write_u8(fd, (uint8_t)nms_state);
+
+    uint32_t target_pid = socket_utils::read_u32(fd);
+    int target_fd = 0;
+
+    if (target_pid == 0) goto error;
+
+    target_fd = (int)socket_utils::read_u32(fd);
+    if (target_fd == 0) goto error;
+
+    close(fd);
+  
+    return "/proc/" + std::to_string(target_pid) + "/fd/" + std::to_string(target_fd);
+
+    error:
+      close(fd);
+
+      return "";
   }
 }

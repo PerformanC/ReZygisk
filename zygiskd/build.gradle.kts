@@ -42,7 +42,7 @@ val CFlagsRelease = arrayOf(
 )
 
 val CFlagsDebug = arrayOf(
-  "-g", "-O0"
+  "-g", "-O0", "-DDEBUG"
 )
 
 val Files = arrayOf(

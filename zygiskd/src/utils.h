@@ -107,4 +107,6 @@ int non_blocking_execv(const char *restrict file, char *const argv[]);
 
 void stringify_root_impl_name(struct root_impl impl, char *restrict output);
 
+int save_mns_fd(int pid, enum MountNamespaceState mns_state, struct root_impl impl);
+
 #endif /* UTILS_H */
