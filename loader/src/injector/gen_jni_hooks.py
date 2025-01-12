@@ -212,8 +212,7 @@ server_samsung_q = ForkServer('samsung_q', [uid, gid, gids, runtime_flags, Anon(
     permitted_capabilities, effective_capabilities])
 
 # GrapheneOS Android 14 Support
-server_grapheneos_u = ForkServer('grapheneos_u', [uid, gid, gids, runtime_flags, Anon(jint), Anon(jint), rlimits,
-    permitted_capabilities, effective_capabilities])
+server_grapheneos_u = ForkServer('grapheneos_u', [uid, gid, gids, runtime_flags, rlimits, permitted_capabilities, effective_capabilities])
 
 fas_grapheneos_u = ForkAndSpec('grapheneos_u', [uid, gid, gids, runtime_flags, rlimits, mount_external,
     se_info, nice_name, fds_to_close, fds_to_ignore, is_child_zygote, instruction_set, app_data_dir, 
