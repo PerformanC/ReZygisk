@@ -46,6 +46,22 @@
       "notAvaliable": "Немає модулів, які б використовували Zygisk.",
       "arch": "Архітектура: "
     },
+    "actions": {
+      "header": "Дії",
+      "monitorButton": {
+        "start": "Почати",
+        "stop": "Зупинити",
+        "pause": "Пауза"
+      },
+      "monitor": "Моніторинг",
+      "status": {
+        "tracing": "Відстежується",
+        "stopping": "Зупиняється",
+        "stopped": "Зупинено",
+        "exiting": "Виходить",
+        "unknown": "Невідомий"
+      }
+    },
     "settings": {
       "header": "Налаштування",
       "font": {
@@ -72,22 +88,6 @@
       "license": {
         "module": "Ліцензія модуля",
         "web": "Ліцензія WebUI"
-      }
-    },
-    "actions": {
-      "header": "Дії",
-      "monitorButton": {
-        "pause": "Пауза",
-        "stop": "Зупинити",
-        "start": "Почати"
-      },
-      "monitor": "Моніторинг",
-      "status": {
-        "tracing": "Відстежується",
-        "stopping": "Зупиняється",
-        "stopped": "Зупинено",
-        "exiting": "Виходить",
-        "unknown": "Невідомий"
       }
     }
   }
