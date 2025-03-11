@@ -18,8 +18,8 @@
         "copy": "SALIN",
         "clear": "BERSIHKAN SEMUA LOG"
       },
-      "header": "Log Kesalahan",
-      "placeholder": "Tidak ada log kesalahan tercatat disini!"
+      "header": "Log Error",
+      "placeholder": "Tidak ada log error tercatat disini!"
     }
   },
   "page": {
@@ -50,7 +50,7 @@
       "header": "Pengaturan",
       "font": {
         "header": "Gunakan Font Sistem",
-        "description": "Opsi ini akan mengaktifkan font sistem pada WebUI saat ini. Catatan: Mungkin tidak kompatibel dengan FlipFont"
+        "description": "Opsi ini akan mengaktifkan font sistem pada WebUI saat ini. (Mungkin tidak kompatibel dengan FlipFont)"
       },
       "theme": {
         "header": "Bawaan Sistem",
@@ -61,13 +61,13 @@
         "description": "Ubah ke bahasa baru Anda"
       },
       "logs": {
-        "header": "Log Kesalahan",
-        "description": "Lihat semua log kesalahan Anda"
+        "header": "Log Error",
+        "description": "Lihat semua log Error Anda"
       },
       "credits": {
-        "module": "Pengembang Modul",
-        "original": "Pengembang Modul Asli",
-        "web": "Pengembang WebUI"
+        "module": "Developer Modul",
+        "original": "Developer Modul Asli",
+        "web": "Developer WebUI"
       },
       "license": {
         "module": "Lisensi Modul",
@@ -75,13 +75,13 @@
       }
     },
     "actions": {
-      "header": "Aksi",
+      "header": "Tindakan",
       "monitorButton": {
         "pause": "Jeda",
         "stop": "Berhenti",
         "start": "Mulai"
       },
-      "monitor": "Pemantauan",
+      "monitor": "Monitor",
       "status": {
         "tracing": "Pelacakan",
         "stopping": "Menghentikan",
