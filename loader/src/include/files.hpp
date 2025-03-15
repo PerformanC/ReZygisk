@@ -2,6 +2,7 @@
 #include <functional>
 #include <string>
 #include <vector>
+#include <unistd.h>
 
 struct mount_info {
     unsigned int id;
@@ -25,6 +26,8 @@ void file_readline(bool trim, const char *file, const std::function<bool(std::st
 void file_readline(const char *file, const std::function<bool(std::string_view)> &fn);
 
 std::vector<mount_info> parse_mount_info(const char *pid);
+
+char *get_path_from_fd(int fd);
 
 using sFILE = std::unique_ptr<FILE, decltype(&fclose)>;
 using sDIR = std::unique_ptr<DIR, decltype(&closedir)>;

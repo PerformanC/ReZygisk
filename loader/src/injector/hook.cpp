@@ -591,7 +591,7 @@ void ZygiskContext::run_modules_post() {
 
     if (modules.size() > 0) {
         LOGD("modules unloaded: %zu/%zu", modules_unloaded, modules.size());
-        clean_trace("jit-cache-zygisk", modules.size(), modules_unloaded, true);
+        clean_trace("/data/adb", modules.size(), modules_unloaded, true);
     }
 }
 
@@ -762,7 +762,7 @@ void clean_trace(const char* path, size_t load, size_t unload, bool spoof_maps) 
     // spoofing map names is futile in Android, we do it simply
     // to avoid Zygisk detections based on string comparison
     for (auto &map : lsplt::MapInfo::Scan()) {
-        if (strstr(map.path.c_str(), path))
+        if (strstr(map.path.c_str(), path) && !strstr(map.path.c_str(), "libzygisk"))
         {
             void *addr = (void *)map.start;
             size_t size = map.end - map.start;

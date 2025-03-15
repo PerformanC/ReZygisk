@@ -83,35 +83,7 @@ int create_library_fd(const char *restrict so_path) {
     return -1;
   }
 
-  /* INFO: This is required as older implementations of glibc may not
-             have the memfd_create function call, causing a crash. */
-  int memfd = (int)syscall(SYS_memfd_create, "jit-cache-zygisk", MFD_ALLOW_SEALING);
-  if (memfd == -1) {
-    LOGE("Failed creating memfd: %s\n", strerror(errno));
-
-    return -1;
-  }
-
-  if (sendfile(memfd, so_fd, NULL, (size_t)so_size) == -1) {
-    LOGE("Failed copying so file to memfd: %s\n", strerror(errno));
-
-    close(so_fd);
-    close(memfd);
-
-    return -1;
-  }
-
-  close(so_fd);
-
-  if (fcntl(memfd, F_ADD_SEALS, F_SEAL_SHRINK | F_SEAL_GROW | F_SEAL_WRITE | F_SEAL_SEAL) == -1) {
-    LOGE("Failed sealing memfd: %s\n", strerror(errno));
-
-    close(memfd);
-
-    return -1;
-  }
-
-  return memfd;
+  return so_fd;
 }
 
 /* WARNING: Dynamic memory based */
