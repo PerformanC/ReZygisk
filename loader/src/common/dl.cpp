@@ -68,6 +68,5 @@ void* DlopenMem(int fd, int flags) {
         LOGE("dlopen fd %d: %s", fd, dlerror());
     }
 
-    free(path);
     return handle;
 }
