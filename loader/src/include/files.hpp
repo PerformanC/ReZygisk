@@ -27,7 +27,7 @@ void file_readline(const char *file, const std::function<bool(std::string_view)>
 
 std::vector<mount_info> parse_mount_info(const char *pid);
 
-char *get_path_from_fd(int fd);
+int get_path_from_fd(int fd, char *buf, size_t size);
 
 using sFILE = std::unique_ptr<FILE, decltype(&fclose)>;
 using sDIR = std::unique_ptr<DIR, decltype(&closedir)>;
