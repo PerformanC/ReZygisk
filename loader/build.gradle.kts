@@ -56,6 +56,7 @@ android {
         externalNativeBuild.cmake {
             arguments += "-DANDROID_STL=none"
             arguments += "-DLSPLT_STANDALONE=ON"
+            arguments += "-DCMAKE_BUILD_PARALLEL_LEVEL=${Runtime.getRuntime().availableProcessors()}"
             cFlags("-std=c18", *defaultCFlags)
             cppFlags("-std=c++20", *defaultCFlags)
             ccachePath?.let {
