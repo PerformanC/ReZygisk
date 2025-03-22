@@ -51,17 +51,17 @@ void* DlopenMem(int fd, int flags) {
         .library_fd = fd
     };
 
-    // We need to find the path of the fd since passing "" to android_dlopen_ext
-    // will not work and passing the original "jit-cache-zygisk" will cause a detection again.
+    /* INFO: We need to find the path of the fd since passing "" to android_dlopen_ext
+        will not work and passing the original "jit-cache-zygisk" will cause a detection again. */
     char *path = get_path_from_fd(fd);
     if (path == NULL) {
         LOGE("Failed to get path for fd: %d", fd);
-        return nullptr;
+        return NULL;
     }
         
     LOGD("Path for fd %d: %s", fd, path);
 
-    auto* handle = android_dlopen_ext(path, flags, &info);
+    auto *handle = android_dlopen_ext(path, flags, &info);
     if (handle) {
         LOGV("dlopen fd %d: %p", fd, handle);
     } else {

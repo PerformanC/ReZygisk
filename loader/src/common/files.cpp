@@ -122,17 +122,13 @@ sFILE make_file(FILE *fp) {
 }
 
 char *get_path_from_fd(int fd) {
-    if (fd < 0) {
-        return NULL;
-    }
+    if (fd < 0) return NULL;
 
     char *path = (char *)malloc(PATH_MAX);
-    if (path == NULL) {
-        return NULL;
-    }
+    if (path == NULL) return NULL;
 
-    // We assume that the path is always at /data/adb/modules/xxx
-    // which should never be longer than 128 chars.
+    /* NOTE: We assume that the path is always at /data/adb/modules/xxx
+        which should never be longer than 128 chars. */
     char proc_path[128];
     snprintf(proc_path, sizeof(proc_path), "/proc/self/fd/%d", fd);
 

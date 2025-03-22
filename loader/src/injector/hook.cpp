@@ -762,7 +762,7 @@ void clean_trace(const char* path, size_t load, size_t unload, bool spoof_maps) 
     // spoofing map names is futile in Android, we do it simply
     // to avoid Zygisk detections based on string comparison
     for (auto &map : lsplt::MapInfo::Scan()) {
-        if (strstr(map.path.c_str(), path) && !strstr(map.path.c_str(), "libzygisk"))
+        if (strstr(map.path.c_str(), path) && strstr(map.path.c_str(), "libzygisk") == 0)
         {
             void *addr = (void *)map.start;
             size_t size = map.end - map.start;
