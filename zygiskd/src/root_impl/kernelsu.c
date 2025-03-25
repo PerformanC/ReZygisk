@@ -143,7 +143,7 @@ static int ksu_request(const char* request, char* response, size_t response_size
     }
     
     // Receive response
-    int bytes_received = recv(sockfd, response, response_size - 1, 0);
+    int bytes_received = (int)recv(sockfd, response, response_size - 1, 0);
     if (bytes_received < 0) {
         LOGE("Failed to receive response from KernelSU: %s\n", strerror(errno));
         close(sockfd);

@@ -25,6 +25,31 @@
 #include "constants.h"
 #include "utils.h"
 
+// Forward declarations
+struct Module;
+struct Context;
+
+// Struct definitions
+struct Module {
+  int companion;
+  void *handle;
+  char *name;
+  int api;
+  void *preload_lib;
+  void *api_table;
+};
+
+struct Context {
+  struct Module *modules;
+  size_t len;
+  struct root_impl root_impl;
+};
+
+// Function declarations
+static void cleanup_daemon_resources(struct Context *context);
+static void free_modules(struct Context *context);
+static void load_modules(enum Architecture arch, struct Context *context);
+
 #define MODULE_OPERATION_TIMEOUT 5 // 5 seconds timeout for module operations
 
 static volatile sig_atomic_t daemon_shutdown = 0;
@@ -64,19 +89,6 @@ static void cleanup_daemon_resources(struct Context *context) {
   
   LOGI("Daemon resources cleaned up\n");
 }
-
-struct Context {
-  struct Module {
-    int companion;
-    void *handle;
-    char *name;
-    int api;
-    void *preload_lib;
-    void *api_table;
-  } *modules;
-  size_t len;
-  struct root_impl root_impl;
-};
 
 enum Architecture {
   ARM32,

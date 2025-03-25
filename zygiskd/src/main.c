@@ -1,11 +1,13 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
-#include <errno.h>
-#include <signal.h>
 #include <unistd.h>
+#include <signal.h>
+#include <string.h>
+#include <sys/types.h>
+#include <sys/stat.h>
 #include <sys/resource.h>
-
+#include <pthread.h>
+#include <errno.h>
 #include <android/log.h>
 
 #include "root_impl/common.h"
