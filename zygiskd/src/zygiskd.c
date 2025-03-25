@@ -22,6 +22,46 @@
 #include "constants.h"
 #include "utils.h"
 
+#define MODULE_OPERATION_TIMEOUT 5 // 5 seconds timeout for module operations
+
+static volatile sig_atomic_t daemon_shutdown = 0;
+
+static void handle_shutdown_signal(int sig) {
+  LOGI("Daemon received signal %d, initiating shutdown\n", sig);
+  daemon_shutdown = 1;
+}
+
+static void setup_daemon_signals(void) {
+  struct sigaction sa;
+  memset(&sa, 0, sizeof(sa));
+  sa.sa_handler = handle_shutdown_signal;
+  sigemptyset(&sa.sa_mask);
+  
+  sigaction(SIGTERM, &sa, NULL);
+  sigaction(SIGINT, &sa, NULL);
+}
+
+static void cleanup_daemon_resources(struct Context *context) {
+  if (!context) return;
+  
+  // Close all module sockets
+  for (size_t i = 0; i < context->len; i++) {
+    if (context->modules[i].companion != -1) {
+      close(context->modules[i].companion);
+      context->modules[i].companion = -1;
+    }
+  }
+  
+  // Free module memory
+  if (context->modules) {
+    free(context->modules);
+    context->modules = NULL;
+    context->len = 0;
+  }
+  
+  LOGI("Daemon resources cleaned up\n");
+}
+
 struct Module {
   char *name;
   int lib_fd;
@@ -86,7 +126,6 @@ int create_library_fd(const char *restrict so_path) {
   return so_fd;
 }
 
-/* WARNING: Dynamic memory based */
 static void load_modules(enum Architecture arch, struct Context *restrict context) {
   context->len = 0;
   context->modules = NULL;
@@ -120,7 +159,6 @@ static void load_modules(enum Architecture arch, struct Context *restrict contex
     struct stat st;
     if (stat(so_path, &st) == -1) {
       errno = 0;
-
       continue;
     }
 
@@ -131,33 +169,39 @@ static void load_modules(enum Architecture arch, struct Context *restrict contex
       if (errno != ENOENT) {
         LOGE("Failed checking if module `%s` is disabled: %s\n", name, strerror(errno));
         errno = 0;
-
         continue;
       }
-
       errno = 0;
     } else continue;
 
     int lib_fd = create_library_fd(so_path);
     if (lib_fd == -1) {
       LOGE("Failed loading module `%s`\n", name);
-
       continue;
     }
 
-
-    context->modules = realloc(context->modules, (size_t)((context->len + 1) * sizeof(struct Module)));
-    if (context->modules == NULL) {
-      LOGE("Failed reallocating memory for modules.\n");
-
-      return;
+    // Use calloc instead of realloc to avoid potential memory fragmentation
+    struct Module *new_modules = calloc(context->len + 1, sizeof(struct Module));
+    if (new_modules == NULL) {
+      LOGE("Failed allocating memory for modules.\n");
+      close(lib_fd);
+      continue;
     }
 
+    // Copy existing modules if any
+    if (context->modules != NULL) {
+      memcpy(new_modules, context->modules, context->len * sizeof(struct Module));
+      free(context->modules);
+    }
+    
+    context->modules = new_modules;
     context->modules[context->len].name = strdup(name);
     context->modules[context->len].lib_fd = lib_fd;
     context->modules[context->len].companion = -1;
     context->len++;
   }
+  
+  closedir(dir);
 }
 
 static void free_modules(struct Context *restrict context) {
@@ -165,6 +209,7 @@ static void free_modules(struct Context *restrict context) {
     free(context->modules[i].name);
     if (context->modules[i].companion != -1) close(context->modules[i].companion);
   }
+  free(context->modules);
 }
 
 static int create_daemon_socket(void) {
@@ -176,8 +221,7 @@ static int create_daemon_socket(void) {
 static int spawn_companion(char *restrict argv[], char *restrict name, int lib_fd) {
   int sockets[2];
   if (socketpair(AF_UNIX, SOCK_STREAM, 0, sockets) == -1) {
-    LOGE("Failed creating socket pair.\n");
-
+    LOGE("Failed creating socket pair: %s\n", strerror(errno));
     return -1;
   }
 
@@ -187,11 +231,9 @@ static int spawn_companion(char *restrict argv[], char *restrict name, int lib_f
   pid_t pid = fork();
   if (pid < 0) {
     LOGE("Failed forking companion: %s\n", strerror(errno));
-
     close(companion_fd);
     close(daemon_fd);
-
-    exit(1);
+    return -1;
   } else if (pid > 0) {
     close(companion_fd);
 
@@ -201,26 +243,20 @@ static int spawn_companion(char *restrict argv[], char *restrict name, int lib_f
     if (WIFEXITED(status) && WEXITSTATUS(status) == 0) {
       if (write_string(daemon_fd, name) == -1) {
         LOGE("Failed writing module name.\n");
-
         close(daemon_fd);
-
         return -1;
       }
       if (write_fd(daemon_fd, lib_fd) == -1) {
         LOGE("Failed sending library fd.\n");
-
         close(daemon_fd);
-
         return -1;
       }
       
       uint8_t response = 0;
       ssize_t ret = read_uint8_t(daemon_fd, &response);
       if (ret <= 0) {
-        LOGE("Failed reading companion response.\n");
-
+        LOGE("Failed reading companion response: %s\n", strerror(errno));
         close(daemon_fd);
-
         return -1;
       }
 
@@ -228,27 +264,24 @@ static int spawn_companion(char *restrict argv[], char *restrict name, int lib_f
         /* INFO: Even without any entry, we should still just deal with it */
         case 0: { return -2; }
         case 1: { return daemon_fd; }
-        /* TODO: Should we be closing daemon socket here? (in non-0-and-1 case) */
+        /* Close daemon socket for any unexpected response */
         default: {
+          close(daemon_fd);
           return -1;
         }
       }
-      /* TODO: Should we be closing daemon socket here? */
     } else {
-      LOGE("Exited with status %d\n", status);
-
+      LOGE("Companion exited with status %d\n", status);
+      close(daemon_fd);
       return -1;
     }
   /* INFO: if pid == 0: */
   } else {
-    /* INFO: There is no case where this will fail with a valid fd. */
     /* INFO: Remove FD_CLOEXEC flag to avoid closing upon exec */
     if (fcntl(companion_fd, F_SETFD, 0) == -1) {
       LOGE("Failed removing FD_CLOEXEC flag: %s\n", strerror(errno));
-
       close(companion_fd);
       close(daemon_fd);
-
       exit(1);
     }
   }
@@ -271,9 +304,7 @@ static int spawn_companion(char *restrict argv[], char *restrict name, int lib_f
   char *eargv[] = { process_name, "companion", companion_fd_str, NULL };
   if (non_blocking_execv(ZYGISKD_PATH, eargv) == -1) {
     LOGE("Failed executing companion: %s\n", strerror(errno));
-
     close(companion_fd);
-
     exit(1);
   }
 
@@ -286,35 +317,28 @@ struct __attribute__((__packed__)) MsgHead {
   char data[0];
 };
 
-/* WARNING: Dynamic memory based */
 void zygiskd_start(char *restrict argv[]) {
-  /* INFO: When implementation is None or Multiple, it won't set the values 
-            for the context, causing it to have garbage values. In response
-            to that, "= { 0 }" is used to ensure that the values are clean. */
+  setup_daemon_signals();
+
   struct Context context = { 0 };
 
   struct root_impl impl;
   get_impl(&impl);
   if (impl.impl == None || impl.impl == Multiple) {
     struct MsgHead *msg = NULL;
-  
-    if (impl.impl == None) {
-      msg = malloc(sizeof(struct MsgHead) + strlen("Unsupported environment: Unknown root implementation") + 1);
-    } else {
-      msg = malloc(sizeof(struct MsgHead) + strlen("Unsupported environment: Multiple root implementations found") + 1);
-    }
+    const char *error_msg = (impl.impl == None) ? 
+      "Unsupported environment: Unknown root implementation" : 
+      "Unsupported environment: Multiple root implementations found";
+    
+    size_t msg_len = strlen(error_msg) + 1;
+    msg = malloc(sizeof(struct MsgHead) + msg_len);
     if (msg == NULL) {
       LOGE("Failed allocating memory for message.\n");
-
       return;
     }
 
     msg->cmd = DAEMON_SET_ERROR_INFO;
-    if (impl.impl == None) {
-      msg->length = sprintf(msg->data, "Unsupported environment: Unknown root implementation");
-    } else {
-      msg->length = sprintf(msg->data, "Unsupported environment: Multiple root implementations found");
-    }
+    msg->length = sprintf(msg->data, "%s", error_msg);
 
     unix_datagram_sendto(CONTROLLER_SOCKET, (void *)msg, (size_t)((int)sizeof(struct MsgHead) + msg->length));
 
@@ -325,39 +349,45 @@ void zygiskd_start(char *restrict argv[]) {
 
     char *module_list = NULL;
     size_t module_list_len = 0;
+    
+    // Improved module list building with better memory handling
     if (context.len == 0) {
       module_list = strdup("None");
+      if (module_list == NULL) {
+        LOGE("Failed allocating memory for module list.\n");
+        return;
+      }
       module_list_len = strlen("None");
     } else {
+      // Calculate required buffer size first
       for (size_t i = 0; i < context.len; i++) {
+        module_list_len += strlen(context.modules[i].name);
         if (i != context.len - 1) {
-          module_list = realloc(module_list, module_list_len + strlen(context.modules[i].name) + strlen(", ") + 1);
-          if (module_list == NULL) {
-            LOGE("Failed reallocating memory for module list.\n");
-
-            return;
-          }
-
-          strcpy(module_list + module_list_len, context.modules[i].name);
-
-          module_list_len += strlen(context.modules[i].name);
-
-          strcpy(module_list + module_list_len, ", ");
-
           module_list_len += strlen(", ");
-        } else {
-          module_list = realloc(module_list, module_list_len + strlen(context.modules[i].name) + 1);
-          if (module_list == NULL) {
-            LOGE("Failed reallocating memory for module list.\n");
-
-            return;
-          }
-
-          strcpy(module_list + module_list_len, context.modules[i].name);
-
-          module_list_len += strlen(context.modules[i].name);
         }
       }
+      
+      // Allocate buffer once with the right size
+      module_list = malloc(module_list_len + 1);
+      if (module_list == NULL) {
+        LOGE("Failed allocating memory for module list.\n");
+        free_modules(&context);
+        return;
+      }
+      
+      // Build the string
+      char *p = module_list;
+      for (size_t i = 0; i < context.len; i++) {
+        size_t name_len = strlen(context.modules[i].name);
+        memcpy(p, context.modules[i].name, name_len);
+        p += name_len;
+        
+        if (i != context.len - 1) {
+          memcpy(p, ", ", 2);
+          p += 2;
+        }
+      }
+      *p = '\0';
     }
 
     char impl_name[LONGEST_ROOT_IMPL_NAME];
@@ -366,6 +396,13 @@ void zygiskd_start(char *restrict argv[]) {
     size_t msg_length = strlen("Root: , Modules: ") + strlen(impl_name) + module_list_len + 1;
 
     struct MsgHead *msg = malloc(sizeof(struct MsgHead) + msg_length);
+    if (msg == NULL) {
+      LOGE("Failed allocating memory for message.\n");
+      free(module_list);
+      free_modules(&context);
+      return;
+    }
+    
     msg->length = snprintf(msg->data, msg_length, "Root: %s, Modules: %s", impl_name, module_list) + 1;
     msg->cmd = DAEMON_SET_INFO;
 
@@ -378,28 +415,52 @@ void zygiskd_start(char *restrict argv[]) {
   int socket_fd = create_daemon_socket();
   if (socket_fd == -1) {
     LOGE("Failed creating daemon socket\n");
-
+    free_modules(&context);
     return;
   }
 
-  while (1) {
+  // Set socket to non-blocking mode to prevent hanging
+  int flags = fcntl(socket_fd, F_GETFL, 0);
+  if (flags != -1) {
+    fcntl(socket_fd, F_SETFL, flags | O_NONBLOCK);
+  }
+
+  // Setup poll for socket monitoring with timeout
+  struct pollfd pfd;
+  pfd.fd = socket_fd;
+  pfd.events = POLLIN;
+  
+  while (!daemon_shutdown) {
+    // Use poll with timeout to prevent CPU spinning
+    int poll_result = poll(&pfd, 1, 1000); // 1 second timeout
+    
+    if (poll_result < 0) {
+      if (errno == EINTR) continue;
+      LOGE("poll error: %s\n", strerror(errno));
+      break;
+    }
+    
+    if (poll_result == 0) continue; // Timeout, continue waiting
+    
+    if (!(pfd.revents & POLLIN)) continue;
+    
     int client_fd = accept(socket_fd, NULL, NULL);
     if (client_fd == -1) {
+      if (errno == EAGAIN || errno == EWOULDBLOCK) continue;
       LOGE("accept: %s\n", strerror(errno));
-
-      return;
+      continue;
     }
 
     uint8_t action8 = 0;
     ssize_t len = read_uint8_t(client_fd, &action8);
     if (len == -1) {
       LOGE("read: %s\n", strerror(errno));
-
-      return;
+      close(client_fd);
+      continue;
     } else if (len == 0) {
       LOGI("Client disconnected\n");
-
-      return;
+      close(client_fd);
+      continue;
     }
 
     enum DaemonSocketAction action = (enum DaemonSocketAction)action8;
@@ -579,14 +640,18 @@ void zygiskd_start(char *restrict argv[]) {
       case RequestCompanionSocket: {
         size_t index = 0;
         ssize_t ret = read_size_t(client_fd, &index);
-        ASSURE_SIZE_READ_BREAK("RequestCompanionSocket", "index", ret, sizeof(index));
+        if (ret == -1 || index >= context.len) {
+          LOGE("Invalid module index: %zu\n", index);
+          ret = write_uint8_t(client_fd, 0);
+          close(client_fd);
+          break;
+        }
 
         struct Module *module = &context.modules[index];
 
         if (module->companion != -1) {
           if (!check_unix_socket(module->companion, false)) {
             LOGE(" - Companion for module \"%s\" crashed\n", module->name);
-
             close(module->companion);
             module->companion = -1;
           }
@@ -616,24 +681,16 @@ void zygiskd_start(char *restrict argv[]) {
           LOGI(" - Sending companion fd socket of module \"%s\"\n", module->name);
 
           if (write_fd(module->companion, client_fd) == -1) {
-            LOGE(" - Failed to send companion fd socket of module \"%s\"\n", module->name);
+            LOGE(" - Failed to send companion fd socket of module \"%s\": %s\n", module->name, strerror(errno));
 
             ret = write_uint8_t(client_fd, 0);
-            ASSURE_SIZE_WRITE_BREAK("RequestCompanionSocket", "response", ret, sizeof(int));
-
             close(module->companion);
             module->companion = -1;
-
-            /* INFO: RequestCompanionSocket by default doesn't close the client_fd */
             close(client_fd);
           }
         } else {
           LOGE(" - Failed to spawn companion for module \"%s\"\n", module->name);
-
           ret = write_uint8_t(client_fd, 0);
-          ASSURE_SIZE_WRITE_BREAK("RequestCompanionSocket", "response", ret, sizeof(int));
-
-          /* INFO: RequestCompanionSocket by default doesn't close the client_fd */
           close(client_fd);
         }
 
@@ -680,6 +737,7 @@ void zygiskd_start(char *restrict argv[]) {
     continue;
   }
 
+  // Proper cleanup on exit
   close(socket_fd);
-  free_modules(&context);
+  cleanup_daemon_resources(&context);
 }

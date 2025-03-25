@@ -107,4 +107,8 @@ int non_blocking_execv(const char *restrict file, char *const argv[]);
 
 void stringify_root_impl_name(struct root_impl impl, char *restrict output);
 
+void safe_close(int *fd);
+bool set_low_priority(void);
+bool check_memory_usage(void);
+
 #endif /* UTILS_H */

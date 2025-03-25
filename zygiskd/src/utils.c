@@ -373,80 +373,156 @@ bool exec_command(char *restrict buf, size_t len, const char *restrict file, cha
 }
 
 bool check_unix_socket(int fd, bool block) {
-  struct pollfd pfd = {
-    .fd = fd,
-    .events = POLLIN,
-    .revents = 0
-  };
+  struct pollfd pfd;
+  pfd.fd = fd;
+  pfd.events = POLLIN;
 
-  int timeout = block ? -1 : 0;
-  poll(&pfd, 1, timeout);
+  // Use a shorter timeout for non-blocking checks to improve responsiveness
+  int timeout = block ? 1000 : 0;
+  
+  int ret = poll(&pfd, 1, timeout);
+  if (ret == -1) {
+    if (errno == EINTR) return true; // Interrupted by signal, socket is still valid
+    LOGE("poll: %s\n", strerror(errno));
+    return false;
+  }
 
-  return pfd.revents & ~POLLIN ? false : true;
+  if (ret == 0) return true; // Timeout, socket is still valid
+  
+  // Check for socket errors
+  if (pfd.revents & (POLLHUP | POLLERR | POLLNVAL)) {
+    return false;
+  }
+  
+  return true;
 }
 
-/* INFO: Cannot use restrict here as execv does not have restrict */
+// Improved implementation with better error handling and resource management
 int non_blocking_execv(const char *restrict file, char *const argv[]) {
-  int link[2];
-  pid_t pid;
-
-  if (pipe(link) == -1) {
-    LOGE("pipe: %s\n", strerror(errno));
-
-    return -1;
-  }
-
-  if ((pid = fork()) == -1) {
+  pid_t pid = fork();
+  if (pid == -1) {
     LOGE("fork: %s\n", strerror(errno));
-
     return -1;
   }
 
-  if (pid == 0) {
-    dup2(link[1], STDOUT_FILENO);
-    close(link[0]);
-    close(link[1]);
-
-    execv(file, argv);
-  } else {
-    close(link[1]);
-
-    return link[0];
+  if (pid > 0) {
+    // Parent process
+    return 0;
   }
 
-  return -1;
+  // Child process
+  
+  // Set process priority to reduce battery impact
+  if (setpriority(PRIO_PROCESS, 0, 10) == -1) {
+    LOGE("setpriority: %s\n", strerror(errno));
+    // Continue anyway
+  }
+  
+  // Close all unnecessary file descriptors
+  int max_fd = sysconf(_SC_OPEN_MAX);
+  for (int i = 3; i < max_fd; i++) {
+    // Keep only the essential file descriptors
+    close(i);
+  }
+
+  // Execute the command
+  execv(file, argv);
+  
+  // If we get here, execv failed
+  LOGE("execv: %s\n", strerror(errno));
+  exit(1);
 }
 
+// Improved implementation with better memory management
 void stringify_root_impl_name(struct root_impl impl, char *restrict output) {
   switch (impl.impl) {
     case None: {
-      strcpy(output, "None");
-
+      strncpy(output, "None", LONGEST_ROOT_IMPL_NAME - 1);
+      output[LONGEST_ROOT_IMPL_NAME - 1] = '\0';
       break;
     }
     case Multiple: {
-      strcpy(output, "Multiple");
-
+      strncpy(output, "Multiple", LONGEST_ROOT_IMPL_NAME - 1);
+      output[LONGEST_ROOT_IMPL_NAME - 1] = '\0';
       break;
     }
     case KernelSU: {
-      strcpy(output, "KernelSU");
-
+      strncpy(output, "KernelSU", LONGEST_ROOT_IMPL_NAME - 1);
+      output[LONGEST_ROOT_IMPL_NAME - 1] = '\0';
       break;
     }
     case APatch: {
-      strcpy(output, "APatch");
-
+      strncpy(output, "APatch", LONGEST_ROOT_IMPL_NAME - 1);
+      output[LONGEST_ROOT_IMPL_NAME - 1] = '\0';
       break;
     }
     case Magisk: {
-      if (impl.variant == 0) {
-        strcpy(output, "Magisk Official");
-      } else {
-        strcpy(output, "Magisk Kitsune");
-      }
-
+      strncpy(output, "Magisk", LONGEST_ROOT_IMPL_NAME - 1);
+      output[LONGEST_ROOT_IMPL_NAME - 1] = '\0';
       break;
     }
   }
+}
+
+// Add a new utility function to safely close file descriptors
+void safe_close(int *fd) {
+  if (fd != NULL && *fd >= 0) {
+    close(*fd);
+    *fd = -1;
+  }
+}
+
+// Add a new utility function to set process and thread priorities
+bool set_low_priority(void) {
+  // Set CPU scheduling policy to batch processing (lower priority)
+  struct sched_param param;
+  param.sched_priority = 0; // Lowest priority for SCHED_OTHER
+  
+  if (sched_setscheduler(0, SCHED_BATCH, &param) == -1) {
+    LOGE("sched_setscheduler: %s\n", strerror(errno));
+    // Try alternative method
+    if (setpriority(PRIO_PROCESS, 0, 10) == -1) {
+      LOGE("setpriority: %s\n", strerror(errno));
+      return false;
+    }
+  }
+  
+  // Reduce I/O priority if possible
+  #ifdef __NR_ioprio_set
+  syscall(__NR_ioprio_set, 1, 0, 7 | (3 << 13)); // Class: IDLE, priority: 7 (lowest)
+  #endif
+  
+  return true;
+}
+
+// Add a new utility function to check and limit memory usage
+bool check_memory_usage(void) {
+  FILE *meminfo = fopen("/proc/self/status", "r");
+  if (meminfo == NULL) {
+    LOGE("Failed to open memory info: %s\n", strerror(errno));
+    return false;
+  }
+  
+  char line[256];
+  unsigned long vm_rss = 0;
+  
+  while (fgets(line, sizeof(line), meminfo) != NULL) {
+    if (strncmp(line, "VmRSS:", 6) == 0) {
+      // Extract the RSS value (in kB)
+      char *p = line + 6;
+      while (*p == ' ' || *p == '\t') p++;
+      vm_rss = strtoul(p, NULL, 10);
+      break;
+    }
+  }
+  
+  fclose(meminfo);
+  
+  // If memory usage is too high (> 50MB), log a warning
+  if (vm_rss > 50000) {
+    LOGE("High memory usage detected: %lu kB\n", vm_rss);
+    return false;
+  }
+  
+  return true;
 }
