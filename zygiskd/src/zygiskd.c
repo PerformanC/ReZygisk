@@ -1,48 +1,62 @@
 #include <stdlib.h>
 #include <string.h>
-#include <dirent.h>
-#include <sys/mman.h>
+#include <unistd.h>
 #include <sys/socket.h>
 #include <sys/un.h>
 #include <sys/stat.h>
-#include <sys/wait.h>
-#include <sys/sendfile.h>
-#include <fcntl.h>
-#include <errno.h>
-#include <stdio.h>
-
-#include <unistd.h>
-#include <linux/limits.h>
-#include <sys/syscall.h>
-#include <linux/memfd.h>
-
 #include <sys/types.h>
-#include <sys/stat.h>
 #include <pthread.h>
+#include <errno.h>
+#include <fcntl.h>
+#include <signal.h>
+#include <android/log.h>
+#include <sys/wait.h>
+#include <sys/prctl.h>
+#include <sys/signalfd.h>
+#include <sys/eventfd.h>
+#include <sys/ioctl.h>
+#include <sys/mount.h>
+#include <sys/stat.h>
+#include <sys/types.h>
 #include <poll.h>
+#include <linux/userfaultfd.h>
+#include <linux/memfd.h>
+#include <linux/oom.h>
+#include <sys/syscall.h>
+#include <sys/mman.h>
+#include <sys/ptrace.h>
+#include <sys/wait.h>
+#include <pwd.h>
+#include <stdbool.h>
+
+#include <dirent.h>
+#include <linux/limits.h>
 
 #include "root_impl/common.h"
 #include "constants.h"
 #include "utils.h"
 
-// Forward declarations
-struct Module;
-struct Context;
-
 // Struct definitions
 struct Module {
-  int companion;
-  void *handle;
-  char *name;
-  int api;
-  void *preload_lib;
-  void *api_table;
+    int companion;
+    void *handle;
+    char *name;
+    int api;
+    void *preload_lib;
+    void *api_table;
+    int lib_fd;
 };
 
 struct Context {
-  struct Module *modules;
-  size_t len;
-  struct root_impl root_impl;
+    struct Module *modules;
+    size_t len;
+    struct root_impl root_impl;
+};
+
+struct __attribute__((__packed__)) MsgHead {
+    unsigned int cmd;
+    int length;
+    char data[0];
 };
 
 // Function declarations
@@ -327,12 +341,6 @@ static int spawn_companion(char *restrict argv[], char *restrict name, int lib_f
 
   exit(0);
 }
-
-struct __attribute__((__packed__)) MsgHead {
-  unsigned int cmd;
-  int length;
-  char data[0];
-};
 
 void zygiskd_start(char *restrict argv[]) {
   setup_daemon_signals();

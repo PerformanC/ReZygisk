@@ -1,20 +1,44 @@
-#include <stdio.h>
 #include <stdlib.h>
-#include <unistd.h>
-#include <signal.h>
 #include <string.h>
-#include <sys/types.h>
+#include <unistd.h>
+#include <sys/socket.h>
+#include <sys/un.h>
 #include <sys/stat.h>
-#include <sys/resource.h>
+#include <sys/types.h>
 #include <pthread.h>
 #include <errno.h>
+#include <fcntl.h>
+#include <signal.h>
 #include <android/log.h>
+#include <sys/wait.h>
+#include <sys/prctl.h>
+#include <sys/signalfd.h>
+#include <sys/eventfd.h>
+#include <sys/ioctl.h>
+#include <sys/mount.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <poll.h>
+#include <linux/userfaultfd.h>
+#include <linux/memfd.h>
+#include <linux/oom.h>
+#include <sys/syscall.h>
+#include <sys/mman.h>
+#include <sys/ptrace.h>
+#include <sys/wait.h>
+#include <pwd.h>
+#include <stdbool.h>
+#include <dirent.h>
+#include <linux/limits.h>
 
 #include "root_impl/common.h"
+#include "constants.h"
 #include "companion.h"
 #include "zygiskd.h"
 
 #include "utils.h"
+
+#define LOG_TAG "ReZygisk"
 
 int __android_log_print(int prio, const char *tag, const char *fmt, ...);
 

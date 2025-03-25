@@ -1,27 +1,88 @@
-#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <errno.h>
 #include <unistd.h>
-#include <fcntl.h>
-#include <sys/stat.h>
-#include <sys/types.h>
 #include <sys/socket.h>
 #include <sys/un.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <pwd.h>
+#include <errno.h>
+#include <stdio.h>
+#include <stdbool.h>
+#include <linux/userfaultfd.h>
+#include <linux/memfd.h>
+#include <linux/oom.h>
+#include <sys/syscall.h>
+#include <sys/mman.h>
+#include <sys/ptrace.h>
+#include <sys/wait.h>
+#include <sys/prctl.h>
+#include <sys/signalfd.h>
+#include <sys/eventfd.h>
+#include <sys/ioctl.h>
+#include <sys/mount.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <fcntl.h>
+#include <poll.h>
 #include <pthread.h>
-
+#include <signal.h>
 #include <android/log.h>
-
-#include "common.h"
-#include "../utils.h"
 
 #define LOG_TAG "ReZygisk-KernelSU"
 
 // KernelSU socket path
 #define KSU_SOCKET_PATH "/dev/socket/ksud"
 
-// Cache for UID checks to reduce system calls
+// UID cache
 #define UID_CACHE_SIZE 32
+static struct uid_cache {
+    uid_t uid;
+    char name[32];
+} uid_cache[UID_CACHE_SIZE];
+
+static pthread_mutex_t cache_mutex = PTHREAD_MUTEX_INITIALIZER;
+
+// Initialize the cache
+static void init_uid_cache(void) {
+    pthread_mutex_lock(&cache_mutex);
+    for (int i = 0; i < UID_CACHE_SIZE; i++) {
+        uid_cache[i].uid = (uid_t)-1; // Invalid UID
+    }
+    pthread_mutex_unlock(&cache_mutex);
+}
+
+// Get UID from cache or system
+uid_t get_uid(const char* name) {
+    pthread_mutex_lock(&cache_mutex);
+    
+    for (int i = 0; i < UID_CACHE_SIZE; i++) {
+        if (uid_cache[i].uid == (uid_t)-1) {
+            struct passwd *pwd = getpwnam(name);
+            if (pwd) {
+                uid_cache[i].uid = pwd->pw_uid;
+                strncpy(uid_cache[i].name, name, sizeof(uid_cache[i].name) - 1);
+                uid_cache[i].name[sizeof(uid_cache[i].name) - 1] = '\0';
+                pthread_mutex_unlock(&cache_mutex);
+                return pwd->pw_uid;
+            }
+            uid_cache[i].uid = (uid_t)-1;
+            pthread_mutex_unlock(&cache_mutex);
+            return (uid_t)-1;
+        }
+        if (strcmp(uid_cache[i].name, name) == 0) {
+            pthread_mutex_unlock(&cache_mutex);
+            return uid_cache[i].uid;
+        }
+    }
+
+    // Cache is full, return error
+    pthread_mutex_unlock(&cache_mutex);
+    return (uid_t)-1;
+}
+
+// Cache for UID checks to reduce system calls
+#define CACHE_TIMEOUT 60
 struct uid_cache_entry {
     uid_t uid;
     bool granted_root;
@@ -30,21 +91,7 @@ struct uid_cache_entry {
     time_t timestamp;
 };
 
-static struct uid_cache_entry uid_cache[UID_CACHE_SIZE];
-static pthread_mutex_t cache_mutex = PTHREAD_MUTEX_INITIALIZER;
-
-// Cache timeout in seconds
-#define CACHE_TIMEOUT 60
-
-// Initialize the cache
-static void init_uid_cache(void) {
-    pthread_mutex_lock(&cache_mutex);
-    memset(uid_cache, 0, sizeof(uid_cache));
-    for (int i = 0; i < UID_CACHE_SIZE; i++) {
-        uid_cache[i].uid = -1; // Invalid UID
-    }
-    pthread_mutex_unlock(&cache_mutex);
-}
+static struct uid_cache_entry uid_cache_entries[UID_CACHE_SIZE];
 
 // Find entry in cache or return NULL if not found
 static struct uid_cache_entry* find_in_cache(uid_t uid) {
@@ -52,15 +99,15 @@ static struct uid_cache_entry* find_in_cache(uid_t uid) {
     time_t now = time(NULL);
     
     for (int i = 0; i < UID_CACHE_SIZE; i++) {
-        if (uid_cache[i].uid == uid) {
+        if (uid_cache_entries[i].uid == uid) {
             // Check if cache entry is still valid
-            if (now - uid_cache[i].timestamp < CACHE_TIMEOUT) {
-                struct uid_cache_entry* entry = &uid_cache[i];
+            if (now - uid_cache_entries[i].timestamp < CACHE_TIMEOUT) {
+                struct uid_cache_entry* entry = &uid_cache_entries[i];
                 pthread_mutex_unlock(&cache_mutex);
                 return entry;
             } else {
                 // Entry expired, mark as invalid
-                uid_cache[i].uid = -1;
+                uid_cache_entries[i].uid = (uid_t)-1;
                 break;
             }
         }
@@ -79,23 +126,23 @@ static void add_to_cache(uid_t uid, bool granted_root, bool should_umount, bool 
     time_t oldest_time = time(NULL);
     
     for (int i = 0; i < UID_CACHE_SIZE; i++) {
-        if (uid_cache[i].uid == -1) {
+        if (uid_cache_entries[i].uid == (uid_t)-1) {
             oldest_idx = i;
             break;
         }
         
-        if (uid_cache[i].timestamp < oldest_time) {
-            oldest_time = uid_cache[i].timestamp;
+        if (uid_cache_entries[i].timestamp < oldest_time) {
+            oldest_time = uid_cache_entries[i].timestamp;
             oldest_idx = i;
         }
     }
     
     // Update the cache entry
-    uid_cache[oldest_idx].uid = uid;
-    uid_cache[oldest_idx].granted_root = granted_root;
-    uid_cache[oldest_idx].should_umount = should_umount;
-    uid_cache[oldest_idx].is_manager = is_manager;
-    uid_cache[oldest_idx].timestamp = time(NULL);
+    uid_cache_entries[oldest_idx].uid = uid;
+    uid_cache_entries[oldest_idx].granted_root = granted_root;
+    uid_cache_entries[oldest_idx].should_umount = should_umount;
+    uid_cache_entries[oldest_idx].is_manager = is_manager;
+    uid_cache_entries[oldest_idx].timestamp = time(NULL);
     
     pthread_mutex_unlock(&cache_mutex);
 }
@@ -143,7 +190,7 @@ static int ksu_request(const char* request, char* response, size_t response_size
     }
     
     // Receive response
-    int bytes_received = (int)recv(sockfd, response, response_size - 1, 0);
+    ssize_t bytes_received = recv(sockfd, response, response_size - 1, 0);
     if (bytes_received < 0) {
         LOGE("Failed to receive response from KernelSU: %s\n", strerror(errno));
         close(sockfd);

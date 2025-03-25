@@ -1,16 +1,42 @@
-#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <errno.h>
 #include <unistd.h>
-#include <pthread.h>
+#include <sys/socket.h>
+#include <sys/un.h>
 #include <sys/stat.h>
-
+#include <sys/types.h>
+#include <pthread.h>
+#include <errno.h>
+#include <fcntl.h>
+#include <signal.h>
 #include <android/log.h>
+#include <sys/wait.h>
+#include <sys/prctl.h>
+#include <sys/signalfd.h>
+#include <sys/eventfd.h>
+#include <sys/ioctl.h>
+#include <sys/mount.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <poll.h>
+#include <linux/userfaultfd.h>
+#include <linux/memfd.h>
+#include <linux/oom.h>
+#include <sys/syscall.h>
+#include <sys/mman.h>
+#include <sys/ptrace.h>
+#include <sys/wait.h>
+#include <pwd.h>
+#include <stdbool.h>
+#include <dirent.h>
+#include <linux/limits.h>
+#include <sys/system_properties.h>
 
-#include "common.h"
 #include "../utils.h"
+#include "common.h"
 
+// Undefine LOG_TAG before redefining it
+#undef LOG_TAG
 #define LOG_TAG "ReZygisk-RootImpl"
 
 // Mutex to protect concurrent access to root implementation
@@ -31,7 +57,7 @@ static bool file_exists(const char *path) {
   
   // Only log if it's not a simple "file not found" error
   if (errno != ENOENT) {
-    LOGE("Failed to stat %s: %s\n", path, strerror(errno));
+    __android_log_print(ANDROID_LOG_ERROR, LOG_TAG, "Failed to stat %s: %s\n", path, strerror(errno));
   }
   
   return false;
@@ -75,7 +101,7 @@ void get_impl(struct root_impl *impl) {
     
     // Check for Magisk variant (not critical, so don't error if it fails)
     char prop[PROP_VALUE_MAX];
-    get_property("ro.magisk.version", prop);
+    __system_property_get("ro.magisk.version", prop);
     
     if (strstr(prop, "kitsune") != NULL) {
       impl->variant = 1; // Kitsune variant
@@ -109,7 +135,7 @@ void root_impls_setup(void) {
   // Log the detected implementation
   char impl_name[LONGEST_ROOT_IMPL_NAME];
   stringify_root_impl_name(impl, impl_name);
-  LOGI("Detected root implementation: %s\n", impl_name);
+  __android_log_print(ANDROID_LOG_INFO, LOG_TAG, "Detected root implementation: %s\n", impl_name);
   
   // Setup the appropriate implementation
   switch (impl.impl) {
@@ -123,7 +149,7 @@ void root_impls_setup(void) {
       magisk_setup();
       break;
     case Multiple:
-      LOGI("Multiple root implementations detected, using priority order\n");
+      __android_log_print(ANDROID_LOG_INFO, LOG_TAG, "Multiple root implementations detected, using priority order\n");
       // Try each implementation in order of preference
       if (file_exists("/sys/module/kernelsu")) {
         kernelsu_setup();
@@ -134,7 +160,7 @@ void root_impls_setup(void) {
       }
       break;
     case None:
-      LOGI("No root implementation detected\n");
+      __android_log_print(ANDROID_LOG_INFO, LOG_TAG, "No root implementation detected\n");
       break;
   }
 }
