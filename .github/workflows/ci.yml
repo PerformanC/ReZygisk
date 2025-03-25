@@ -2,7 +2,7 @@ name: CI
 
 on:
   push:
-    branches: [ main ]
+    branches: [ main, improve-stability-reduce-battery-drain ]
 
   pull_request:
   merge_group:
