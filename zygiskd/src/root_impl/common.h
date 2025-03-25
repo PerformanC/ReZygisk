@@ -2,6 +2,7 @@
 #define __ROOT_IMPL_COMMON_H__
 
 #include <stdbool.h>
+#include <stdint.h>
 #include <sys/types.h>
 
 // Forward declarations for root implementation functions
@@ -25,6 +26,13 @@ enum RootImpl {
 struct root_impl {
   enum RootImpl impl;
   int variant;
+};
+
+// Root implementation state structure
+struct root_impl_state {
+  uint8_t variant;
+  int state;
+  // Add any other fields needed for state tracking
 };
 
 // Setup root implementations

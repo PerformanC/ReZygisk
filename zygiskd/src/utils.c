@@ -419,7 +419,7 @@ int non_blocking_execv(const char *restrict file, char *const argv[]) {
   }
   
   // Close all unnecessary file descriptors
-  int max_fd = sysconf(_SC_OPEN_MAX);
+  int max_fd = (int)sysconf(_SC_OPEN_MAX);
   for (int i = 3; i < max_fd; i++) {
     // Keep only the essential file descriptors
     close(i);

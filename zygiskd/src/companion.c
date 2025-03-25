@@ -16,6 +16,7 @@
 #include "companion.h"
 #include "utils.h"
 
+#undef LOG_TAG
 #define LOG_TAG "ReZygisk-Companion"
 
 // Timeout for companion operations

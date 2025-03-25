@@ -16,7 +16,10 @@
 #include <sys/syscall.h>
 #include <linux/memfd.h>
 
+#include <sys/types.h>
+#include <sys/stat.h>
 #include <pthread.h>
+#include <poll.h>
 
 #include "root_impl/common.h"
 #include "constants.h"
@@ -62,15 +65,17 @@ static void cleanup_daemon_resources(struct Context *context) {
   LOGI("Daemon resources cleaned up\n");
 }
 
-struct Module {
-  char *name;
-  int lib_fd;
-  int companion;
-};
-
 struct Context {
-  struct Module *modules;
+  struct Module {
+    int companion;
+    void *handle;
+    char *name;
+    int api;
+    void *preload_lib;
+    void *api_table;
+  } *modules;
   size_t len;
+  struct root_impl root_impl;
 };
 
 enum Architecture {
@@ -534,68 +539,69 @@ void zygiskd_start(char *restrict argv[]) {
         ssize_t ret = read_uint32_t(client_fd, &uid);
         ASSURE_SIZE_READ_BREAK("GetProcessFlags", "uid", ret, sizeof(uid));
 
-        uint32_t flags = 0;
+        uint32_t process_flags = 0;
+        
         if (uid_is_manager(uid)) {
-          flags |= PROCESS_IS_MANAGER;
+          process_flags |= PROCESS_IS_MANAGER;
         } else {
           if (uid_granted_root(uid)) {
-            flags |= PROCESS_GRANTED_ROOT;
+            process_flags |= PROCESS_GRANTED_ROOT;
           }
           if (uid_should_umount(uid)) {
-            flags |= PROCESS_ON_DENYLIST;
+            process_flags |= PROCESS_ON_DENYLIST;
           }
         }
-
+        
         switch (impl.impl) {
           case None: { break; }
           case Multiple: { break; }
           case KernelSU: {
-            flags |= PROCESS_ROOT_IS_KSU;
+            process_flags |= PROCESS_ROOT_IS_KSU;
 
             break;
           }
           case APatch: {
-            flags |= PROCESS_ROOT_IS_APATCH;
+            process_flags |= PROCESS_ROOT_IS_APATCH;
 
             break;
           }
           case Magisk: {
-            flags |= PROCESS_ROOT_IS_MAGISK;
+            process_flags |= PROCESS_ROOT_IS_MAGISK;
 
             break;
           }
         }
 
-        ret = write_uint32_t(client_fd, flags);
-        ASSURE_SIZE_WRITE_BREAK("GetProcessFlags", "flags", ret, sizeof(flags));
+        ret = write_uint32_t(client_fd, process_flags);
+        ASSURE_SIZE_WRITE_BREAK("GetProcessFlags", "process_flags", ret, sizeof(process_flags));
 
         break;
       }
       case GetInfo: {
-        uint32_t flags = 0;
+        uint32_t info_flags = 0;
 
         switch (impl.impl) {
           case None: { break; }
           case Multiple: { break; }
           case KernelSU: {
-            flags |= PROCESS_ROOT_IS_KSU;
+            info_flags |= PROCESS_ROOT_IS_KSU;
 
             break;
           }
           case APatch: {
-            flags |= PROCESS_ROOT_IS_APATCH;
+            info_flags |= PROCESS_ROOT_IS_APATCH;
 
             break;
           }
           case Magisk: {
-            flags |= PROCESS_ROOT_IS_MAGISK;
+            info_flags |= PROCESS_ROOT_IS_MAGISK;
 
             break;
           }
         }
 
-        ssize_t ret = write_uint32_t(client_fd, flags);
-        ASSURE_SIZE_WRITE_BREAK("GetInfo", "flags", ret, sizeof(flags));
+        ssize_t ret = write_uint32_t(client_fd, info_flags);
+        ASSURE_SIZE_WRITE_BREAK("GetInfo", "info_flags", ret, sizeof(info_flags));
 
         /* TODO: Use pid_t */
         uint32_t pid = (uint32_t)getpid();    
