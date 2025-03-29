@@ -1,0 +1,94 @@
+{
+  "langName": "繁體中文（中國臺灣）",
+  "global": {
+    "unknown": "未知"
+  },
+  "smallPage": {
+    "language": {
+      "header": "選擇新語言"
+    },
+    "theme": {
+      "header": "選擇新主題",
+      "dark": "深色",
+      "light": "淺色",
+      "system": "基於系統"
+    },
+    "errorh": {
+      "buttons": {
+        "copy": "複製",
+        "clear": "清除所有日誌"
+      },
+      "header": "錯誤歷史記錄",
+      "placeholder": "這裡沒有記錄錯誤日誌！"
+    }
+  },
+  "page": {
+    "home": {
+      "header": "首頁",
+      "status": {
+        "unknown": "未知",
+        "notWorking": "未運作",
+        "ok": "運作中",
+        "partially": "部分運作"
+      },
+      "info": {
+        "version": "版本",
+        "root": "根實施",
+        "zygote": {
+          "injected": "已注入",
+          "notInjected": "未注入",
+          "unknown": "未知"
+        }
+      }
+    },
+    "modules": {
+      "header": "模組",
+      "notAvaliable": "此處沒有使用 Zygisk 的模組。",
+      "arch": "架構： "
+    },
+    "actions": {
+      "header": "操作",
+      "monitorButton": {
+        "start": "啟用",
+        "stop": "停用",
+        "pause": "暫停"
+      },
+      "monitor": "監控",
+      "status": {
+        "tracing": "Tracing",
+        "stopping": "Stopping",
+        "stopped": "Stopped",
+        "exiting": "Exiting",
+        "unknown": "Unknown"
+      }
+    },
+    "settings": {
+      "header": "設定",
+      "font": {
+        "header": "啟用系統字型",
+        "description": "此選項將在當前 WebUI 中啟用系統字體。注意：可能不兼容 FlipFont。"
+      },
+      "theme": {
+        "header": "系統主題",
+        "description": "為當前 WebUI 選擇系統主題"
+      },
+      "language": {
+        "header": "更改語言",
+        "description": "更換新語言"
+      },
+      "logs": {
+        "header": "錯誤歷史記錄",
+        "description": "查看您的所有錯誤日誌"
+      },
+      "credits": {
+        "module": "模組開發者",
+        "original": "原始模組開發者",
+        "web": "WebUI 開發者"
+      },
+      "license": {
+        "module": "模組授權條款",
+        "web": "WebUI 授權條款"
+      }
+    }
+  }
+}

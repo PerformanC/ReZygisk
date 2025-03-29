@@ -708,6 +708,29 @@ static char post_section[1024];
     }                                                                                \
   }
 
+#define WRITE_STATUS_FILE(suffix)                                               \
+  if (status ## suffix.supported) {                                             \
+    fprintf(state_file, "Daemon" # suffix ": ");                                \
+    if (status ## suffix.daemon_running) {                                      \
+      fprintf(state_file, "running");                                           \
+                                                                                \
+      if (status ## suffix.daemon_info != NULL)                                 \
+        fprintf(state_file, " (%s)", status ## suffix.daemon_info);             \
+    } else {                                                                    \
+      fprintf(state_file, "crashed");                                           \
+                                                                                \
+      if (status ## suffix.daemon_error_info != NULL)                           \
+        fprintf(state_file, " (%s)", status ## suffix.daemon_error_info);       \
+    }                                                                           \
+                                                                                \
+    fprintf(state_file, "\nZygote" # suffix ": ");                              \
+    if (tracing_state != TRACING) fprintf(state_file, "unknown");               \
+    else if (status ## suffix.zygote_injected) fprintf(state_file, "injected"); \
+    else fprintf(state_file, "not injected");                                   \
+                                                                                \
+    fprintf(state_file, "\n");                                                  \
+  } 
+
 static void updateStatus() {
   FILE *prop = fopen(prop_path, "w");
   char status_text[1024] = "monitor: ";
@@ -744,6 +767,29 @@ static void updateStatus() {
   fprintf(prop, "%s[%s] %s", pre_section, status_text, post_section);
 
   fclose(prop);
+
+  char state_file_path[PATH_MAX];
+  snprintf(state_file_path, sizeof(state_file_path), "%s/%s", zygiskd::GetTmpPath().c_str(), "status");
+
+  FILE *state_file = fopen(state_file_path, "w");
+  if (state_file == NULL) {
+    PLOGE("failed to open state file");
+
+    return;
+  }
+
+  fprintf(state_file, "Version: %s\n", ZKSU_VERSION);
+  fprintf(state_file, "Tracing: %d", tracing_state);
+  if (tracing_state != TRACING && monitor_stop_reason[0] != '\0') {
+    fprintf(state_file, " (%s)\n", monitor_stop_reason);
+  } else {
+    fprintf(state_file, "\n");
+  }
+
+  WRITE_STATUS_FILE(64)
+  WRITE_STATUS_FILE(32)
+
+  fclose(state_file);
 }
 
 static bool prepare_environment() {

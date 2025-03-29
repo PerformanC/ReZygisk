@@ -1,0 +1,94 @@
+{
+  "langName": "Bahasa Indonesia (Indonesia)",
+  "global": {
+    "unknown": "Tidak diketahui"
+  },
+  "smallPage": {
+    "language": {
+      "header": "Pilih bahasa baru Anda"
+    },
+    "theme": {
+      "header": "Pilih tema baru Anda",
+      "dark": "Gelap",
+      "light": "Terang",
+      "system": "Bawaan Sistem"
+    },
+    "errorh": {
+      "buttons": {
+        "copy": "SALIN",
+        "clear": "BERSIHKAN SEMUA LOG"
+      },
+      "header": "Log Error",
+      "placeholder": "Tidak ada log error tercatat disini!"
+    }
+  },
+  "page": {
+    "home": {
+      "header": "Beranda",
+      "status": {
+        "unknown": "Tidak diketahui",
+        "notWorking": "Tidak Bekerja",
+        "ok": "Bekerja",
+        "partially": "Bekerja Sebagian"
+      },
+      "info": {
+        "version": "Versi",
+        "root": "Implementasi Root",
+        "zygote": {
+          "injected": "Terinjeksi",
+          "notInjected": "Tidak Terinjeksi",
+          "unknown": "Tidak diketahui"
+        }
+      }
+    },
+    "modules": {
+      "header": "Modul",
+      "notAvaliable": "Tidak ada modul yang menggunakan Zygisk disini.",
+      "arch": "Arsitektur: "
+    },
+    "settings": {
+      "header": "Pengaturan",
+      "font": {
+        "header": "Gunakan Font Sistem",
+        "description": "Opsi ini akan mengaktifkan font sistem pada WebUI saat ini. (Mungkin tidak kompatibel dengan FlipFont)"
+      },
+      "theme": {
+        "header": "Bawaan Sistem",
+        "description": "Pilih tema untuk tampilan WebUI Anda saat ini"
+      },
+      "language": {
+        "header": "Ubah Bahasa",
+        "description": "Ubah ke bahasa baru Anda"
+      },
+      "logs": {
+        "header": "Log Error",
+        "description": "Lihat semua log Error Anda"
+      },
+      "credits": {
+        "module": "Developer Modul",
+        "original": "Developer Modul Asli",
+        "web": "Developer WebUI"
+      },
+      "license": {
+        "module": "Lisensi Modul",
+        "web": "Lisensi WebUI"
+      }
+    },
+    "actions": {
+      "header": "Tindakan",
+      "monitorButton": {
+        "pause": "Jeda",
+        "stop": "Berhenti",
+        "start": "Mulai"
+      },
+      "monitor": "Monitor",
+      "status": {
+        "tracing": "Pelacakan",
+        "stopping": "Menghentikan",
+        "stopped": "Terhenti",
+        "exiting": "Keluar",
+        "unknown": "Tidak diketahui"
+      }
+    }
+  }
+}
