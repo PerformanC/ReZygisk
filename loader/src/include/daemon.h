@@ -70,10 +70,11 @@ enum mount_namespace_state {
 namespace zygiskd {
 
     struct ModuleInfo {
+        std::string path;
+        /* TODO: Perhaps we can also remove this and just send paths? */
         std::string name;
-        UniqueFd memfd;
 
-        inline explicit ModuleInfo(std::string name, int memfd) : name(name), memfd(memfd) {}
+        inline explicit ModuleInfo(std::string path, std::string name) : path(path), name(name) {}
     };
 
     enum class SocketAction {

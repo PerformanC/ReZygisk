@@ -15,7 +15,6 @@
 #include <sys/mman.h>
 #include <unistd.h>
 
-#include "dl.h"
 #include "daemon.h"
 #include "zygisk.hpp"
 #include "module.hpp"
@@ -573,24 +572,35 @@ void ZygiskContext::fork_post() {
 
 /* Zygisksu changed: Load module fds */
 void ZygiskContext::run_modules_pre() {
-    auto ms = zygiskd::ReadModules();
-    auto size = ms.size();
-    for (size_t i = 0; i < size; i++) {
-        auto& m = ms[i];
-        if (void* handle = DlopenMem(m.memfd, RTLD_NOW);
-            void* entry = handle ? dlsym(handle, "zygisk_module_entry") : nullptr) {
-            modules.emplace_back(i, handle, entry);
-        }
+  auto ms = zygiskd::ReadModules();
+  auto size = ms.size();
+  for (size_t i = 0; i < size; i++) {
+    auto &m = ms[i];
+
+    void *handle = dlopen(m.path.c_str(), RTLD_NOW);
+    if (!handle) {
+      LOGE("Failed to load module [%s]: %s", m.path.c_str(), dlerror());
+
+      continue;
     }
 
-    for (auto &m : modules) {
-        m.onLoad(env);
-        if (flags[APP_SPECIALIZE]) {
-            m.preAppSpecialize(args.app);
-        } else if (flags[SERVER_FORK_AND_SPECIALIZE]) {
-            m.preServerSpecialize(args.server);
-        }
+    void *entry = dlsym(handle, "zygisk_module_entry");
+    if (!entry) {
+      LOGE("Failed to find entry point in module [%s]: %s", m.path.c_str(), dlerror());
+
+      dlclose(handle);
+
+      continue;
     }
+
+    modules.emplace_back(i, handle, entry);
+  }
+
+  for (auto &m : modules) {
+    m.onLoad(env);
+    if (flags[APP_SPECIALIZE]) m.preAppSpecialize(args.app);
+    else if (flags[SERVER_FORK_AND_SPECIALIZE]) m.preServerSpecialize(args.server);
+  }
 }
 
 void ZygiskContext::run_modules_post() {
@@ -598,11 +608,9 @@ void ZygiskContext::run_modules_post() {
 
     size_t modules_unloaded = 0;
     for (const auto &m : modules) {
-        if (flags[APP_SPECIALIZE]) {
-            m.postAppSpecialize(args.app);
-        } else if (flags[SERVER_FORK_AND_SPECIALIZE]) {
-            m.postServerSpecialize(args.server);
-        }
+        if (flags[APP_SPECIALIZE]) m.postAppSpecialize(args.app);
+        else if (flags[SERVER_FORK_AND_SPECIALIZE]) m.postServerSpecialize(args.server);
+
         if (m.tryUnload()) modules_unloaded++;
     }
 
