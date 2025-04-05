@@ -7,7 +7,6 @@
 #include <fcntl.h>
 
 #include "daemon.h"
-#include "dl.h"
 #include "socket_utils.h"
 
 namespace zygiskd {
@@ -93,9 +92,9 @@ namespace zygiskd {
     socket_utils::write_u8(fd, (uint8_t) SocketAction::ReadModules);
     size_t len = socket_utils::read_usize(fd);
     for (size_t i = 0; i < len; i++) {
+      std::string lib_path = socket_utils::read_string(fd);
       std::string name = socket_utils::read_string(fd);
-      int module_fd = socket_utils::recv_fd(fd);
-      modules.emplace_back(name, module_fd);
+      modules.emplace_back(lib_path, name);
     }
 
     close(fd);

@@ -537,14 +537,28 @@ void zygiskd_start(char *restrict argv[]) {
         ssize_t ret = write_size_t(client_fd, clen);
         ASSURE_SIZE_WRITE_BREAK("ReadModules", "len", ret, sizeof(clen));
 
+        enum Architecture arch = get_arch();
+
+        char arch_str[32];
+        switch (arch) {
+          case ARM64: { strcpy(arch_str, "arm64-v8a"); break; }
+          case X86_64: { strcpy(arch_str, "x86_64"); break; }
+          case ARM32: { strcpy(arch_str, "armeabi-v7a"); break; }
+          case X86: { strcpy(arch_str, "x86"); break; }
+        }
+
         for (size_t i = 0; i < clen; i++) {
-          if (write_string(client_fd, context.modules[i].name) == -1) {
-            LOGE("Failed writing module name.\n");
+          char lib_path[PATH_MAX];
+          snprintf(lib_path, PATH_MAX, "/data/adb/modules/%s/zygisk/%s.so", context.modules[i].name, arch_str);
+
+          if (write_string(client_fd, lib_path) == -1) {
+            LOGE("Failed writing module path.\n");
 
             break;
           }
-          if (write_fd(client_fd, context.modules[i].lib_fd) == -1) {
-            LOGE("Failed writing module fd.\n");
+ 
+          if (write_string(client_fd, context.modules[i].name) == -1) {
+            LOGE("Failed writing module name.\n");
 
             break;
           }
