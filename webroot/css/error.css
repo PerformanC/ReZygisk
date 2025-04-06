@@ -1,0 +1,56 @@
+.e-container {
+  background-color: black;
+  z-index: 30;
+  position: fixed;
+  top: 0;
+  bottom: 0; 
+  left: 0; 
+  right: 0; 
+  color: #fff;
+}
+
+.e-main {
+  background-color: black;
+  color: #fff;
+}
+
+.e-wrap {
+  display: flex;
+  align-items: center;
+  overflow: auto;
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
+} 
+
+.e-bg {
+  background-color: black;
+  color: #fff;
+}
+
+.e-card {
+  margin: 30px;
+  color: #fff;
+}
+
+.e-font {
+  color: #ba1a1a;
+}
+
+.e-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 120px;
+  height: 40px;
+  border-radius: 30px;
+  background-color: #ba1a1a;
+  color: black;
+  transition: transform 0.1s ease-in-out;
+}
+
+.e-button:active {
+  transform: scale(90%) 
+}

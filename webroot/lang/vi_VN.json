@@ -1,0 +1,94 @@
+{
+  "langName": "Tiếng Việt",
+  "global": {
+    "unknown": "Không xác định"
+  },
+  "smallPage": {
+    "language": {
+      "header": "Chọn ngôn ngữ mới của bạn"
+    },
+    "theme": {
+      "header": "Chọn giao diện mới của bạn",
+      "dark": "Tối",
+      "light": "Sáng",
+      "system": "Theo hệ thống"
+    },
+    "errorh": {
+      "buttons": {
+        "copy": "SAO CHÉP",
+        "clear": "XOÁ TOÀN BỘ LOGS"
+      },
+      "header": "Lịch Sử Lỗi",
+      "placeholder": "Không có lỗi nào được ghi ở đây!"
+    }
+  },
+  "page": {
+    "home": {
+      "header": "Trang Chủ",
+      "status": {
+        "unknown": "Không xác định",
+        "notWorking": "Không hoạt động",
+        "ok": "Đang hoạt động",
+        "partially": "Đang hoạt động một phần"
+      },
+      "info": {
+        "version": "Phiên bản",
+        "root": "Hệ thống root",
+        "zygote": {
+          "injected": "Đã can thiệp",
+          "notInjected": "Chưa can thiệp",
+          "unknown": "Không xác định"
+        }
+      }
+    },
+    "modules": {
+      "header": "Mô Đun",
+      "notAvaliable": "Không có mô-đun nào sử dụng Zygisk ở đây!",
+      "arch": "Cấu trúc: "
+    },
+    "actions": {
+      "header": "Trình điều khiển",
+      "monitorButton": {
+        "start": "Chạy",
+        "stop": "Dừng",
+        "pause": "Tạm Dừng"
+      },
+      "monitor": "Trình theo dõi",
+      "status": {
+        "tracing": "Đang chạy",
+        "stopping": "Đang Dừng",
+        "stopped": "Đã Dừng",
+        "exiting": "Đã Thoát",
+        "unknown": "Không Xác Định"
+      }
+    },
+    "settings": {
+      "header": "Cài đặt",
+      "font": {
+        "header": "Sử dụng phông chữ hệ thống",
+        "description": "Tuỳ chọn này sẽ cho phép người dùng sử dụng phông chữ của hệ thống. LƯU Ý: Có thể sẽ không tương thích với FlipFont"
+      },
+      "theme": {
+        "header": "Giao diện hệ thống",
+        "description": "Chọn giao diện cho WebUI hiện tại của bạn"
+      },
+      "language": {
+        "header": "Thay đổi ngôn ngữ",
+        "description": "Thay đổi sang ngôn ngữ mới"
+      },
+      "logs": {
+        "header": "Lịch sử lỗi",
+        "description": "Xem tất cả các lỗi"
+      },
+      "credits": {
+        "module": "Nhà phát triển mô-đun",
+        "original": "Nhà phát triển mô-đun gốc",
+        "web": "Nhà phát triển WebUI"
+      },
+      "license": {
+        "module": "Giấy phép bản quyền mô-đun",
+        "web": "Giấy phép bản quyền WebUI"
+      }
+    }
+  }
+}

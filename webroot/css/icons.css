@@ -1,0 +1,62 @@
+/* Dark */
+#ni_home {
+  background: url(../assets/home.svg);
+  width: 24px;
+  height: 24px;
+  z-index: 10;
+}
+
+#ni_modules {
+  background: url(../assets/module.svg);
+  width: 24px;
+  height: 24px;
+  z-index: 10;
+}
+
+#ni_actions {
+  background: url(../assets/action.svg);
+  width: 24px;
+  height: 24px;
+  z-index: 10;
+}
+
+#ni_settings {
+  background: url(../assets/settings.svg);
+  width: 24px;
+  height: 24px;
+  z-index: 10;
+}
+
+#ec_icon {
+  background: url(../assets/ec-icon.svg);
+  z-index: 40;
+}
+
+/* Light */
+#ni_home.light {
+  background: url(../assets_light/home.svg);
+  width: 24px;
+  height: 24px;
+  z-index: 10;
+}
+
+#ni_modules.light {
+  background: url(../assets_light/module.svg);
+  width: 24px;
+  height: 24px;
+  z-index: 10;
+}
+
+#ni_actions.light {
+  background: url(../assets_light/action.svg);
+  width: 24px;
+  height: 24px;
+  z-index: 10;
+}
+
+#ni_settings.light {
+  background: url(../assets_light/settings.svg);
+  width: 24px;
+  height: 24px;
+  z-index: 10;
+}
