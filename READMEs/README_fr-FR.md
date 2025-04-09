@@ -23,13 +23,13 @@ Les développeurs de Zygisk Next sont connus et reconnus dans la communauté And
 
 ## Dépendances
 
-| Outil            | Déscription                            |
+| Outil            | Description                            |
 |-----------------|----------------------------------------|
 | `Android NDK`   | Kit de développement natif d'Android     |
 
 ### Dépendances C++ 
 
-| Dépendance | Déscription                   |
+| Dépendance | Description                   |
 |------------|-------------------------------|
 | `lsplt`    | Simple PLT Hook pour Android   |
 
