@@ -59,4 +59,4 @@ Il est obligatoire de lire les instructions de PerformanC dans les [Contribution
 
 ## License
 
-ReZygisk est majoritairement sous la licence GPL pour la partie de Dr-TSNG, mais sous licence AGPL 3.0 pour la partie réécrite du code par PerformanC. Vous pouvez en lire plus sur : [Open Source Initiative](https://opensource.org/licenses/AGPL-3.0).
+ReZygisk est majoritairement sous la licence GPL pour la partie de Dr-TSNG, mais sous licence AGPL 3.0 pour la partie réécrite du code par PerformanC. Vous pouvez obtenir plus d'information avec le lien suivant: [Open Source Initiative](https://opensource.org/licenses/AGPL-3.0).
