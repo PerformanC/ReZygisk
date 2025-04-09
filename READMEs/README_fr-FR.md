@@ -11,7 +11,7 @@ L'objectif est de moderniser et de réécrire la base du code, initialement en C
 >
 >Bien que vous puissiez installer les fichiers .zip provenant de la page [Actions](https://github.com/PerformanC/ReZygisk/actions), cela vous regarde et peut faire entrer votre téléphone en boucle de redémarrage (bootloop).
 
-## Pourquoi?
+## Pourquoi ?
 
 La dernière release de Zygisk Next n'est pas open source, le code est donc accessible uniquement à ses développeurs. Non seulement cela limite notre capacité à contribuer au projet, mais cela rend également impossible la vérification du code, ce qui constitue une préoccupation majeure en matière de sécurité. Zygisk Next est un module fonctionnant avec les permissions administrateur (root) et a donc accès à l'entièreté du système.
 
@@ -47,7 +47,6 @@ Il n'y a actuellement pas de version (releases) stable (Pour bientôt)
 
 ## Support
 
-For any question related to ReZygisk or other PerformanC projects, feel free to join any of the following channels below:
 Pour toutes questions relatives a ReZygisk ou d'autres projets de PerformanC, sentez vous a l'aise de nous rejoindre par tous les moyens disponibles: 
 
 - Notre Discord: [PerformanC](https://discord.gg/uPveNfTuCJ)
@@ -56,7 +55,6 @@ Pour toutes questions relatives a ReZygisk ou d'autres projets de PerformanC, se
 
 ## Contribution
 
-It is mandatory to follow PerformanC's [Contribution Guidelines](https://github.com/PerformanC/contributing) to contribute to ReZygisk. Following its Security Policy, Code of Conduct, and syntax standard.
 Il est obligatoire de lire les instructions de PerformanC dans les [Contribution Guidelines](https://github.com/PerformanC/contributing) afin de contribuer au projet ReZygisk. Suivez la politique de sécurité, le code de conduite et les standards relatif à la syntaxe.
 
 ## License
