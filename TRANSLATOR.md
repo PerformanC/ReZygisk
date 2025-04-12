@@ -8,10 +8,10 @@
 - **ro_RO** by [@ExtremeXT](https://github.com/ExtremeXT)
 - **ru_RU** by [@Emulond](https://github.com/Emulond) & [@AJleKcAHgP68](https://github.com/AJleKcAHgP68)
 - **tr_TR** by [@dyingwillow](https://github.com/dyingwillow)
+- **uk_UA** by [@Kittyskj](https://github.com/Kittyskj)
 - **vi_VN** by [@RainyXeon](https://github.com/RainyXeon)
 - **zh_CN** by [@Meltartica](https://github.com/Meltartica) & [@SheepChef](https://github.com/SheepChef)
 - **zh_TW** by [@Meltartica](https://github.com/Meltartica)
-- **uk_UA** by [@Kittyskj](https://github.com/Kittyskj)
 
 > [!NOTE]
 > Want to add your translation? Go to [Crowdin](https://crowdin.com/project/rezygisk) and translate!
