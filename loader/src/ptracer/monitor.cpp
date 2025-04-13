@@ -438,7 +438,7 @@ static bool ensure_daemon_created(bool is_64bit) {
 }
 
 #define CHECK_DAEMON_EXIT(abi)                                                   \
-  if (status##abi.supported && pid == status##abi.daemon_pid) {                     \
+  if (status##abi.supported && pid == status##abi.daemon_pid) {                   \
     char status_str[64];                                                         \
     parse_status(status, status_str, sizeof(status_str));                        \
                                                                                  \
