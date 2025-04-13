@@ -9,6 +9,7 @@ allow zygote su dir search
 allow zygote su {lnk_file file} read
 
 allow zygote adb_data_file dir search
+allow zygote adb_data_file file *
 allow zygote zygote process execmem
 allow system_server system_server process execmem
 allow zygote tmpfs file *
