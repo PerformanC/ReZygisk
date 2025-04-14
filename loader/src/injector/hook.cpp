@@ -1,4 +1,3 @@
-#include <android/dlext.h>
 #include <sys/mount.h>
 #include <dlfcn.h>
 #include <regex.h>
@@ -10,9 +9,12 @@
 #include <lsplt.hpp>
 
 #include <fcntl.h>
+#include <dirent.h>
+#include <sys/types.h>
 #include <sys/prctl.h>
 #include <sys/stat.h>
 #include <sys/mman.h>
+
 #include <unistd.h>
 
 #include "daemon.h"
@@ -21,7 +23,7 @@
 #include "files.hpp"
 #include "misc.hpp"
 
-#include "solist.hpp"
+#include "solist.h"
 
 #include "art_method.hpp"
 
@@ -487,25 +489,38 @@ int sigmask(int how, int signum) {
 }
 
 void ZygiskContext::fork_pre() {
-    // Do our own fork before loading any 3rd party code
-    // First block SIGCHLD, unblock after original fork is done
+    /* INFO: Do our own fork before loading any 3rd party code.
+             First block SIGCHLD, unblock after original fork is done.
+    */
     sigmask(SIG_BLOCK, SIGCHLD);
     pid = old_fork();
     if (pid != 0 || flags[SKIP_FD_SANITIZATION])
         return;
 
-    // Record all open fds
-    auto dir = xopen_dir("/proc/self/fd");
-    for (dirent *entry; (entry = readdir(dir.get()));) {
+    /* INFO: Record all open fds */
+    DIR *dir = opendir("/proc/self/fd");
+    if (dir == nullptr) {
+        PLOGE("Failed to open /proc/self/fd");
+
+        return;
+    }
+
+    struct dirent *entry;
+    while ((entry = readdir(dir))) {
         int fd = parse_int(entry->d_name);
         if (fd < 0 || fd >= MAX_FD_SIZE) {
             close(fd);
+
             continue;
         }
+
         allowed_fds[fd] = true;
     }
-    // The dirfd should not be allowed
-    allowed_fds[dirfd(dir.get())] = false;
+
+    /* INFO: The dirfd should not be allowed */
+    allowed_fds[dirfd(dir)] = false;
+
+    closedir(dir);
 }
 
 void ZygiskContext::sanitize_fds() {
@@ -554,14 +569,23 @@ void ZygiskContext::sanitize_fds() {
         return;
 
     // Close all forbidden fds to prevent crashing
-    auto dir = open_dir("/proc/self/fd");
-    int dfd = dirfd(dir.get());
-    for (dirent *entry; (entry = readdir(dir.get()));) {
-        int fd = parse_int(entry->d_name);
-        if ((fd < 0 || fd >= MAX_FD_SIZE || !allowed_fds[fd]) && fd != dfd) {
-            close(fd);
-        }
+    DIR *dir = opendir("/proc/self/fd");
+    if (dir == nullptr) {
+        PLOGE("Failed to open /proc/self/fd");
+
+        return;
     }
+
+    int dfd = dirfd(dir);
+    struct dirent *entry;
+    while ((entry = readdir(dir))) {
+        int fd = parse_int(entry->d_name);
+        if (fd == dfd || allowed_fds[fd] || fd < 0 || fd < MAX_FD_SIZE) continue;
+
+        close(fd);
+    }
+
+    closedir(dir);
 }
 
 void ZygiskContext::fork_post() {
@@ -778,8 +802,11 @@ static void hook_register(dev_t dev, ino_t inode, const char *symbol, void *new_
 void clean_trace(const char* path, size_t load, size_t unload, bool spoof_maps) {
     LOGD("cleaning trace for path %s", path);
 
-    if (load > 0 || unload >0) SoList::ResetCounters(load, unload);
-    bool path_found = SoList::DropSoPath(path);
+    if (load > 0 || unload > 0) solist_reset_counters(load, unload);
+
+    LOGI("Dropping solist record for %s", path);
+
+    bool path_found = solist_drop_so_path(path);
     if (!path_found || !spoof_maps) return;
 
     LOGD("spoofing virtual maps for %s", path);

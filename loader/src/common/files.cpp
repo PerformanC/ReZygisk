@@ -25,12 +25,17 @@ void file_readline(bool trim, FILE *fp, const std::function<bool(std::string_vie
     free(buf);
 }
 
-void file_readline(bool trim, const char *file, const std::function<bool(std::string_view)> &fn) {
-    if (auto fp = open_file(file, "re"))
-        file_readline(trim, fp.get(), fn);
-}
 void file_readline(const char *file, const std::function<bool(std::string_view)> &fn) {
-    file_readline(false, file, fn);
+    FILE *fp = fopen(file, "re");
+    if (!fp) {
+        PLOGE("Failed to open file %s", file);
+
+        return;
+    }
+
+    file_readline(false, fp, fn);
+
+    fclose(fp);
 }
 
 std::vector<mount_info> parse_mount_info(const char *pid) {
@@ -111,27 +116,4 @@ std::vector<mount_info> parse_mount_info(const char *pid) {
         return true;
     });
     return result;
-}
-
-sDIR make_dir(DIR *dp) {
-    return sDIR(dp, [](DIR *dp){ return dp ? closedir(dp) : 1; });
-}
-
-sFILE make_file(FILE *fp) {
-    return sFILE(fp, [](FILE *fp){ return fp ? fclose(fp) : 1; });
-}
-
-int get_path_from_fd(int fd, char *buf, size_t size) {
-    if (fd < 0 || !buf || size == 0) return -1;
-
-    /* NOTE: We assume that the path is always at /data/adb/modules/xxx
-        which should never be longer than 128 chars. */
-    char proc_path[128];
-    snprintf(proc_path, sizeof(proc_path), "/proc/self/fd/%d", fd);
-
-    ssize_t len = readlink(proc_path, buf, size - 1);
-    if (len == -1) return -1;
-
-    buf[len] = '\0';
-    return 0;
 }
