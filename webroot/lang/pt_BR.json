@@ -1,0 +1,94 @@
+{
+  "langName": "Português (Brasil)",
+  "global": {
+    "unknown": "Desconhecido"
+  },
+  "smallPage": {
+    "language": {
+      "header": "Escolha o seu novo idioma"
+    },
+    "theme": {
+      "header": "Escolha o seu novo tema",
+      "dark": "Escuro",
+      "light": "Claro",
+      "system": "Baseado no do sistema"
+    },
+    "errorh": {
+      "buttons": {
+        "copy": "COPIAR",
+        "clear": "LIMPAR TODOS OS REGISTROS"
+      },
+      "header": "Histórico de Erros",
+      "placeholder": "Nenhum registro de erros aqui!"
+    }
+  },
+  "page": {
+    "home": {
+      "header": "Início",
+      "status": {
+        "unknown": "Desconhecido",
+        "notWorking": "Não funcionando",
+        "ok": "Funcionando",
+        "partially": "Funcionando parcialmente"
+      },
+      "info": {
+        "version": "Versão",
+        "root": "Implementação de Root",
+        "zygote": {
+          "injected": "Injetado",
+          "notInjected": "Não Injetado",
+          "unknown": "Desconhecido"
+        }
+      }
+    },
+    "modules": {
+      "header": "Módulos",
+      "notAvaliable": "Nenhum módulo está usando Zygisk aqui.",
+      "arch": "Arquitetura: "
+    },
+    "actions": {
+      "header": "Ações",
+      "monitorButton": {
+        "start": "Iniciar",
+        "stop": "Parar",
+        "pause": "Pausar"
+      },
+      "monitor": "Monitor",
+      "status": {
+        "tracing": "Rastreando",
+        "stopping": "Parando",
+        "stopped": "Parado",
+        "exiting": "Desligando",
+        "unknown": "Desconhecido"
+      }
+    },
+    "settings": {
+      "header": "Configurações",
+      "font": {
+        "header": "Usar a fonte do sistema",
+        "description": "Esta opção irá usar a fonte do sistema no WebUI atual. Observação: Talvez não seja compatível com o FlipFont"
+      },
+      "theme": {
+        "header": "Tema do sistema",
+        "description": "Escolha o tema do seu sistema para o WebUI atual"
+      },
+      "language": {
+        "header": "Alterar a língua",
+        "description": "Mude para sua nova língua"
+      },
+      "logs": {
+        "header": "Histórico de Erros",
+        "description": "Ver o histórico de erros inteiro"
+      },
+      "credits": {
+        "module": "Desenvolvedora do módulo",
+        "original": "Desenvolvedores do módulo original",
+        "web": "Desenvolvedor do WebUI"
+      },
+      "license": {
+        "module": "Licença do Módulo",
+        "web": "Licença do WebUI"
+      }
+    }
+  }
+}

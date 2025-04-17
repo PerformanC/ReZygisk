@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta name="viewport" content="initial-scale=1, width=device-width" />
+    <meta name="viewport" content="viewport-fit=cover" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <meta id="cache-navbar-previous" />
+    <meta id="cache-page-small-previous" />
+    <meta id="cache-fallback-open" />
+
+    <link rel="stylesheet" href="fonts/header.css">
+    <link rel="stylesheet" href="css/index.css">
+    <link rel="stylesheet" href="css/error.css">
+    <link rel="stylesheet" href="css/icons.css">
+
+    <script src="js/errorCatcher.js" type="module"></script>
+    <script src="js/errorScreen.js" type="module"></script>
+    <script src="js/browserRedirect.js" type="module"></script>
+    <script src="js/smallPage/theme.js" type="module"></script>
+    <script src="js/smallPage/language.js" type="module"></script>
+    <script src="js/smallPage/errorHistory.js" type="module"></script>
+    <script src="js/restoreError.js" type="module"></script>
+    <script src="js/navbar.js" type="module"></script>
+    <script src="js/monitorActions.js" type="module"></script>
+    <script src="js/switcher/fontChanger.js" type="module"></script>
+    <script src="js/main.js" type="module"></script>
+  </head>
+  <body id="main_body">
+    <!-- INFO: Error screen -->
+    <div id="fatal-error-screen" class="e-container" style="display: none;">
+      <div class="e-bg e-wrap">
+        <div class="e-bg e-card e-main">
+          <img class="e-bg" src="./assets/ec-icon.svg" style="margin-bottom: 10px;"/>
+          <div class="e-bg">
+            Your WebUI is corrupt. It can't be trusted and may not work properly.
+          </div>
+  
+          <div class="e-bg" style="margin-top: 15px;">
+            Please click the copy log button below and visit
+            <div class="e-bg e-font" credit-link="t.me/performancorg">t.me/performancorg</div>
+            for support.
+          </div>
+  
+          <div id="esc-copy-button" class="e-button" style="margin-top: 25px;">COPY LOG</div>
+          <textarea id="esc-log" style="display: none;"></textarea>
+        </div>
+      </div>
+    </div>
+
+    <!-- INFO: Loading screen -->
+    <div id="loading_screen" class="load_screen">
+      <div id="backport_errorh" class="loader"></div>
+    </div>
+
+    <!-- INFO: Home page -->
+    <div id="panel_home" class="panel">
+      <div class="header">ReZygisk</div>
+      <div style="padding: 45px 0px;"></div>
+
+      <!-- INFO: Status card -->
+      <div id="info_card" class="bright card list">
+        <div class="brightc" style="display: flex; align-items: center;">
+          <div id="rezygisk_icon_state" class="brightc" style="margin-bottom: 1px;">
+            <img class="brightc" src="assets/mark.svg">
+          </div>
+          <div id="rezygisk_state" class="brightc content lock" style="font-size: 1.2em; padding-bottom: 4px; padding-left: 5px;">
+            Unknown
+          </div>
+        </div>
+      </div>
+
+      <!-- INFO: Info card -->
+      <div class="dim card">
+        <div class="dimc content">
+          <div id="version_info_title" class="dimc" style="font-size: 1.1em">Version</div>
+          <div class="dimc desc" id="version_code" style="font-size: 0.9em; margin-top: 3px;">Unknown</div>
+        </div>
+        <div class="dimc content" style="margin-top: 4px;">
+          <div id="root_info_title" class="dimc" style="font-size: 1.1em">Root Implementation</div>
+          <div class="dimc desc" id="root_impl" style="font-size: 0.9em; margin-top: 3px;">Unknown</div>
+        </div>
+        <div id="zygote32" class="dimc content" style="margin-top: 4px;">
+          <div class="dimc" style="font-size: 1.1em">Zygote32</div>
+          <div class="dimc desc" id="zygote32_status" style="font-size: 0.9em; margin-top: 3px;">Unknown</div>
+        </div>
+        <div id="zygote64" class="dimc" style="margin-top: 4px;">
+          <div class="dimc" style="font-size: 1.1em">Zygote64</div>
+          <div class="dimc desc" id="zygote64_status" style="font-size: 0.9em; margin-top: 3px;">Unknown</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- INFO: Module page -->
+    <div id="panel_modules" class="panel">
+      <div id="panel_modules_header" class="header">Modules</div>
+      <div style="padding: 45px 0px;"></div>
+      <div id="modules_list" style="width: 100%; height: fit-content; display: grid;">
+        <div id="modules_list_not_avaliable" class="not_avaliable">
+          No modules using Zygisk here.
+        </div>
+        <!-- N/A -->
+      </div>
+    </div>
+
+    <!-- INFO: Action page -->
+    <div id="panel_actions" class="panel">
+      <div id="panel_actions_header" class="header">Actions</div>
+      <div style="padding: 45px 0px;"></div>
+      <!-- INFO: Settings card body (monitor) -->
+      <div id="monitor" class="dimc" style="display: block; margin: 0 15px 0 15px; border-radius: 20px;">
+        <div class="dimc liste" style="padding: 30px 22px 30px; border-radius: 20px;">
+          <div id="monitor_title" class="dimc" style="font-size: 1.22em;">Monitor</div>
+          <div id="monitor_status" class="dimc" style="font-size: 1.1em;">Unknown</div>
+        </div>
+
+        <div class="small_card_bg" style="padding: 25px 20px 25px 20px; border-radius: 20px;">
+          <div class="small_card_bg button_list">
+            <div id="monitor_stop_button" class="center button">Stop</div>
+            <div id="monitor_start_button" class="center button">Start</div>
+            <div id="monitor_pause_button" class="center button">Pause</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- INFO: Settings page -->
+    <div id="panel_settings" class="panel">
+      <div id="panel_settings_header" class="header">Settings</div>
+      <div style="padding: 40px 0px;"></div>
+      <!-- INFO: Enable system font option -->
+      <div class="small_card dimc" style="margin-top: 15px; justify-content: space-between; display: flex; align-items: center;">
+        <div class="dimc" style="display: inline-block; width: 80%;">
+          <div id="sys_font_option_title" class="dimc content" style="font-size: 1.1em; padding-left: 5px; padding-top: 6px; padding-bottom: 2px;">
+            Enable system font
+          </div>
+          <div id="sys_font_option_desc" class="dimc desc" style="font-size: 0.9em; padding-left: 5px; padding-bottom: 6px;">
+            This option will enable system font in current WebUI. NOTE: May not be compatible with FlipFont
+          </div>
+        </div>
+
+        <label class="switch dimc">
+          <input id="font_switcher" type="checkbox">
+          <span class="slider round"></span>
+        </label>
+      </div>
+
+      <!-- INFO: Enable light theme option -->
+      <div id="theme_page_toggle" class="small_card dimc card_animation" style="margin-top: 15px; justify-content: space-between; display: flex; align-items: center;">
+        <div class="dimc" style="display: inline-block;">
+          <div id="sys_theme_option_title" class="dimc content" style="font-size: 1.1em; padding-left: 5px; padding-top: 6px; padding-bottom: 2px;">
+            System theme
+          </div>
+          <div id="sys_theme_option_desc" class="dimc desc" style="font-size: 0.9em; padding-left: 5px; padding-bottom: 6px;">
+            Choose your system theme for current WebUI
+          </div>
+        </div>
+      </div>
+
+      <!-- INFO: Change language -->
+      <div id="lang_page_toggle" class="small_card dimc card_animation" style="margin-top: 15px; justify-content: space-between; display: flex; align-items: center;">
+        <div class="dimc" style="display: inline-block;">
+          <div id="sys_lang_option_title" class="dimc content" style="font-size: 1.1em; padding-left: 5px; padding-top: 6px; padding-bottom: 2px;">
+            Change language
+          </div>
+          <div id="sys_lang_option_desc" class="dimc desc" style="font-size: 0.9em; padding-left: 5px; padding-bottom: 6px;">
+            Change to your new language
+          </div>
+        </div>
+      </div>
+
+      <!-- INFO: Error history -->
+      <div id="errorh_page_toggle" class="small_card dimc card_animation" style="margin-top: 15px; justify-content: space-between; display: flex; align-items: center;">
+        <div class="dimc" style="display: inline-block;">
+          <div id="sys_errorh_title" class="dimc content" style="font-size: 1.1em; padding-left: 5px; padding-top: 6px; padding-bottom: 2px;">
+            Error History
+          </div>
+          <div id="sys_errorh_desc" class="dimc desc" style="font-size: 0.9em; padding-left: 5px; padding-bottom: 6px;">
+            View all of your error log
+          </div>
+        </div>
+      </div>
+
+      <!-- INFO: Credit card -->
+      <div class="dim card" style="margin-top: 15px;">
+        <div class="dimc content">
+          <div id="mcre_title" class="dimc" style="font-size: 1.1em">Module Developer</div>
+          <div  credit-link="github.com/PerformanC" class="dimc desc" style="font-size: 0.9em; margin-top: 3px; cursor: pointer;">
+            The PerformanC Organization
+          </div>
+        </div>
+
+        <div class="dimc content" style="margin-top: 6px;">
+          <div id="omcre_title" class="dimc" style="font-size: 1.1em">Original Module Developer</div>
+          <div class="dimc" style="font-size: 0.9em; margin-top: 3px; align-items: center; display: flex;">
+            <div credit-link="github.com/Dr-TSNG" class="dimc desc" style="cursor: pointer;">
+              Nullptr
+            </div>
+            <div class="dimc desc">,</div>
+            <div credit-link="github.com/5ec1cff" class="dimc desc" style="margin-left: 2px; cursor: pointer;">
+              5ec1cff
+            </div>
+          </div>
+        </div>
+
+        <div class="dimc" style="margin-top: 6px;">
+          <div id="webcre_title" class="dimc" style="font-size: 1.1em">WebUI Developer</div>
+          <div credit-link="github.com/RainyXeon" class="dimc desc" style="font-size: 0.9em; margin-top: 3px; cursor: pointer;">
+            RainyXeon
+          </div>
+        </div>
+      </div>
+
+      <!-- INFO: License card -->
+      <div class="dim card" style="margin-top: 15px;">
+        <div class="dimc content">
+          <div id="mlic_title" class="dimc" style="font-size: 1.1em">Module License</div>
+          <div class="dimc desc" style="font-size: 0.9em; margin-top: 3px;">GPL (Nullptr), BSD 2-Clause</div>
+        </div>
+
+        <div class="dimc" style="margin-top: 6px;">
+          <div id="mweb_title" class="dimc" style="font-size: 1.1em">WebUI License</div>
+          <div class="dimc desc" style="font-size: 0.9em; margin-top: 3px;">BSD 2-Clause</div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- INFO: System theme small page -->
+    <div id="small_panel_theme" class="panel">
+      <div class="header" style="padding-left: 20px; display: flex; align-items: center; justify-content: initial;">
+        <div id="sp_theme_close" style="width: 36px; height: 36px; margin-right: 6px;">
+          <img src="./assets/back.svg"/>
+        </div>
+        <div id="small_panel_theme_title">Theme</div>
+      </div>
+      <div style="padding: 47px 0px;"></div>
+      <div style="width: 100%; height: fit-content;">
+        <div theme-data="amoled" class="dim card card_animation" style="padding: 25px 15px; cursor: pointer;">
+          <div theme-data="amoled" id="small_panel_theme_amoled_option" class="dimc" style="font-size: 1.1em;">Amoled</div>
+        </div>
+        <div theme-data="dark" class="dim card card_animation" style="padding: 25px 15px; cursor: pointer;">
+          <div theme-data="dark" id="small_panel_theme_dark_option" class="dimc" style="font-size: 1.1em;">Dark</div>
+        </div>
+        <div theme-data="light" class="dim card card_animation" style="padding: 25px 15px; cursor: pointer;">
+          <div theme-data="light" id="small_panel_theme_light_option" class="dimc" style="font-size: 1.1em;">Light</div>
+        </div>
+        <div theme-data="monochrome" class="dim card card_animation" style="padding: 25px 15px; cursor: pointer;">
+          <div theme-data="monochrome" id="small_panel_theme_monochrome_option" class="dimc" style="font-size: 1.1em;">Monochrome</div>
+        </div>
+        <div theme-data="system" class="dim card card_animation" style="padding: 25px 15px; cursor: pointer;">
+          <div theme-data="system" id="small_panel_theme_system_option" class="dimc" style="font-size: 1.1em;">System Based</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- INFO: Language small page -->
+    <div id="small_panel_language" class="panel">
+      <div class="header" style="padding-left: 20px; display: flex; align-items: center; justify-content: initial;">
+        <div id="sp_lang_close" style="width: 36px; height: 36px; margin-right: 6px;">
+          <img src="./assets/back.svg"/>
+        </div>
+        <div id="small_panel_lang_title">Choose your new language</div>
+      </div>
+      <div style="padding: 47px 0px;"></div>
+      <div id="lang_modal_list" style="width: 100%; height: fit-content;">
+        <!-- N/A -->
+      </div>
+    </div>
+
+    <!-- INFO: Error small page -->
+    <div id="small_panel_errorh" class="panel">
+      <div id="errorh_small_panel_header" class="header" style="padding-left: 20px; display: flex; align-items: center; justify-content: initial;">
+        <div id="sp_errorh_close" style="width: 36px; height: 36px; margin-right: 6px;">
+          <img src="./assets/back.svg"/>
+        </div>
+        <div id="small_panel_errorh_title">Error History</div>
+      </div>
+      <div style="display: block; height: 100%;">
+        <div class="errorh_button_container">
+          <div id="errorh_copy" class="errorh_button">COPY</div>
+          <div id="errorh_clear_all" class="errorh_button">CLEAR ALL LOG</div>
+        </div>
+        <textarea id="errorh_panel" class="errorh_textarea" placeholder="No error log recorded here!" disabled></textarea>
+      </div>
+    </div>
+        
+
+    <!-- INFO: Bottom navbar -->
+    <div id="navbar_support_div" style="display: none;">
+      <div id="navbar" class="navbar radios">
+        <div class="navicon_support nav_dimc">
+          <input id="n_home" type="radio" name="navbutton" value="home" checked/>
+          <label class="navicon_support radio nav_dimc" for="n_home">
+  
+            <div class="navicon_support nav_dimc" style="display: grid; place-items: center;">
+              <div class="navicon_support nav_dimc" style="display: grid; place-items: center; width: 65px;">
+                <div style="grid-area: 1 / 1;" id="ni_home"></div>
+                <div style="grid-area: 1 / 1;" id="nibg_home" class="navicon"></div>
+              </div>
+              <div id="nav_home_title" class="navtitle nav_dimc">Home</div>
+            </div>
+  
+          </label>
+        </div>
+  
+        <div class="nav_dimc">
+          <input id="n_modules" type="radio" name="navbutton" value="modules"/>
+          <label class="radio nav_dimc" for="n_modules">
+  
+            <div class="nav_dimc" style="display: grid; place-items: center;">
+              <div class="nav_dimc" style="display: grid; place-items: center; width: 65px;">
+                <div style="grid-area: 1 / 1;" id="ni_modules"></div>
+                <div style="grid-area: 1 / 1;" id="nibg_modules" class="navicon"></div>
+              </div>
+              <div id="nav_modules_title" class="navtitle nav_dimc">Modules</div>
+            </div>
+  
+          </label>
+        </div>
+  
+        <div class="nav_dimc">
+          <input id="n_actions" type="radio" name="navbutton" value="actions"/>
+          <label class="radio nav_dimc" for="n_actions">
+  
+            <div class="nav_dimc" style="display: grid; place-items: center;">
+              <div class="nav_dimc" style="display: grid; place-items: center; width: 65px;">
+                <div style="grid-area: 1 / 1;" id="ni_actions"></div>
+                <div style="grid-area: 1 / 1;" id="nibg_actions" class="navicon"></div>
+              </div>
+              <div id="nav_actions_title" class="navtitle nav_dimc">Actions</div>
+            </div>
+  
+          </label>
+        </div>
+  
+        <div class="navicon_support nav_dimc">
+          <input id="n_settings" type="radio" name="navbutton" value="settings"/>
+          <label class="navicon_support radio nav_dimc" for="n_settings">
+  
+            <div class="navicon_support nav_dimc" style="display: grid; place-items: center;">
+              <div class="navicon_support nav_dimc" style="display: grid; place-items: center; width: 65px;">
+                <div style="grid-area: 1 / 1;" id="ni_settings"></div>
+                <div style="grid-area: 1 / 1;" id="nibg_settings" class="navicon"></div>
+              </div>
+              <div id="nav_settings_title" class="navtitle nav_dimc">Settings</div>
+            </div>
+  
+          </label>
+        </div>
+      </div>
+
+    </div>
+    
+  </body>
+</html>
