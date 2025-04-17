@@ -22,15 +22,15 @@ Les développeurs de Zygisk Next sont connus et reconnus dans la communauté And
 
 ## Dépendances
 
-| Outil            | Description                            |
+| Outil            | Description                           |
 |-----------------|----------------------------------------|
-| `Android NDK`   | Kit de développement natif d'Android     |
+| `Android NDK`   | Kit de développement natif d'Android   |
 
 ### Dépendances C++ 
 
 | Dépendance | Description                   |
 |------------|-------------------------------|
-| `lsplt`    | Simple PLT Hook pour Android   |
+| `lsplt`    | Simple PLT Hook pour Android  |
 
 ## Utilisation
 
@@ -46,7 +46,7 @@ Il n'y a actuellement pas de version (releases) stable (Pour bientôt)
 
 ## Support
 
-Pour toutes questions relatives a ReZygisk ou d'autres projets de PerformanC, sentez vous a l'aise de nous rejoindre par tous les moyens disponibles: 
+Pour toutes questions relatives a ReZygisk ou d'autres projets de PerformanC, n'hésitez pas à nous rejoindre via les différents moyens disponibles: 
 
 - Notre Discord: [PerformanC](https://discord.gg/uPveNfTuCJ)
 - Le Telegram relatif a ReZygisk: [@rezygiskchat](https://t.me/rezygiskchat)
