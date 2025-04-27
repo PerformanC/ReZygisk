@@ -49,7 +49,7 @@ As of now, we don't have integration with another platform for translations but 
 For any question related to ReZygisk or other PerformanC projects, feel free to join any of the following channels below:
 
 - Discord Channel: [PerformanC](https://discord.gg/uPveNfTuCJ)
-- ReZygisk Telegram Channel: [@rezygiskchat](https://t.me/rezygiskchat)
+- ReZygisk Telegram Channel: [@rezygisk](https://t.me/rezygisk)
 - PerformanC Telegram Channel: [@performancorg](https://t.me/performancorg)
 
 ## Contribution
