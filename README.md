@@ -66,7 +66,7 @@ For any question related to ReZygisk or other PerformanC projects, feel free to 
 - Discord Channel: [PerformanC](https://discord.gg/uPveNfTuCJ)
 - ReZygisk Telegram Channel: [@rezygisk](https://t.me/rezygisk)
 - PerformanC Telegram Channel: [@performancorg](https://t.me/performancorg)
-- PerformanC Signal Group: [@performanc](https://signal.group/#CjQKID3SS8N5y4lXj3VjjGxVJnzNsTIuaYZjj3i8UhipAS0gEhAedxPjT5WjbOs6FUuXptcT)
+- Notre Signal: [@performanc](https://signal.group/#CjQKID3SS8N5y4lXj3VjjGxVJnzNsTIuaYZjj3i8UhipAS0gEhAedxPjT5WjbOs6FUuXptcT)
 
 ## Contribution
 
