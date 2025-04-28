@@ -51,6 +51,7 @@ Pour toutes questions relatives a ReZygisk ou d'autres projets de PerformanC, n'
 - Notre Discord: [PerformanC](https://discord.gg/uPveNfTuCJ)
 - Le Telegram relatif a ReZygisk: [@rezygiskchat](https://t.me/rezygiskchat)
 - Notre Telegram: [@performancorg](https://t.me/performancorg)
+- Notre Signal: [@performanc](https://signal.group/#CjQKID3SS8N5y4lXj3VjjGxVJnzNsTIuaYZjj3i8UhipAS0gEhAedxPjT5WjbOs6FUuXptcT)
 
 ## Contribution
 
