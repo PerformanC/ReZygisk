@@ -1,5 +1,5 @@
-# 🌎 Translator
-
+# 🌎 Translators
+- **ar_EG** by [@ZG089](https://github.com/ZG089)
 - **de_DE** by [@Blazzycrafer](https://github.com/Blazzycrafter)
 - **en_US** by [@PerformanC (The PerformanC Organization)](https://github.com/PerformanC)
 - **fr_FR** by [@GhostFRR](https://github.com/GhostFRR)
