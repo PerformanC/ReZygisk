@@ -40,15 +40,15 @@ La sélection du build/archive ZIP est important, car cela déterminera à quel 
  
 En ce qui concerne les branches, vous devriez toujours utiliser la branche `main`, sauf si les développeurs vous indiquent le contraire ou si vous souhaitez tester les fonctionnalités à venir et êtes conscient des risques encourus.
  
- ### 2. Flashez l'archive zip
+### 2. Flashez l'archive zip
 
 Après avoir choisi le bon build, vous devez le flasher à l'aide de votre gestionnaire root, comme Magisk ou KernelSU. Vous pouvez le faire en allant dans la section `Modules` de votre gestionnaire root et en y sélectionnant l'archive zip que vous venez de télécharger.
  
- Après le flash, vérifiez les journaux d'installation pour vous assurer qu'il n'y ait pas d'erreurs, et si tout va bien, vous pouvez redémarrer votre appareil.
+Après le flash, vérifiez les journaux d'installation pour vous assurer qu'il n'y ait pas d'erreurs, et si tout va bien, vous pouvez redémarrer votre appareil.
 
  
-> [!ATTENTION] 
->Les utilisateurs de Magisk doivent désactiver Zygisk pré intégré, car sinon il entrera en conflit avec ReZygisk. Cela peut être fait en vous rendant dans la section `Paramètres` de Magisk et en désactivant l'option `Zygisk`
+> [!WARNING] 
+> Les utilisateurs de Magisk doivent désactiver Zygisk pré intégré, car sinon il entrera en conflit avec ReZygisk. Cela peut être fait en vous rendant dans la section `Paramètres` de Magisk et en désactivant l'option `Zygisk`
  
 ### 3. Vérifiez l'installation
 
