@@ -6,7 +6,7 @@ ReZygisk è un fork di Zygisk Next, una implementazione di Zygisk, che da suppor
 
 Il suo obbiettivo è modernizzare e riscrivere il codice in C (da C++ e Rust), promettendo un'implementazione più efficente e veloce dell'API Zygisk con una licenza più permissiva.
 
-> [!NOTA]
+> [!NOTE]
 > Questo modulo/fork è in via di sviluppo; usa solo i .zip dalle Releases.
 >
 > Anche se potresti installare il .zip da [Actions](https://github.com/PerformanC/ReZygisk/actions), è a tua discrezione farlo siccome potrebbe causare bootloop.
