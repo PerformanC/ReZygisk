@@ -5,6 +5,7 @@
 - **fr_FR** by [@GhostFRR](https://github.com/GhostFRR)
 - **ja_JP** by [@Fyphen1223](https://github.com/Fyphen1223)
 - **id_ID** by [@bpanca05](https://github.com/bpanca05) & [@LuckyKiddos](https://github.com/GuitarHeroStyles)
+- **it_IT** by [@thasave14](https://github.com/thasave14)
 - **pt_BR** by [@ThePedroo](https://github.com/ThePedroo)
 - **ro_RO** by [@ExtremeXT](https://github.com/ExtremeXT)
 - **ru_RU** by [@Emulond](https://github.com/Emulond) & [@AJleKcAHgP68](https://github.com/AJleKcAHgP68)
