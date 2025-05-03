@@ -1,0 +1,93 @@
+{
+  "langName": "Italiano (Italia)",
+  "global": {
+    "unknown": "Sconosciuto"
+  },
+  "smallPage": {
+    "language": {
+      "header": "Scegli la tua nuova lingua"
+    },
+    "theme": {
+      "header": "Scegli il tuo nuovo tema",
+      "dark": "Scuro",
+      "light": "Chiaro",
+      "system": "Sistema"
+    },
+    "errorh": {
+      "buttons": {
+        "copy": "COPIA",
+        "clear": "CANCELLA TUTTI I LOGS"
+      },
+      "header": "Storico degli Errori",
+      "placeholder": "Nessun errore è stato registrato qui!"
+    }
+  },
+  "page": {
+    "home": {
+      "header": "Home",
+      "status": {
+        "notWorking": "Non funzionante",
+        "ok": "Funzionante",
+        "partially": "Funzionante Parzialmente"
+      },
+      "info": {
+        "version": "Versione",
+        "root": "Implementazione root",
+        "zygote": {
+          "injected": "Iniettato",
+          "notInjected": "Non Iniettato",
+          "unknown": "Sconosciuto"
+        }
+      }
+    },
+    "modules": {
+      "header": "Moduli",
+      "notAvaliable": "Nessun modulo che utilizza Zygisk qui.",
+      "arch": "Architettura: "
+    },
+    "settings": {
+      "header": "Impostazioni",
+      "font": {
+        "header": "Abilita font di sistema",
+        "description": "Questa opzione abiliterà il font di sistema nella WebUI. NOTA: Potrebbe non funzionare bene con FlipFont"
+      },
+      "theme": {
+        "header": "Tema di sistema",
+        "description": "Scegli il tuo tema di sistema per la WebUI"
+      },
+      "language": {
+        "header": "Cambia lingua",
+        "description": "Cambia alla tua nuova lingua"
+      },
+      "logs": {
+        "header": "Storico degli errori",
+        "description": "Visualizza tutto il log dell'errore"
+      },
+      "credits": {
+        "module": "Programmatore del Modulo",
+        "original": "Programmatore del Modulo Originale",
+        "web": "Programmatore della WebUI"
+      },
+      "license": {
+        "module": "Licenza del modulo",
+        "web": "Licenza della WebUI"
+      }
+    },
+    "actions": {
+      "header": "Azioni",
+      "monitorButton": {
+        "pause": "Pausa",
+        "stop": "Ferma",
+        "start": "Avvia"
+      },
+      "monitor": "Controlla",
+      "status": {
+        "tracing": "Tracing",
+        "stopping": "Fermando",
+        "stopped": "Fermato",
+        "exiting": "Uscendo",
+        "unknown": "Sconosciuto"
+      }
+    }
+  }
+}
