@@ -1,6 +1,6 @@
 # ReZygisk
 
-[简体中文](/READMEs/README_zh-CN.md)|[繁體中文](/READMEs/README_zh-TW.md)|[Bahasa Indonesia](/READMEs/README_id-ID.md)|[Tiếng Việt](/READMEs/README_vi-VN.md)|[Português Brasileiro](/READMEs/README_pt-BR.md)|[Türkçe](/READMEs/README_tr-TR.md)|[French](/READMEs/README_fr-FR.md)
+[English](/README.md)
 
 ReZygisk è un fork di Zygisk Next, una implementazione di Zygisk, che da supporto della Zygisk API per KernelSU, Magisk (tranne quello già presente), e APatch (In via di sviluppo).
 
@@ -9,7 +9,7 @@ Il suo obbiettivo è modernizzare e riscrivere il codice in C (da C++ e Rust), p
 > [!NOTA]
 > Questo modulo/fork è in via di sviluppo; usa solo i .zip dalle Releases.
 >
-> Anche se potresti installare il .zip da [Actions](https://github.com/PerformanC/ReZygisk/actions), è a tua discrezione installarlo siccome potrebbe causare bootloop.
+> Anche se potresti installare il .zip da [Actions](https://github.com/PerformanC/ReZygisk/actions), è a tua discrezione farlo siccome potrebbe causare bootloop.
 
 ## Perché?
 
@@ -41,7 +41,7 @@ In questo momento stiamo cucinando (Presto).
 
 Per ora non ci sono release stabili. (Presto)
 
-## Translation
+## Traduzioni
 
 Per ora, non abbiamo integrazione con una piattaforma per le traduzioni, ma puoi contribuire al branch [add/new-webui](https://github.com/PerformanC/ReZygisk/tree/add/new-webui). Perfavore non scordarti di includere il tuo profilo GitHub in [TRANSLATOR.md](https://github.com/PerformanC/ReZygisk/blob/add/new-webui/TRANSLATOR.md) così che si possa vedere il tuo contributo.
 
