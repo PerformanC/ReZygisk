@@ -1,0 +1,93 @@
+{
+  "langName": "العربية",
+  "global": {
+    "unknown": "غير معروف"
+  },
+  "smallPage": {
+    "language": {
+      "header": "اختر اللغة"
+    },
+    "theme": {
+      "header": "اختر السمة",
+      "dark": "مظلم",
+      "light": "مضئ",
+      "system": "تلقائي"
+    },
+    "errorh": {
+      "buttons": {
+        "copy": "نسخ",
+        "clear": "حذف كل السجلات"
+      },
+      "header": "سجلات الأخطاء",
+      "placeholder": "لا توجد أخطاء!"
+    }
+  },
+  "page": {
+    "home": {
+      "header": "الصفحة الرئيسية",
+      "status": {
+        "notWorking": "لا يعمل",
+        "ok": "يعمل",
+        "partially": "يعمل بشكل جزئي"
+      },
+      "info": {
+        "version": "الإصدار",
+        "root": "مدير الروت",
+        "zygote": {
+          "injected": "محقن",
+          "notInjected": "غير محقن",
+          "unknown": "غير معروف"
+        }
+      }
+    },
+    "modules": {
+      "header": "الإضافات",
+      "notAvaliable": "لا توجد إضافات تستخدم zygisk.",
+      "arch": "النواة: "
+    },
+    "actions": {
+      "header": "زر الإجراء",
+      "monitorButton": {
+        "start": "تشغيل",
+        "stop": "تعطيل",
+        "pause": "إيقاف مؤقت"
+      },
+      "monitor": "المراقبة",
+      "status": {
+        "tracing": "يتم التتبع",
+        "stopping": "يتم الإيقاف",
+        "stopped": "متوقف",
+        "exiting": "يتم الخروج",
+        "unknown": "غير معروف"
+      }
+    },
+    "settings": {
+      "header": "الإعدادات",
+      "font": {
+        "header": "تشغيل خط النظام",
+        "description": "هذا الخيار يقوم بعرض النص بخط النظام بدلا من خط WebUI. قد لا يتوافق مع FlipFont"
+      },
+      "theme": {
+        "header": "الثيمات",
+        "description": "اختر الثيم المناسب"
+      },
+      "language": {
+        "header": "تغيير اللغة",
+        "description": "غير إلى لغة أخرى"
+      },
+      "logs": {
+        "header": "سجل الأخطاء",
+        "description": "إعرض كل سجلات الأخطاء"
+      },
+      "credits": {
+        "module": "مطور الإضافة",
+        "original": "المطورون الأصليون",
+        "web": "مطور واجهة الويب"
+      },
+      "license": {
+        "module": "ترخيص الإضافة",
+        "web": "ترخيص واجهة الويب"
+      }
+    }
+  }
+}

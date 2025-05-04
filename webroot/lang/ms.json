@@ -1,0 +1,93 @@
+{
+  "langName": "Malay (Malaysia)",
+  "global": {
+    "unknown": "Tidak diketahui"
+  },
+  "smallPage": {
+    "language": {
+      "header": "Pilih bahasa anda"
+    },
+    "theme": {
+      "header": "Pilih tema anda",
+      "dark": "Gelap",
+      "light": "Cerah",
+      "system": "Berasaskan Sistem"
+    },
+    "errorh": {
+      "buttons": {
+        "copy": "Salin",
+        "clear": "KOSONGKAN SEMUA LOG"
+      },
+      "header": "Sejarah Ralat",
+      "placeholder": "Tiada log ralat direkodkan di sini!"
+    }
+  },
+  "page": {
+    "home": {
+      "header": "Home",
+      "status": {
+        "notWorking": "Tidak Berfungsi",
+        "ok": "Berfungsi",
+        "partially": "Separa Berfungsi"
+      },
+      "info": {
+        "version": "Versi",
+        "root": "Pelaksanaan Root",
+        "zygote": {
+          "injected": "Disuntik",
+          "notInjected": "Tidak Disuntik",
+          "unknown": "Tidak diketahui"
+        }
+      }
+    },
+    "modules": {
+      "header": "Modul",
+      "notAvaliable": "Tiada modul menggunakan Zygisk di sini.",
+      "arch": "Arkitektur: "
+    },
+    "settings": {
+      "header": "Tetapan",
+      "font": {
+        "header": "Hidupkan fon sistem",
+        "description": "Pilihan ini akan menghidupkan fon sistem dalam WebUI semasa. NOTA: Mungkin tidak serasi dengan FlipFont"
+      },
+      "theme": {
+        "header": "Tema sistem",
+        "description": "Pilih tema sistem anda untuk WebUI semasa"
+      },
+      "language": {
+        "header": "Tukar bahasa",
+        "description": "Tukar kepada bahasa baharu anda"
+      },
+      "logs": {
+        "header": "Sejarah Ralat",
+        "description": "Lihat semua log ralat anda"
+      },
+      "credits": {
+        "module": "Pembangun Modul",
+        "original": "Pembangun Modul Asal",
+        "web": "Pembangun WebUI"
+      },
+      "license": {
+        "module": "Lesen Modul",
+        "web": "Lesen WebUI"
+      }
+    },
+    "actions": {
+      "header": "Tindakan",
+      "monitorButton": {
+        "pause": "Berhenti sebentar",
+        "stop": "Berhenti",
+        "start": "Mula"
+      },
+      "monitor": "Pantau",
+      "status": {
+        "tracing": "Menjejak",
+        "stopping": "Berhenti",
+        "stopped": "Telah Berhenti",
+        "exiting": "Keluar",
+        "unknown": "Tidak diketahui"
+      }
+    }
+  }
+}

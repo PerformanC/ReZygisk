@@ -1,0 +1,94 @@
+{
+  "langName": "Nederlands",
+  "global": {
+    "unknown": "Onbekend"
+  },
+  "smallPage": {
+    "language": {
+      "header": "Kies uw nieuwe taal"
+    },
+    "theme": {
+      "header": "Kies uw nieuwe thema",
+      "dark": "Donker",
+      "light": "Licht",
+      "system": "Systeem Gebaseerd"
+    },
+    "errorh": {
+      "buttons": {
+        "copy": "KOPIËREN",
+        "clear": "VERWIJDER ALLE LOGS"
+      },
+      "header": "Foutmelding Geschiedenis",
+      "placeholder": "Er is hier geen foutlogboek geregistreerd!"
+    }
+  },
+  "page": {
+    "home": {
+      "header": "Thuis",
+      "status": {
+        "unknown": "Onbekend",
+        "notWorking": "Werkt Niet",
+        "ok": "Werkt",
+        "partially": "Werkt Gedeeltelijk"
+      },
+      "info": {
+        "version": "Versie",
+        "root": "Root Implementatie",
+        "zygote": {
+          "injected": "Geïnjecteerd",
+          "notInjected": "Niet Geïnjecteerd",
+          "unknown": "Onbekend"
+        }
+      }
+    },
+    "modules": {
+      "header": "Modules",
+      "notAvaliable": "Geen modules die Zygisk gebruiken.",
+      "arch": "Architectuur: "
+    },
+    "settings": {
+      "header": "Instellingen",
+      "font": {
+        "header": "Systeem lettertype inschakelen",
+        "description": "Deze optie zal het systeemlettertype inschakelen in huidige WebUI. Opmerking: Kan niet compatibel zijn met FlipFont"
+      },
+      "theme": {
+        "header": "Systeem thema",
+        "description": "Kies uw systeemthema voor huidige WebUI"
+      },
+      "language": {
+        "header": "Taal wijzigen",
+        "description": "Verander naar nieuwe taal"
+      },
+      "logs": {
+        "header": "Foutmelding Geschiedenis",
+        "description": "Al uw foutenlogboek weergeven"
+      },
+      "credits": {
+        "module": "Module Ontwikkelaar",
+        "original": "Originele Module Ontwikkelaar",
+        "web": "WebUI Ontwikkelaar"
+      },
+      "license": {
+        "module": "Module Licentie",
+        "web": "WebUI Licentie"
+      }
+    },
+    "actions": {
+      "header": "Acties",
+      "monitorButton": {
+        "pause": "Pauzeren",
+        "stop": "Stoppen",
+        "start": "Starten"
+      },
+      "monitor": "Bewaken",
+      "status": {
+        "tracing": "Traceren",
+        "stopping": "Bezig met Stoppen",
+        "stopped": "Gestopt",
+        "exiting": "Wordt Beëindigd",
+        "unknown": "Onbekend"
+      }
+    }
+  }
+}

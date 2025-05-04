@@ -1,0 +1,93 @@
+{
+  "langName": "Français (France)",
+  "global": {
+    "unknown": "Inconnu"
+  },
+  "smallPage": {
+    "language": {
+      "header": "Choisissez votre nouvelle langue"
+    },
+    "theme": {
+      "header": "Choisissez votre nouveau thème",
+      "dark": "Sombre",
+      "light": "Clair",
+      "system": "Basé sur le système"
+    },
+    "errorh": {
+      "buttons": {
+        "copy": "COPIER",
+        "clear": "EFFACER TOUS LES JOURNEAUX"
+      },
+      "header": "Historique d'erreurs",
+      "placeholder": "Pas de journal d'erreur enregistré ici !"
+    }
+  },
+  "page": {
+    "home": {
+      "header": "Page d'accueil",
+      "status": {
+        "notWorking": "Inactif",
+        "ok": "Actif",
+        "partially": "Fonctionnement partiel"
+      },
+      "info": {
+        "version": "Version",
+        "root": "Implémentation root",
+        "zygote": {
+          "injected": "Injecté",
+          "notInjected": "Non injecté",
+          "unknown": "Inconnu"
+        }
+      }
+    },
+    "modules": {
+      "header": "Modules",
+      "notAvaliable": "Aucuns modules n'utilisent Zygisk actuellement.",
+      "arch": " Architecture: "
+    },
+    "settings": {
+      "header": "Paramètres",
+      "font": {
+        "header": "Activer la police du système",
+        "description": "Cette option activera la police de caractère du système d'interface WebUI. NOTE: N'est peut-être pas compatible avec FlipFont"
+      },
+      "theme": {
+        "header": "Thème système",
+        "description": "Choisissez votre thème système pour le WebUI"
+      },
+      "language": {
+        "header": "Changez de langue",
+        "description": "Changez vers votre nouvelle langue"
+      },
+      "logs": {
+        "header": "Historique d'erreur",
+        "description": "Voir le détail du journal d'erreur"
+      },
+      "credits": {
+        "module": "Module développeur",
+        "original": "Module Original du Développeur",
+        "web": "WebUI Développeur"
+      },
+      "license": {
+        "module": "Module de licence",
+        "web": "Licence WebUI"
+      }
+    },
+    "actions": {
+      "header": "Actions",
+      "monitorButton": {
+        "pause": "Mettre en Pause",
+        "stop": "Arrêter",
+        "start": "Démarrer"
+      },
+      "monitor": "Surveillance",
+      "status": {
+        "tracing": "Tracer",
+        "stopping": "Stopper immédiatement",
+        "stopped": "Arrêté",
+        "exiting": "Sortir d'ici",
+        "unknown": "Inconnu"
+      }
+    }
+  }
+}
