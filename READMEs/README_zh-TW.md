@@ -48,7 +48,7 @@ ReZygisk 是 Zygisk Next 的一個分支，這是一個獨立實現的 Zygisk，
 如有關於 ReZygisk 或其他 PerformanC 專案的任何問題，歡迎加入以下任一頻道：
 
 - Discord 頻道: [PerformanC](https://discord.gg/uPveNfTuCJ)
-- ReZygisk Telegram 頻道: [@rezygiskchat](https://t.me/rezygiskchat)
+- ReZygisk Telegram 頻道: [@rezygisk](https://t.me/rezygisk)
 - PerformanC Telegram 頻道: [@performancorg](https://t.me/performancorg)
 
 ## 貢獻

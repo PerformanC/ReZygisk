@@ -49,7 +49,7 @@ Zygisk Next geliştiricileri, Android topluluğunda tanınmış ve güvenilir ki
 ReZygisk veya diğer PerformanC projeleriyle ilgili herhangi bir soru için aşağıdaki kanallardan herhangi birine katılabilirsiniz:
 
 - Discord Kanalı: [PerformanC](https://discord.gg/uPveNfTuCJ)
-- ReZygisk Telegram Kanalı: [@rezygiskchat](https://t.me/rezygiskchat)
+- ReZygisk Telegram Kanalı: [@rezygisk](https://t.me/rezygisk)
 - PerformanC Telegram Kanalı: [@performancorg](https://t.me/performancorg)
 
 ## Katkıda Bulunma

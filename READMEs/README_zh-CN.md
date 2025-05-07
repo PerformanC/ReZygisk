@@ -52,7 +52,7 @@ Zygisk Next 的开发者们在Android社区享有盛誉，备受信任。但这�
 如果您有任何关于 ReZygisk 或者其他 PerformanC 项目的问题，可以随时加入以下群组：
 
 - Discord 服务器: [PerformanC](https://discord.gg/uPveNfTuCJ)
-- ReZygisk Telegram 群组: [@rezygiskchat](https://t.me/rezygiskchat)
+- ReZygisk Telegram 群组: [@rezygisk](https://t.me/rezygisk)
 - PerformanC Telegram 群组: [@performancorg](https://t.me/performancorg)
 
 ## 贡献

@@ -56,7 +56,7 @@ For any question related to ReZygisk or other PerformanC projects, feel free to 
 ReZygisk/他のPerformanCのプロジェクトに対する質問がある場合は、以下のどれかに参加してください！
 
 - Discord チャンネル: [PerformanC](https://discord.gg/uPveNfTuCJ)
-- ReZygisk Telegram チャンネル: [@rezygiskchat](https://t.me/rezygiskchat)
+- ReZygisk Telegram チャンネル: [@rezygisk](https://t.me/rezygisk)
 - PerformanC Telegram チャンネル: [@performancorg](https://t.me/performancorg)
 
 ## 貢献
