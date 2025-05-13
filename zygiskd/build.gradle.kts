@@ -34,7 +34,7 @@ val CStandardFlags = arrayOf(
   "-DMIN_KSU_VERSION=$minKsuVersion",
   "-DMAX_KSU_VERSION=$maxKsuVersion",
   "-DMIN_MAGISK_VERSION=$minMagiskVersion",
-  "-DZKSU_VERSION=\"\\\"$verName\\\"\""
+  "-DZKSU_VERSION=\\\"$verName\\\""
 )
 
 val CFlagsRelease = arrayOf(
