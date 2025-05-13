@@ -52,7 +52,7 @@
         "description": "Opsi ini akan mengaktifkan font sistem pada WebUI saat ini. (Mungkin tidak kompatibel dengan FlipFont)"
       },
       "theme": {
-        "header": "Bawaan Sistem",
+        "header": "Tema Sistem",
         "description": "Pilih tema untuk tampilan WebUI Anda saat ini"
       },
       "language": {
@@ -82,10 +82,10 @@
       },
       "monitor": "Monitor",
       "status": {
-        "tracing": "Pelacakan",
+        "tracing": "Melacak",
         "stopping": "Menghentikan",
         "stopped": "Terhenti",
-        "exiting": "Keluar",
+        "exiting": "Terkeluar",
         "unknown": "Tidak diketahui"
       }
     }
