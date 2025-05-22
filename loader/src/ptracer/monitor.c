@@ -752,7 +752,7 @@ static bool update_status(const char *message) {
   }
 
   if (message) {
-    fprintf(prop, "%s[%s] %s", pre_section, message, post_section);
+    fprintf(prop, "%s[%s]\\n%s", pre_section, message, post_section);
     fclose(prop);
 
     return true;
@@ -789,7 +789,7 @@ static bool update_status(const char *message) {
   WRITE_STATUS_ABI(64)
   WRITE_STATUS_ABI(32)
 
-  fprintf(prop, "%s[%s] %s", pre_section, status_text, post_section);
+  fprintf(prop, "%s[%s]\\n%s", pre_section, status_text, post_section);
 
   fclose(prop);
 
