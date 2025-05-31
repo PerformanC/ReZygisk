@@ -125,6 +125,7 @@ struct ZygiskContext {
 vector<tuple<dev_t, ino_t, const char *, void **>> *plt_hook_list;
 map<string, vector<JNINativeMethod>> *jni_hook_list;
 bool should_unmap_zygisk = false;
+bool enable_unloader = false;
 std::vector<lsplt::MapInfo> cached_map_infos = {};
 
 } // namespace
@@ -216,6 +217,9 @@ DCL_HOOK_FUNC(int, pthread_attr_setstacksize, void *target, size_t size) {
     int res = old_pthread_attr_setstacksize((pthread_attr_t *)target, size);
     LOGV("Call pthread_attr_setstacksize in [tid, pid]: %d, %d", gettid(), getpid());
 
+    if (!enable_unloader)
+        return res;
+
     // Only perform unloading on the main thread
     if (gettid() != getpid())
         return res;
@@ -245,6 +249,7 @@ DCL_HOOK_FUNC(char *, strdup, const char *s) {
       initialize_jni_hook();
       cached_map_infos = lsplt::MapInfo::Scan();
       LOGD("cached_map_infos updated");
+      hook_unloader();
     }
 
     return old_strdup(s);
@@ -838,7 +843,7 @@ ZygiskContext::~ZygiskContext() {
         m.clearApi();
     }
 
-    hook_unloader();
+    enable_unloader = true;
 }
 
 } // namespace
