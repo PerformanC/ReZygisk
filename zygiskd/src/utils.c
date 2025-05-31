@@ -628,6 +628,7 @@ bool umount_root(struct root_impl impl) {
     if (strcmp(mount.source, source_name) == 0) should_unmount = true;
     if (strncmp(mount.target, "/data/adb/modules", strlen("/data/adb/modules")) == 0) should_unmount = true;
     if (strncmp(mount.root, "/adb/modules/", strlen("/adb/modules/")) == 0) should_unmount = true;
+    if (strncmp(mount.root, "/zygisk", strlen("/zygisk")) == 0) should_unmount = true;
 
     if (!should_unmount) continue;
 
