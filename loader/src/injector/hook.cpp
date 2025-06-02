@@ -124,6 +124,8 @@ struct ZygiskContext {
 vector<tuple<dev_t, ino_t, const char *, void **>> *plt_hook_list;
 map<string, vector<JNINativeMethod>> *jni_hook_list;
 bool should_unmap_zygisk = false;
+bool enable_unloader = false;
+bool hooked_unloader = false;
 std::vector<lsplt::MapInfo> cached_map_infos = {};
 
 } // namespace
@@ -215,6 +217,9 @@ DCL_HOOK_FUNC(int, pthread_attr_setstacksize, void *target, size_t size) {
     int res = old_pthread_attr_setstacksize((pthread_attr_t *)target, size);
     LOGV("Call pthread_attr_setstacksize in [tid, pid]: %d, %d", gettid(), getpid());
 
+    if (!enable_unloader)
+        return res;
+
     // Only perform unloading on the main thread
     if (gettid() != getpid())
         return res;
@@ -264,6 +269,11 @@ DCL_HOOK_FUNC(char *, strdup, const char *s) {
     }
 
     return old_strdup(s);
+}
+
+DCL_HOOK_FUNC(int, property_get, const char *key, char *value, const char *default_value) {
+    hook_unloader();
+    return old_property_get(key, value, default_value);
 }
 
 #undef DCL_HOOK_FUNC
@@ -854,7 +864,7 @@ ZygiskContext::~ZygiskContext() {
         m.clearApi();
     }
 
-    hook_unloader();
+    enable_unloader = true;
 }
 
 } // namespace
@@ -936,6 +946,7 @@ void hook_functions() {
     PLT_HOOK_REGISTER(android_runtime_dev, android_runtime_inode, fork);
     PLT_HOOK_REGISTER(android_runtime_dev, android_runtime_inode, unshare);
     PLT_HOOK_REGISTER(android_runtime_dev, android_runtime_inode, strdup);
+    PLT_HOOK_REGISTER(android_runtime_dev, android_runtime_inode, property_get);
     hook_commit();
 
     // Remove unhooked methods
@@ -946,9 +957,13 @@ void hook_functions() {
 }
 
 static void hook_unloader() {
+    if (hooked_unloader) return;
+    hooked_unloader = true;
+
     ino_t art_inode = 0;
     dev_t art_dev = 0;
 
+    cached_map_infos = lsplt::MapInfo::Scan();
     for (auto &map : cached_map_infos) {
         if (map.path.ends_with("/libart.so")) {
             art_inode = map.inode;
@@ -959,6 +974,7 @@ static void hook_unloader() {
 
     if (art_dev == 0 || art_inode == 0) {
         LOGE("virtual map for libart.so is not cached");
+        hooked_unloader = false;
         return;
     } else {
         LOGD("hook_unloader called with libart.so [%zu:%lu]", art_dev, art_inode);
