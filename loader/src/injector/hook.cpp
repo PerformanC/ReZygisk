@@ -277,7 +277,15 @@ DCL_HOOK_FUNC(char *, strdup, const char *s) {
  * threads crash if they try to use the PLT while we are in the process of hooking it.
  * For this task, hooking property_get was chosen as there are lots of calls to this, so it's
  * relatively unlikely to break.
- * https://github.com/aosp-mirror/platform_frameworks_base/blob/main/core/jni/AndroidRuntime.cpp
+ *
+ * The line where libart.so is loaded is:
+ * https://github.com/aosp-mirror/platform_frameworks_base/blob/1cdfff555f4a21f71ccc978290e2e212e2f8b168/core/jni/AndroidRuntime.cpp#L1266
+ *
+ * And shortly after that, in the startVm method that is called right after, there are many calls to property_get:
+ * https://github.com/aosp-mirror/platform_frameworks_base/blob/1cdfff555f4a21f71ccc978290e2e212e2f8b168/core/jni/AndroidRuntime.cpp#L791
+ *
+ * After we succeed in getting called at a point where libart.so is already loaded, we will ignore
+ * the rest of the property_get calls.
  */
 DCL_HOOK_FUNC(int, property_get, const char *key, char *value, const char *default_value) {
     hook_unloader();
