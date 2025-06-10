@@ -271,6 +271,14 @@ DCL_HOOK_FUNC(char *, strdup, const char *s) {
     return old_strdup(s);
 }
 
+/*
+ * INFO: Our goal is to get called after libart.so is loaded, but before ART actually starts running.
+ * If we are too early, we won't find libart.so in maps, and if we are too late, we could make other
+ * threads crash if they try to use the PLT while we are in the process of hooking it.
+ * For this task, hooking property_get was chosen as there are lots of calls to this, so it's
+ * relatively unlikely to break.
+ * https://github.com/aosp-mirror/platform_frameworks_base/blob/main/core/jni/AndroidRuntime.cpp
+ */
 DCL_HOOK_FUNC(int, property_get, const char *key, char *value, const char *default_value) {
     hook_unloader();
     return old_property_get(key, value, default_value);
@@ -973,8 +981,16 @@ static void hook_unloader() {
     }
 
     if (art_dev == 0 || art_inode == 0) {
+        /*
+         * INFO: If we are here, it means we are too early and libart.so hasn't loaded yet when
+         * property_get was called. This doesn't normally happen, but we try again next time
+         * just to be safe.
+         */
+
         LOGE("virtual map for libart.so is not cached");
+
         hooked_unloader = false;
+
         return;
     } else {
         LOGD("hook_unloader called with libart.so [%zu:%lu]", art_dev, art_inode);
