@@ -711,10 +711,10 @@ void ZygiskContext::run_modules_post() {
 
         size_t i = 0;
         for (const auto &m : modules) {
-            module_addrs[i++] = m.getHandle();
+            module_addrs[i++] = m.getEntry();
         }
 
-        clean_trace("/data/adb", module_addrs, modules.size(), modules.size(), modules_unloaded, false);
+        clean_trace("/data/adb", module_addrs, modules.size(), modules.size(), modules_unloaded, true);
     }
 }
 
@@ -948,8 +948,8 @@ void clean_trace(const char *path, void **module_addrs, size_t module_addrs_leng
                 mprotect(addr, size, PROT_READ);
             }
             memcpy(copy, addr, size);
+            mprotect(copy, size, map.perms);
             mremap(copy, size, size, MREMAP_MAYMOVE | MREMAP_FIXED, addr);
-            mprotect(addr, size, map.perms);
         }
     }
 }

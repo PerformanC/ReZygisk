@@ -213,7 +213,7 @@ case 5:                                \
         bool tryUnload() const { return unload && dlclose(handle) == 0; };
         void clearApi() { memset(&api, 0, sizeof(api)); }
         int getId() const { return id; }
-        void *getHandle() const { return handle; }
+        void *getEntry() const { return entry.ptr; }
 
         ZygiskModule(int id, void *handle, void *entry);
 
