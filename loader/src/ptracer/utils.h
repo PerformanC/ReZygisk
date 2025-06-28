@@ -37,18 +37,22 @@ void free_maps(struct maps *maps);
   #define REG_SP rsp
   #define REG_IP rip
   #define REG_RET rax
+  #define REG_SYSNR orig_rax
 #elif defined(__i386__)
   #define REG_SP esp
   #define REG_IP eip
   #define REG_RET eax
+  #define REG_SYSNR orig_eax
 #elif defined(__aarch64__)
   #define REG_SP sp
   #define REG_IP pc
   #define REG_RET regs[0]
+  #define REG_SYSNR regs[8]
 #elif defined(__arm__)
   #define REG_SP uregs[13]
   #define REG_IP uregs[15]
   #define REG_RET uregs[0]
+  #define REG_SYSNR uregs[7]
   #define user_regs_struct user_regs
 #endif
 

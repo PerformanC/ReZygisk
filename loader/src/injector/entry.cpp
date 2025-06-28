@@ -25,4 +25,5 @@ void entry(void* addr, size_t size, const char* path) {
 
     void *module_addrs[1] = { addr };
     clean_trace(path, module_addrs, 1, 1, 0, false);
+    send_seccomp_event();
 }

@@ -403,7 +403,7 @@ bool trace_zygote(int pid) {
 
   int status;
 
-  if (ptrace(PTRACE_SEIZE, pid, 0, PTRACE_O_EXITKILL) == -1) {
+  if (ptrace(PTRACE_SEIZE, pid, 0, PTRACE_O_EXITKILL | PTRACE_O_TRACESECCOMP) == -1) {
     PLOGE("seize");
 
     return false;

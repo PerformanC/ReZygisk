@@ -522,6 +522,32 @@ int fork_dont_care() {
   return pid;
 }
 
+void tracee_skip_syscall(int pid) {
+  struct user_regs_struct regs;
+  if (!get_regs(pid, &regs)) {
+    LOGE("failed to get seccomp regs");
+    exit(1);
+  }
+  regs.REG_SYSNR = -1;
+  if (!set_regs(pid, &regs)) {
+    LOGE("failed to set seccomp regs");
+    exit(1);
+  }
+
+  /* INFO: It might not work, don't check for error */
+#if defined(__aarch64__)
+  int sysnr = -1;
+  struct iovec iov = {
+    .iov_base = &sysnr,
+    .iov_len = sizeof (int),
+  };
+  ptrace(PTRACE_SETREGSET, pid, NT_ARM_SYSTEM_CALL, &iov);
+#elif defined(__arm__)
+  ptrace(PTRACE_SET_SYSCALL, pid, 0, (void*) -1);
+#endif
+
+}
+
 void wait_for_trace(int pid, int *status, int flags) {
   while (1) {
     pid_t result = waitpid(pid, status, flags);
@@ -532,7 +558,11 @@ void wait_for_trace(int pid, int *status, int flags) {
       exit(1);
     }
 
-    if (!WIFSTOPPED(*status)) {
+    if (*status >> 8 == (SIGTRAP | (PTRACE_EVENT_SECCOMP << 8))) {
+      tracee_skip_syscall(pid);
+      ptrace(PTRACE_CONT, pid, 0, 0);
+      continue;
+    } else if (!WIFSTOPPED(*status)) {
       char status_str[64];
       parse_status(*status, status_str, sizeof(status_str));
 
