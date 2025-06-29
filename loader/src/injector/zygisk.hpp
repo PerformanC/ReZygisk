@@ -9,4 +9,4 @@ void hook_functions();
 
 void clean_trace(const char *path, void **module_addrs, size_t module_addrs_length, size_t load, size_t unload, bool spoof_maps);
 
-void send_seccomp_event();
+extern "C" void send_seccomp_event();

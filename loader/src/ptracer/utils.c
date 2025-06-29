@@ -560,7 +560,9 @@ void wait_for_trace(int pid, int *status, int flags) {
 
     if (*status >> 8 == (SIGTRAP | (PTRACE_EVENT_SECCOMP << 8))) {
       tracee_skip_syscall(pid);
+
       ptrace(PTRACE_CONT, pid, 0, 0);
+
       continue;
     } else if (!WIFSTOPPED(*status)) {
       char status_str[64];
