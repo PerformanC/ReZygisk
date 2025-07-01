@@ -12,7 +12,7 @@
 - **pt_BR** by [@ThePedroo](https://github.com/ThePedroo)
 - **ro_RO** by [@ExtremeXT](https://github.com/ExtremeXT)
 - **ru_RU** by [@Emulond](https://github.com/Emulond) & [@AJleKcAHgP68](https://github.com/AJleKcAHgP68)
-- **tr_TR** by [@dyingwillow](https://github.com/dyingwillow)
+- **tr_TR** by [@witchfuneral](https://github.com/witchfuneral)
 - **uk_UA** by [@Kittyskj](https://github.com/Kittyskj)
 - **vi_VN** by [@RainyXeon](https://github.com/RainyXeon)
 - **zh_CN** by [@Meltartica](https://github.com/Meltartica) & [@SheepChef](https://github.com/SheepChef)
