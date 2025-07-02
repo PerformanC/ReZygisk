@@ -6,7 +6,7 @@
 - **es_ES** by [@LuchoModzzz](https://github.com/Lxchoooo)
 - **es_MX** by [@LuchoModzzz](https://github.com/Lxchoooo)
 - **fr_FR** by [@GhostFRR](https://github.com/GhostFRR)
-- **ja_JP** by [@Fyphen1223](https://github.com/Fyphen1223)
+- **ja_JP** by [@Fyphen1223](https://github.com/Fyphen1223) & [@reindex-ot](https://github.com/reindex-ot) 
 - **id_ID** by [@bpanca05](https://github.com/bpanca05) & [@LuckyKiddos](https://github.com/GuitarHeroStyles)
 - **it_IT** by [@thasave14](https://github.com/thasave14)
 - **pt_BR** by [@ThePedroo](https://github.com/ThePedroo)
