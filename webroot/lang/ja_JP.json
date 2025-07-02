@@ -1,0 +1,93 @@
+{
+  "langName": "日本語",
+  "global": {
+    "unknown": "不明"
+  },
+  "smallPage": {
+    "language": {
+      "header": "言語を選択してください"
+    },
+    "theme": {
+      "header": "テーマを選択してください",
+      "dark": "ダーク",
+      "light": "ライト",
+      "system": "システムベース"
+    },
+    "errorh": {
+      "buttons": {
+        "copy": "コピー",
+        "clear": "すべてのログを消去"
+      },
+      "header": "履歴のエラー",
+      "placeholder": "エラーログは記録されていません！"
+    }
+  },
+  "page": {
+    "home": {
+      "header": "ホーム",
+      "status": {
+        "notWorking": "動作していません",
+        "ok": "動作中",
+        "partially": "部分的に動作中"
+      },
+      "info": {
+        "version": "バージョン",
+        "root": "root 実装",
+        "zygote": {
+          "injected": "インジェクト済み",
+          "notInjected": "未インジェクト",
+          "unknown": "不明"
+        }
+      }
+    },
+    "modules": {
+      "header": "モジュール",
+      "notAvaliable": "Zygisk を使用するモジュールはありません。",
+      "arch": "アーキテクチャ: "
+    },
+    "actions": {
+      "header": "アクション",
+      "monitorButton": {
+        "start": "開始",
+        "stop": "停止",
+        "pause": "一時停止"
+      },
+      "monitor": "監視",
+      "status": {
+        "tracing": "トレース中",
+        "stopping": "停止中",
+        "stopped": "停止済み",
+        "exiting": "終了中",
+        "unknown": "不明"
+      }
+    },
+    "settings": {
+      "header": "設定",
+      "font": {
+        "header": "システムフォントを有効化",
+        "description": "現在の WebUI でシステムフォントの使用を有効化します。注意: FlipFont との互換性がない場合があります"
+      },
+      "theme": {
+        "header": "システムテーマ",
+        "description": "WebUI のシステムテーマを変更します"
+      },
+      "language": {
+        "header": "言語の変更",
+        "description": "言語を変更します"
+      },
+      "logs": {
+        "header": "エラー履歴",
+        "description": "すべてのエラーログを表示します"
+      },
+      "credits": {
+        "module": "モジュールの開発者",
+        "original": "オリジナルの開発者",
+        "web": "WebUI の開発者"
+      },
+      "license": {
+        "module": "モジュールのライセンス",
+        "web": "WebUI のライセンス"
+      }
+    }
+  }
+}
