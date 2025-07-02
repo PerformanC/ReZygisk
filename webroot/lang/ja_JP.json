@@ -76,7 +76,7 @@
         "description": "言語を変更します"
       },
       "logs": {
-        "header": "エラー履歴",
+        "header": "エラーの履歴",
         "description": "すべてのエラーログを表示します"
       },
       "credits": {
