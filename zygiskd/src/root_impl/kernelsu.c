@@ -19,8 +19,8 @@
 #define CMD_GET_VERSION 2
 #define CMD_UID_GRANTED_ROOT 12
 #define CMD_UID_SHOULD_UMOUNT 13
-#define CMD_HOOK_MODE 16
-#define CMD_GET_MANAGER_UID 17
+#define CMD_GET_MANAGER_UID 16
+#define CMD_HOOK_MODE 0xC0DEAD1A
 
 static enum kernelsu_variants variant = KOfficial;
 
