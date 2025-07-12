@@ -714,7 +714,7 @@ void ZygiskContext::run_modules_post() {
             module_addrs[i++] = m.getEntry();
         }
 
-        clean_trace("/data/adb", module_addrs, modules.size(), modules.size(), modules_unloaded, true);
+        clean_trace("/data/adb", module_addrs, modules.size(), modules.size(), modules_unloaded, flags[DO_REVERT_UNMOUNT]);
     }
 }
 
@@ -997,11 +997,13 @@ void clean_trace(const char *path, void **module_addrs, size_t module_addrs_leng
 
     /* TODO: Use SoList to map through libraries to avoid open /proc/self/maps here */
     for (auto &map : lsplt::MapInfo::Scan()) {
+        if (!map.is_private) continue;
+
         if (strstr(map.path.c_str(), path) && strstr(map.path.c_str(), "libzygisk") == 0)
         {
             void *addr = (void *)map.start;
             size_t size = map.end - map.start;
-            void *copy = mmap(nullptr, size, PROT_WRITE, MAP_ANONYMOUS | MAP_SHARED, -1, 0);
+            void *copy = mmap(nullptr, size, PROT_WRITE, MAP_ANONYMOUS | MAP_PRIVATE, -1, 0);
             if (copy == MAP_FAILED) {
                 LOGE("failed to backup block %s [%p, %p]", map.path.c_str(), addr, (void*)map.end);
                 continue;
