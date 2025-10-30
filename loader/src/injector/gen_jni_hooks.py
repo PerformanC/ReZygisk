@@ -297,6 +297,6 @@ static void do_hook_zygote(JNIEnv *env) {
             break;
         }
     }
-    jni_hook_list->emplace(clz, std::move(hooks));
+    jni_hook_list.emplace(clz, std::move(hooks));
 }
 """)

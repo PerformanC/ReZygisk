@@ -126,11 +126,11 @@ struct ZygiskContext {
 #undef DCL_PRE_POST
 
 // Global variables
-vector<tuple<dev_t, ino_t, const char *, void **>> *plt_hook_list;
-map<string, vector<JNINativeMethod>, less<>> *jni_hook_list;
+vector<tuple<dev_t, ino_t, const char *, void **>> plt_hook_list;
+map<string, vector<JNINativeMethod>, less<>> jni_hook_list;
 
 bool modules_loaded = false;
-struct rezygisk_module *zygisk_modules = nullptr;
+vector<struct rezygisk_module> zygisk_modules;
 size_t zygisk_module_length = 0;
 
 bool should_unmap_zygisk = false;
@@ -251,8 +251,7 @@ DCL_HOOK_FUNC(int, pthread_attr_setstacksize, void *target, size_t size) {
 
         /* INFO: Modules might use libzygisk.so after postAppSpecialize. We can only
                    free it when we are really before our unmap. */
-        free(zygisk_modules);
-        zygisk_modules = nullptr;
+        zygisk_modules = vector<struct rezygisk_module>();
 
         lsplt_free_resources();
 
@@ -727,14 +726,7 @@ bool load_modules_only() {
         return false;
     }
 
-    zygisk_modules = (struct rezygisk_module *)malloc(ms.modules_count * sizeof(struct rezygisk_module));
-    if (!zygisk_modules) {
-        LOGE("Failed to allocate memory for modules");
-
-        free_modules(&ms);
-
-        return false;
-    }
+    zygisk_modules.resize(ms.modules_count);
 
     for (size_t i = 0; i < ms.modules_count; i++) {
         char *lib_path = ms.modules[i];
@@ -1042,7 +1034,7 @@ ZygiskContext::~ZygiskContext() {
     should_unmap_zygisk = true;
 
     // Unhook JNI methods
-    for (const auto &[clz, methods] : *jni_hook_list) {
+    for (const auto &[clz, methods] : jni_hook_list) {
         if (jclass jc = env->FindClass(clz.data()); jc) {
             if (!methods.empty() && env->RegisterNatives(jc, methods.data(),
                     static_cast<jint>(methods.size())) != 0) {
@@ -1052,8 +1044,7 @@ ZygiskContext::~ZygiskContext() {
             env->DeleteLocalRef(jc);
         }
     }
-    delete jni_hook_list;
-    jni_hook_list = nullptr;
+    jni_hook_list = map<string, vector<JNINativeMethod>, less<>>();
 
     // Strip out all API function pointers
     for (size_t i = 0; i < zygisk_module_length; i++) {
@@ -1079,7 +1070,7 @@ static void hook_register(dev_t dev, ino_t inode, const char *symbol, void *new_
         LOGE("Failed to register plt_hook \"%s\"", symbol);
         return;
     }
-    plt_hook_list->emplace_back(dev, inode, symbol, old_func);
+    plt_hook_list.emplace_back(dev, inode, symbol, old_func);
 }
 
 #define PLT_HOOK_REGISTER_SYM(DEV, INODE, SYM, NAME) \
@@ -1089,9 +1080,6 @@ static void hook_register(dev_t dev, ino_t inode, const char *symbol, void *new_
     PLT_HOOK_REGISTER_SYM(DEV, INODE, #NAME, NAME)
 
 void hook_functions() {
-    plt_hook_list = new vector<tuple<dev_t, ino_t, const char *, void **>>();
-    jni_hook_list = new map<string, vector<JNINativeMethod>, less<>>();
-
     ino_t android_runtime_inode = 0;
     dev_t android_runtime_dev = 0;
 
@@ -1124,7 +1112,7 @@ void hook_functions() {
     if (!hook_commit(map_infos)) {
         LOGW("Failed to hook. Trying older symbol for ReopenOrDetach");
 
-        plt_hook_list->clear();
+        plt_hook_list.clear();
 
         PLT_HOOK_REGISTER(android_runtime_dev, android_runtime_inode, fork);
         PLT_HOOK_REGISTER(android_runtime_dev, android_runtime_inode, strdup);
@@ -1136,7 +1124,7 @@ void hook_functions() {
         if (!hook_commit(map_infos)) {
             LOGE("All methods of hooking failed");
 
-            plt_hook_list->clear();
+            plt_hook_list.clear();
         }
     }
 
@@ -1199,12 +1187,11 @@ static void hook_unloader() {
 
 static void unhook_functions() {
     // Unhook plt_hook
-    for (const auto &[dev, inode, sym, old_func] : *plt_hook_list) {
+    for (const auto &[dev, inode, sym, old_func] : plt_hook_list) {
         if (!lsplt_register_hook(dev, inode, sym, *old_func, nullptr)) {
             LOGE("Failed to register plt_hook [%s]", sym);
         }
     }
-    delete plt_hook_list;
     if (!hook_commit(nullptr)) {
         LOGE("Failed to restore plt_hook");
         should_unmap_zygisk = false;
