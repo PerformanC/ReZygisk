@@ -1,7 +1,8 @@
 #ifndef MODULE_H
 #define MODULE_H
 
-#include "logging.h"
+#include <jni.h>
+#include <string.h>
 #include "solist.h"
 
 #define REZYGISK_API_VERSION 5
@@ -114,7 +115,7 @@ enum rezygisk_options : uint32_t {
 
 struct rezygisk_api {
     void *impl;
-    bool (*register_module)(struct rezygisk_api *, struct rezygisk_abi *);
+    bool (*register_module)(struct rezygisk_api *, struct rezygisk_abi const*);
 
     void (*hook_jni_native_methods)(JNIEnv *, const char *, JNINativeMethod *, int);
     union {
@@ -158,11 +159,11 @@ struct rezygisk_module {
   bool unload;
 };
 
-void rezygisk_module_call_on_load(struct rezygisk_module *m, void *env) {
+inline void rezygisk_module_call_on_load(struct rezygisk_module *m, void *env) {
     m->zygisk_module_entry((void *)&m->api, env);
 }
 
-void rezygisk_module_call_pre_app_specialize(struct rezygisk_module *m, struct app_specialize_args_v5 *args) {
+inline void rezygisk_module_call_pre_app_specialize(struct rezygisk_module *m, struct app_specialize_args_v5 *args) {
     switch (m->abi.api_version) {
         case 1:
         case 2: {
@@ -205,7 +206,7 @@ void rezygisk_module_call_pre_app_specialize(struct rezygisk_module *m, struct a
     }
 }
 
-void rezygisk_module_call_post_app_specialize(struct rezygisk_module *m, const struct app_specialize_args_v5 *args) {
+inline void rezygisk_module_call_post_app_specialize(struct rezygisk_module *m, const struct app_specialize_args_v5 *args) {
     switch (m->abi.api_version) {
         case 1:
         case 2: {
@@ -248,11 +249,11 @@ void rezygisk_module_call_post_app_specialize(struct rezygisk_module *m, const s
     }
 }
 
-void rezygisk_module_call_pre_server_specialize(struct rezygisk_module *m, struct server_specialize_args_v1 *args) {
+inline void rezygisk_module_call_pre_server_specialize(struct rezygisk_module *m, struct server_specialize_args_v1 *args) {
     m->abi.pre_server_specialize(m->abi.impl, args);
 }
 
-void rezygisk_module_call_post_server_specialize(struct rezygisk_module *m, const struct server_specialize_args_v1 *args) {
+inline void rezygisk_module_call_post_server_specialize(struct rezygisk_module *m, const struct server_specialize_args_v1 *args) {
     m->abi.post_server_specialize(m->abi.impl, args);
 }
 

@@ -113,7 +113,7 @@ static bool solist_init() {
 
       See #63 for more information.
   */
-  somain = (SoInfo *)getSymbValueByPrefix(linker, "__dl__ZL6somain");
+  somain = getSymbValueByPrefix(linker, "__dl__ZL6somain");
   if (somain == NULL) {
     LOGE("Failed to find somain __dl__ZL6somain*");
 
@@ -151,7 +151,7 @@ static bool solist_init() {
 
   LOGD("%p is r_debug_tail", (void *)r_debug_tail);
 
-  SoInfo *solinker = (SoInfo *)getSymbValueByPrefix(linker, "__dl__ZL8solinker");
+  SoInfo *solinker = getSymbValueByPrefix(linker, "__dl__ZL8solinker");
   if (solinker == NULL) {
     LOGE("Failed to find solinker __dl__ZL8solinker");
 
@@ -190,7 +190,7 @@ static bool solist_init() {
       base_size_found = true;
     }
 
-    struct link_map *possible_link_map_head = (struct link_map *)((uintptr_t)solinker + i * sizeof(void *));
+    struct link_map const* possible_link_map_head = (struct link_map *)((uintptr_t)solinker + i * sizeof(void *));
     if (!fini_version_gap_found && possible_link_map_head->l_name == solinker_map->l_name) {
       #ifdef __arm__
         /* INFO: For arm32, ARM_exidx and ARM_exidx_count is defined between them. */
@@ -325,7 +325,7 @@ bool solist_drop_so_path(void *lib_memory, bool unload) {
     pdg_protect();
   }
 
-  if (dlclose((void *)found) == -1) {
+  if (dlclose(found) == -1) {
     LOGE("Failed to dlclose so path for %s: %s", path, dlerror());
 
     return false;
