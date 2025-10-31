@@ -45,13 +45,13 @@ class Method:
         self.args = args
 
     def cpp(self):
-        return ', '.join(map(lambda x: x.cpp(), self.args))
+        return ', '.join(x.cpp() for x in self.args)
 
     def name_list(self):
-        return ', '.join(map(lambda x: x.name, self.args))
+        return ', '.join(x.name for x in self.args)
 
     def jni(self):
-        args = ''.join(map(lambda x: x.type.jni, self.args))
+        args = ''.join(x.type.jni for x in self.args)
         return f'({args}){self.ret.type.jni}'
 
     def body(self):
@@ -215,7 +215,7 @@ server_samsung_q = ForkServer('samsung_q', [uid, gid, gids, runtime_flags, Anon(
 server_grapheneos_u = ForkServer('grapheneos_u', [uid, gid, gids, runtime_flags, rlimits, permitted_capabilities, effective_capabilities])
 
 fas_grapheneos_u = ForkAndSpec('grapheneos_u', [uid, gid, gids, runtime_flags, rlimits, mount_external,
-    se_info, nice_name, fds_to_close, fds_to_ignore, is_child_zygote, instruction_set, app_data_dir, 
+    se_info, nice_name, fds_to_close, fds_to_ignore, is_child_zygote, instruction_set, app_data_dir,
     is_top_app, pkg_data_info_list, whitelisted_data_info_list, mount_data_dirs, mount_storage_dirs, mount_sysprop_overrides, Anon(jlongArray)])
 
 spec_grapheneos_u = SpecApp('grapheneos_u', [uid, gid, gids, runtime_flags, rlimits, mount_external,
@@ -244,7 +244,7 @@ def gen_jni_def(clz, methods):
         decl += ind(2) + f'(void *) &{m.name}'
         decl += ind(1) + '},'
     decl += ind(0) + '};'
-    decl = ind(0) + f'void *{m.base_name()}_orig = nullptr;' + decl
+    decl = ind(0) + f'void *{m.base_name()}_orig = NULL;' + decl
     decl += ind(0)
 
     hook_map[clz].append(m.base_name())

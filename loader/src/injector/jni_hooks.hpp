@@ -2,7 +2,7 @@
 
 namespace {
 
-void *nativeForkAndSpecialize_orig = nullptr;
+void *nativeForkAndSpecialize_orig = NULL;
 [[clang::no_stack_protector]] jint nativeForkAndSpecialize_l(JNIEnv *env, jclass clazz, jint uid, jint gid, jintArray gids, jint runtime_flags, jobjectArray rlimits, jint mount_external, jstring se_info, jstring nice_name, jintArray fds_to_close, jstring instruction_set, jstring app_data_dir) {
     struct app_specialize_args_v5 args(&uid, &gid, &gids, &runtime_flags, &rlimits, &mount_external, &se_info, &nice_name, &instruction_set, &app_data_dir);
     ZygiskContext ctx(env, &args);
@@ -203,7 +203,7 @@ std::array nativeForkAndSpecialize_methods = {
     },
 };
 
-void *nativeSpecializeAppProcess_orig = nullptr;
+void *nativeSpecializeAppProcess_orig = NULL;
 [[clang::no_stack_protector]] void nativeSpecializeAppProcess_q(JNIEnv *env, jclass clazz, jint uid, jint gid, jintArray gids, jint runtime_flags, jobjectArray rlimits, jint mount_external, jstring se_info, jstring nice_name, jboolean is_child_zygote, jstring instruction_set, jstring app_data_dir) {
     struct app_specialize_args_v5 args(&uid, &gid, &gids, &runtime_flags, &rlimits, &mount_external, &se_info, &nice_name, &instruction_set, &app_data_dir);
     args.is_child_zygote = &is_child_zygote;
@@ -315,7 +315,7 @@ std::array nativeSpecializeAppProcess_methods = {
     },
 };
 
-void *nativeForkSystemServer_orig = nullptr;
+void *nativeForkSystemServer_orig = NULL;
 [[clang::no_stack_protector]] jint nativeForkSystemServer_l(JNIEnv *env, jclass clazz, jint uid, jint gid, jintArray gids, jint runtime_flags, jobjectArray rlimits, jlong permitted_capabilities, jlong effective_capabilities) {
     struct server_specialize_args_v1 args(&uid, &gid, &gids, &runtime_flags, &permitted_capabilities, &effective_capabilities);
     ZygiskContext ctx(env, &args);
