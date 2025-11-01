@@ -154,7 +154,6 @@ struct rezygisk_module {
   size_t size;
 
   struct soinfo_deconstructor deconstructors;
-  struct soinfo_gap gap;
 
   bool unload;
 };

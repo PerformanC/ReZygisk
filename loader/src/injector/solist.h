@@ -23,11 +23,6 @@ struct soinfo_deconstructor {
   void (**fini_array)();
 };
 
-struct soinfo_gap {
-  void *start;
-  size_t size;
-};
-
 /*
   INFO: When dlopen'ing a library, the system will save information of the
           opened library so a structure called soinfo, which contains another
@@ -75,20 +70,6 @@ bool solist_drop_so_path(void *lib_memory, bool unload);
 void solist_reset_counters(size_t load, size_t unload);
 
 /*
-  INFO: Loaded libraries have several mappings to load the different parts of their ELF
-          in the memory. Some libraries might include a padding (gap) in case it is extended.
-
-        This function deals with both those jobs, and is purely here for organization, as it
-          is simple.
-
-  SOURCES:
-   - https://android.googlesource.com/platform/bionic/+/refs/heads/android15-release/linker/linker.cpp#333
-   - https://android.googlesource.com/platform/bionic/+/refs/heads/android15-release/linker/linker_phdr.cpp#584
-*/
-void solist_unload_lib(struct soinfo_gap *gap, void *base, size_t size);
-
-
-/*
   INFO: Helper function to get the size of the mappings of a loaded library.
 
   SOURCES:
@@ -114,15 +95,6 @@ void *solist_get_base(void *lib_memory);
    - https://android.googlesource.com/platform/bionic/+/refs/heads/android15-release/linker/linker_soinfo.h#222
 */
 struct soinfo_deconstructor solist_get_deconstructors(void *lib_memory);
-
-/*
-  INFO: Helper function to get the information of the padding/gap.
-
-  SOURCES:
-   - https://android.googlesource.com/platform/bionic/+/refs/heads/android15-release/linker/linker_soinfo.h#450
-   - https://android.googlesource.com/platform/bionic/+/refs/heads/android15-release/linker/linker_soinfo.h#451
-*/
-struct soinfo_gap solist_get_gap_info(void *lib_memory);
 
 #ifdef __cplusplus
 }

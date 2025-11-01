@@ -2,7 +2,6 @@
 #include <stdbool.h>
 #include <string.h>
 #include <dlfcn.h>
-#include <sys/mman.h>
 
 #include <linux/limits.h>
 
@@ -28,10 +27,6 @@
   size_t solist_fini_array_offset = 0xa8;
   size_t solist_fini_array_size_offset = 0xb0;
   size_t solist_fini_offset = 0xc0;
-
-  size_t solist_version_offset = 0x10c;
-  size_t solist_gap_start_offset = 0x248;
-  size_t solist_gap_size_offset = 0x250;
 #else
   size_t solist_base_offset = 0x8;
   size_t solist_size_offset = 0xc;
@@ -39,14 +34,10 @@
   size_t solist_fini_array_offset = 0x58;
   size_t solist_fini_array_size_offset = 0x5c;
   size_t solist_fini_offset = 0x64;
-
-  size_t solist_version_offset = 0x94;
-  size_t solist_gap_start_offset = 0x140;
-  size_t solist_gap_size_offset = 0x144;
 #endif
 
 bool base_size_found = false;
-bool fini_version_gap_found = false;
+bool fini_found = false;
 
 static const char *(*get_realpath)(SoInfo *) = NULL;
 static SoInfo *(*find_containing_library)(const void *) = NULL;
@@ -177,7 +168,7 @@ static bool solist_init() {
 
   ElfImg_destroy(linker);
 
-  for (size_t i = 0; i < 1024 / sizeof(void *); i++) {
+  for (size_t i = 0; i < 680 / sizeof(void *); i++) {
     size_t possible_size_of_somain = *(size_t *)((uintptr_t)somain + i * sizeof(void *));
 
     if (!base_size_found && possible_size_of_somain < 0x100000 && possible_size_of_somain > 0x100) {
@@ -191,7 +182,7 @@ static bool solist_init() {
     }
 
     struct link_map const* possible_link_map_head = (struct link_map *)((uintptr_t)solinker + i * sizeof(void *));
-    if (!fini_version_gap_found && possible_link_map_head->l_name == solinker_map->l_name) {
+    if (!fini_found && possible_link_map_head->l_name == solinker_map->l_name) {
       #ifdef __arm__
         /* INFO: For arm32, ARM_exidx and ARM_exidx_count is defined between them. */
         solist_fini_array_offset = (i - 7) * sizeof(void *);
@@ -209,29 +200,10 @@ static bool solist_init() {
         LOGD("solist_fini_offset is %zu * %zu = %p", (i - 2), sizeof(void *), (void *)solist_fini_offset);
       #endif
 
-      /* INFO: Offsets are hardcoded. They will not change. They have been retrieved through the same
-                 ways as the ones in the top of the file.
-      */
-      #ifndef __LP64__
-        solist_version_offset = (i * sizeof(void *)) + 0x20;
-        solist_gap_start_offset = solist_version_offset + 0xAC;
-        solist_gap_size_offset = solist_gap_start_offset + sizeof(ElfW(Addr));
-
-        LOGD("solist_version_offset is %zu * %zu + 0x20 = %p", i, sizeof(void *), (void *)solist_version_offset);
-        LOGD("solist_gap_start_offset is %zu + 0xAC = %p", solist_version_offset, (void *)solist_gap_start_offset);
-        LOGD("solist_gap_size_offset is %zu + %zu = %p", solist_gap_start_offset, sizeof(ElfW(Addr)), (void *)solist_gap_size_offset);
-      #else
-        solist_version_offset = (i * sizeof(void *)) + 0x3C;
-        solist_gap_start_offset = solist_version_offset + 0x13C;
-        solist_gap_size_offset = solist_gap_start_offset + sizeof(ElfW(Addr));
-
-        LOGD("solist_version_offset is %zu * %zu + 0x3C = %p", i, sizeof(void *), (void *)solist_version_offset);
-        LOGD("solist_gap_start_offset is %zu + 0x13C = %p", solist_version_offset, (void *)solist_gap_start_offset);
-        LOGD("solist_gap_size_offset is %zu + %zu = %p", solist_gap_start_offset, sizeof(ElfW(Addr)), (void *)solist_gap_size_offset);
-      #endif
-
-      fini_version_gap_found = true;
+      fini_found = true;
     }
+
+    if (base_size_found && fini_found) break;
   }
 
   return true;
@@ -368,18 +340,6 @@ void solist_reset_counters(size_t load, size_t unload) {
   }
 }
 
-void solist_unload_lib(struct soinfo_gap *gap, void *base, size_t size) {
-  if (munmap(base, size) == -1) {
-    PLOGE("Failed to unmap library from %p (size %zu)", base, size);
-  }
-
-  if (gap->size) {
-    if (munmap(gap->start, gap->size) == -1) {
-      PLOGE("Failed to unmap gap from %p (size %zu)", gap->start, gap->size);
-    }
-  }
-}
-
 ssize_t solist_get_size(void *lib_memory) {
   if (somain == NULL && !solist_init()) {
     LOGE("Failed to initialize solist");
@@ -435,36 +395,6 @@ struct soinfo_deconstructor solist_get_deconstructors(void *lib_memory) {
   result.fini_array_size = *(size_t *)((uintptr_t)found + solist_fini_array_size_offset);
   result.fini_array = *(void (***)())((uintptr_t)found + solist_fini_array_offset);
   result.fini_func = *(void (**)())((uintptr_t)found + solist_fini_offset);
-
-  return result;
-}
-
-struct soinfo_gap solist_get_gap_info(void *lib_memory) {
-  struct soinfo_gap result = { 0 };
-
-  if (somain == NULL && !solist_init()) {
-    LOGE("Failed to initialize solist");
-
-    return result;
-  }
-
-  SoInfo *found = (*find_containing_library)(lib_memory);
-  if (found == NULL) {
-    LOGD("Could not find containing library for %p", lib_memory);
-
-    return result;
-  }
-
-  if (*(uint32_t *)((uintptr_t)found + solist_version_offset) < 6) {
-    LOGD("soinfo for %p has no gap info (version %d)",
-         lib_memory,
-         *(uint32_t *)((uintptr_t)found + solist_version_offset));
-
-    return result;
-  }
-
-  result.start = *(void **)((uintptr_t)found + solist_gap_start_offset);
-  result.size = *(size_t *)((uintptr_t)found + solist_gap_size_offset);
 
   return result;
 }
