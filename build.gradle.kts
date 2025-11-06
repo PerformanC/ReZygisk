@@ -26,7 +26,7 @@ val commitHash by extra(gitCommitHash)
 val minAPatchVersion by extra(10655)
 val minKsuVersion by extra(10940)
 val minKsudVersion by extra(11425)
-val maxKsuVersion by extra(20000)
+val maxKsuVersion by extra(99999)
 val minMagiskVersion by extra(26402)
 
 val androidMinSdkVersion by extra(26)
