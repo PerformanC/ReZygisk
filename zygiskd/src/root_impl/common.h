@@ -35,4 +35,6 @@ bool uid_should_umount(uid_t uid, const char *const process);
 
 bool uid_is_manager(uid_t uid);
 
+void root_impl_cleanup(void);
+
 #endif /* COMMON_H */

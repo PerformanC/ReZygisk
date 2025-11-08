@@ -72,7 +72,6 @@ androidComponents.onVariants { variant ->
                 "MIN_APATCH_VERSION" to "$minAPatchVersion",
                 "MIN_KSU_VERSION" to "$minKsuVersion",
                 "MIN_KSUD_VERSION" to "$minKsudVersion",
-                "MAX_KSU_VERSION" to "$maxKsuVersion",
                 "MIN_MAGISK_VERSION" to "$minMagiskVersion",
             )
             filter<ReplaceTokens>("tokens" to tokens)
