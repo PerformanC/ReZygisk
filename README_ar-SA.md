@@ -1,6 +1,6 @@
 # ReZygisk
 
-[English/اللغة الانجليزية](https://github.com/PerformanC/ReZygisk)
+[English](../README.md)
 
 ReZygisk هو **فرع (fork)** من Zygisk Next، وهو تطبيق مستقل لـ Zygisk، يوفر دعم واجهة برمجة تطبيقات Zygisk (Zygisk API) لكل من **KernelSU** و **APatch** و **Magisk** (الرسمي و Kitsune).
 
