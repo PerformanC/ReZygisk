@@ -1,8 +1,10 @@
 #ifndef MODULE_H
 #define MODULE_H
 
-#include <jni.h>
 #include <string.h>
+
+#include <jni.h>
+
 #include "solist.h"
 
 #define REZYGISK_API_VERSION 5
@@ -115,7 +117,7 @@ enum rezygisk_options : uint32_t {
 
 struct rezygisk_api {
     void *impl;
-    bool (*register_module)(struct rezygisk_api *, struct rezygisk_abi const*);
+    bool (*register_module)(struct rezygisk_api *, struct rezygisk_abi const *);
 
     void (*hook_jni_native_methods)(JNIEnv *, const char *, JNINativeMethod *, int);
     union {
@@ -157,6 +159,17 @@ struct rezygisk_module {
 
   bool unload;
 };
+
+/* What follows are function definitions to be included wherever necessary.
+    As a reminder for best C practices, a function body should not be in a header
+    since they lead to ODR violations, resulting in UB since the compiled code *can* have duplicate defintions.
+    Therefore, we have only ONE of two choices:
+        1. Put the function declarations here and their respective definitions in a separate .c file;
+        2. Inline these function definitions in the header so as to allow multiple definitions.
+
+    Doing otherwise, clang-tidy throws this warning:
+    https://clang.llvm.org/extra/clang-tidy/checks/misc/definitions-in-headers.html
+*/
 
 inline void rezygisk_module_call_on_load(struct rezygisk_module *m, void *env) {
     m->zygisk_module_entry((void *)&m->api, env);

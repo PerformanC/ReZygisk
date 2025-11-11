@@ -6,12 +6,17 @@ extern "C" {
 #endif /* __cplusplus */
 
 #include <jni.h>
+
 #include "logging.h"
 
 static jfieldID art_method_field = NULL;
 static size_t art_method_size = 0;
 static size_t entry_point_offset = 0;
 static size_t data_offset = 0;
+
+/* Inlining these methods to ensure multiple definitions, avoiding ODR violations.
+  Check module.h for more info on why this matters.
+*/
 
 void *amethod_from_reflected_method(JNIEnv *env, jobject method);
 
