@@ -181,7 +181,7 @@ static bool solist_init() {
       base_size_found = true;
     }
 
-    struct link_map const* possible_link_map_head = (struct link_map *)((uintptr_t)solinker + i * sizeof(void *));
+    struct link_map const *possible_link_map_head = (struct link_map *)((uintptr_t)solinker + i * sizeof(void *));
     if (!fini_found && possible_link_map_head->l_name == solinker_map->l_name) {
       #ifdef __arm__
         /* INFO: For arm32, ARM_exidx and ARM_exidx_count is defined between them. */
