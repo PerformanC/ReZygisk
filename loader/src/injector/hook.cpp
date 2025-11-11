@@ -3,7 +3,6 @@
 #include <link.h>
 #include <regex.h>
 #include <bitset>
-#include <list>
 #include <map>
 #include <array>
 #include <vector>
@@ -49,7 +48,7 @@ enum {
 
 #define DCL_PRE_POST(name) \
 void name##_pre();         \
-void name##_post();
+void name##_post()
 
 #define MAX_FD_SIZE 1024
 
@@ -91,8 +90,9 @@ struct ZygiskContext {
     vector<IgnoreInfo> ignore_info;
 
     ZygiskContext(JNIEnv *env, void *args) :
-    env(env), args{args}, process(nullptr), pid(-1), info_flags(0),
-    hook_info_lock(PTHREAD_MUTEX_INITIALIZER) {
+        env(env), args{args}, process(nullptr), pid(-1), info_flags(0),
+        hook_info_lock(PTHREAD_MUTEX_INITIALIZER)
+    {
         g_ctx = this;
     }
     ~ZygiskContext();
@@ -100,11 +100,11 @@ struct ZygiskContext {
     /* Zygisksu changed: Load module fds */
     void run_modules_pre();
     void run_modules_post();
-    DCL_PRE_POST(fork)
-    DCL_PRE_POST(app_specialize)
-    DCL_PRE_POST(nativeForkAndSpecialize)
-    DCL_PRE_POST(nativeSpecializeAppProcess)
-    DCL_PRE_POST(nativeForkSystemServer)
+    DCL_PRE_POST(fork);
+    DCL_PRE_POST(app_specialize);
+    DCL_PRE_POST(nativeForkAndSpecialize);
+    DCL_PRE_POST(nativeSpecializeAppProcess);
+    DCL_PRE_POST(nativeForkSystemServer);
 
     void sanitize_fds();
     bool exempt_fd(int fd);
@@ -122,7 +122,7 @@ struct ZygiskContext {
 
 // Global variables
 vector<tuple<dev_t, ino_t, const char *, void **>> *plt_hook_list;
-map<string, vector<JNINativeMethod>> *jni_hook_list;
+map<string, vector<JNINativeMethod>, less<>> *jni_hook_list;
 
 bool modules_loaded = false;
 struct rezygisk_module *zygisk_modules = NULL;
@@ -244,6 +244,7 @@ DCL_HOOK_FUNC(int, pthread_attr_setstacksize, void *target, size_t size) {
         /* INFO: Modules might use libzygisk.so after postAppSpecialize. We can only
                    free it when we are really before our unmap. */
         free(zygisk_modules);
+        zygisk_modules = NULL;
 
         lsplt_free_resources();
 
@@ -298,15 +299,15 @@ DCL_HOOK_FUNC(int, property_get, const char *key, char *value, const char *defau
 
 static bool can_hook_jni = false;
 static jint MODIFIER_NATIVE = 0;
-static jmethodID member_getModifiers = nullptr;
+static jmethodID member_getModifiers = NULL;
 
 void hookJniNativeMethods(JNIEnv *env, const char *clz, JNINativeMethod *methods, int numMethods) {
     if (!can_hook_jni) return;
     auto clazz = env->FindClass(clz);
-    if (clazz == nullptr) {
+    if (clazz == NULL) {
         env->ExceptionClear();
         for (int i = 0; i < numMethods; i++) {
-            methods[i].fnPtr = nullptr;
+            methods[i].fnPtr = NULL;
         }
         return;
     }
@@ -316,20 +317,20 @@ void hookJniNativeMethods(JNIEnv *env, const char *clz, JNINativeMethod *methods
         auto &nm = methods[i];
         auto mid = env->GetMethodID(clazz, nm.name, nm.signature);
         bool is_static = false;
-        if (mid == nullptr) {
+        if (mid == NULL) {
             env->ExceptionClear();
             mid = env->GetStaticMethodID(clazz, nm.name, nm.signature);
             is_static = true;
         }
-        if (mid == nullptr) {
+        if (mid == NULL) {
             env->ExceptionClear();
-            nm.fnPtr = nullptr;
+            nm.fnPtr = NULL;
             continue;
         }
         auto method = env->ToReflectedMethod(clazz, mid, is_static);
         auto modifier = env->CallIntMethod(method, member_getModifiers);
         if ((modifier & MODIFIER_NATIVE) == 0) {
-            nm.fnPtr = nullptr;
+            nm.fnPtr = NULL;
             continue;
         }
         auto artMethod = amethod_from_reflected_method(env, method);
@@ -350,7 +351,7 @@ void hookJniNativeMethods(JNIEnv *env, const char *clz, JNINativeMethod *methods
 
 void initialize_jni_hook() {
     auto get_created_java_vms = reinterpret_cast<jint (*)(JavaVM **, jsize, jsize *)>(
-            dlsym(RTLD_DEFAULT, "JNI_GetCreatedJavaVMs"));
+        dlsym(RTLD_DEFAULT, "JNI_GetCreatedJavaVMs"));
     if (!get_created_java_vms) {
         struct lsplt_map_info *map_infos = lsplt_scan_maps("self");
         if (!map_infos) {
@@ -366,10 +367,11 @@ void initialize_jni_hook() {
             void *h = dlopen(map.path, RTLD_LAZY);
             if (!h) {
                 LOGW("cannot dlopen libnativehelper.so: %s", dlerror());
-                break;
             }
-            get_created_java_vms = reinterpret_cast<decltype(get_created_java_vms)>(dlsym(h, "JNI_GetCreatedJavaVMs"));
-            dlclose(h);
+            else {
+                get_created_java_vms = reinterpret_cast<decltype(get_created_java_vms)>(dlsym(h, "JNI_GetCreatedJavaVMs"));
+                dlclose(h);
+            }
             break;
         }
 
@@ -380,26 +382,26 @@ void initialize_jni_hook() {
             return;
         }
     }
-    JavaVM *vm = nullptr;
+    JavaVM *vm = NULL;
     jsize num = 0;
     jint res = get_created_java_vms(&vm, 1, &num);
-    if (res != JNI_OK || vm == nullptr) return;
-    JNIEnv *env = nullptr;
+    if (res != JNI_OK || vm == NULL) return;
+    JNIEnv *env = NULL;
     res = vm->GetEnv(reinterpret_cast<void **>(&env), JNI_VERSION_1_6);
-    if (res != JNI_OK || env == nullptr) return;
+    if (res != JNI_OK || env == NULL) return;
 
     auto classMember = env->FindClass("java/lang/reflect/Member");
-    if (classMember != nullptr) member_getModifiers = env->GetMethodID(classMember, "getModifiers", "()I");
+    if (classMember != NULL) member_getModifiers = env->GetMethodID(classMember, "getModifiers", "()I");
     auto classModifier = env->FindClass("java/lang/reflect/Modifier");
-    if (classModifier != nullptr) {
+    if (classModifier != NULL) {
         auto fieldId = env->GetStaticFieldID(classModifier, "NATIVE", "I");
-        if (fieldId != nullptr) MODIFIER_NATIVE = env->GetStaticIntField(classModifier, fieldId);
+        if (fieldId != NULL) MODIFIER_NATIVE = env->GetStaticIntField(classModifier, fieldId);
     }
 
     env->DeleteLocalRef(classMember);
     env->DeleteLocalRef(classModifier);
 
-    if (member_getModifiers == nullptr || MODIFIER_NATIVE == 0) return;
+    if (member_getModifiers == NULL || MODIFIER_NATIVE == 0) return;
     if (!amethod_init(env)) {
         LOGE("failed to init amethod");
 
@@ -412,21 +414,21 @@ void initialize_jni_hook() {
 
 // -----------------------------------------------------------------
 
-bool rezygisk_module_register(struct rezygisk_api *api, struct rezygisk_abi *module) {
-    LOGD("Registering module with API version %ld", module->api_version);
+bool rezygisk_module_register(struct rezygisk_api *api, struct rezygisk_abi const* target_module) {
+    LOGD("Registering module with API version %ld", target_module->api_version);
 
-    if (api == nullptr || module == nullptr)
+    if (api == NULL || target_module == NULL)
         return false;
 
-    if (module->api_version > REZYGISK_API_VERSION)
+    if (target_module->api_version > REZYGISK_API_VERSION)
         return false;
 
     struct rezygisk_module *m = &zygisk_modules[(size_t)api->impl];
-    m->abi = *module;
+    m->abi = *target_module;
     m->api = *api;
 
     api->hook_jni_native_methods = hookJniNativeMethods;
-    if (module->api_version >= 4) {
+    if (target_module->api_version >= 4) {
         api->plt_hook_register_v4 = [](dev_t dev, ino_t inode, const char *symbol, void *fn, void **backup) {
             if (dev == 0 || inode == 0 || symbol == NULL || fn == NULL) {
                 LOGE("Invalid arguments to plt_hook_register");
@@ -478,14 +480,14 @@ bool rezygisk_module_register(struct rezygisk_api *api, struct rezygisk_abi *mod
                 break;
             }
             case DLCLOSE_MODULE_LIBRARY: {
-                struct rezygisk_module *m = &zygisk_modules[(size_t)id];
-                m->unload = true;
+                struct rezygisk_module *m_lib = &zygisk_modules[(size_t)id];
+                m_lib->unload = true;
 
                 break;
             }
         }
     };
-    if (module->api_version >= 2) {
+    if (target_module->api_version >= 2) {
         api->get_module_dir = [](void *id) {
             if ((size_t)id >= zygisk_module_length) {
                 LOGE("Invalid module id %zu", (size_t)id);
@@ -504,13 +506,13 @@ bool rezygisk_module_register(struct rezygisk_api *api, struct rezygisk_abi *mod
 }
 
 void ZygiskContext::plt_hook_register(const char *regex, const char *symbol, void *fn, void **backup) {
-    if (regex == nullptr || symbol == nullptr || fn == nullptr)
+    if (regex == NULL || symbol == NULL || fn == NULL)
         return;
     regex_t re;
     if (regcomp(&re, regex, REG_NOSUB) != 0)
         return;
     pthread_mutex_lock(&hook_info_lock);
-    register_info.emplace_back(RegisterInfo{re, symbol, fn, backup});
+    register_info.emplace_back(re, symbol, fn, backup);
     pthread_mutex_unlock(&hook_info_lock);
 }
 
@@ -520,7 +522,7 @@ void ZygiskContext::plt_hook_exclude(const char *regex, const char *symbol) {
     if (regcomp(&re, regex, REG_NOSUB) != 0)
         return;
     pthread_mutex_lock(&hook_info_lock);
-    ignore_info.emplace_back(IgnoreInfo{re, symbol ?: ""});
+    ignore_info.emplace_back(re, symbol ?: "");
     pthread_mutex_unlock(&hook_info_lock);
 }
 
@@ -540,13 +542,13 @@ void ZygiskContext::plt_hook_process_regex() {
 
         if (map.offset != 0 || !map.is_private || !(map.perms & PROT_READ)) continue;
         for (auto &reg: register_info) {
-            if (regexec(&reg.regex, map.path, 0, nullptr, 0) != 0)
+            if (regexec(&reg.regex, map.path, 0, NULL, 0) != 0)
                 continue;
             bool ignored = false;
-            for (auto &ign: ignore_info) {
-                if (regexec(&ign.regex, map.path, 0, nullptr, 0) != 0)
+            for (auto const &ign: ignore_info) {
+                if (regexec(&ign.regex, map.path, 0, NULL, 0) != 0)
                     continue;
-                if (ign.symbol.empty() || ign.symbol == reg.symbol) {
+                else if (ign.symbol.empty() || ign.symbol == reg.symbol) {
                     ignored = true;
                     break;
                 }
@@ -578,7 +580,7 @@ int sigmask(int how, int signum) {
     sigset_t set;
     sigemptyset(&set);
     sigaddset(&set, signum);
-    return sigprocmask(how, &set, nullptr);
+    return sigprocmask(how, &set, NULL);
 }
 
 void ZygiskContext::fork_pre() {
@@ -592,13 +594,13 @@ void ZygiskContext::fork_pre() {
 
     /* INFO: Record all open fds */
     DIR *dir = opendir("/proc/self/fd");
-    if (dir == nullptr) {
-        PLOGE("Failed to open /proc/self/fd");
+    if (dir == NULL) {
+        PLOGE("Failed to open %s", "/proc/self/fd");
 
         return;
     }
 
-    struct dirent *entry;
+    struct dirent const *entry;
     while ((entry = readdir(dir))) {
         int fd = parse_int(entry->d_name);
         if (fd < 0 || fd >= MAX_FD_SIZE) {
@@ -623,11 +625,11 @@ void ZygiskContext::sanitize_fds() {
     if (flags[APP_FORK_AND_SPECIALIZE]) {
         auto update_fd_array = [&](int off) -> jintArray {
             if (exempted_fds.empty())
-                return nullptr;
+                return NULL;
 
             jintArray array = env->NewIntArray(static_cast<int>(off + exempted_fds.size()));
-            if (array == nullptr)
-                return nullptr;
+            if (array == NULL)
+                return NULL;
 
             env->SetIntArrayRegion(array, off, static_cast<int>(exempted_fds.size()), exempted_fds.data());
             for (int fd : exempted_fds) {
@@ -647,11 +649,11 @@ void ZygiskContext::sanitize_fds() {
         };
 
         if (jintArray fdsToIgnore = *args.app->fds_to_ignore) {
-            int *arr = env->GetIntArrayElements(fdsToIgnore, nullptr);
+            int *arr = env->GetIntArrayElements(fdsToIgnore, NULL);
             int len = env->GetArrayLength(fdsToIgnore);
             for (int i = 0; i < len; ++i) {
                 int fd = arr[i];
-                if (fd >= 0 && fd < MAX_FD_SIZE) {
+                if (0 <= fd && fd < MAX_FD_SIZE) {
                     allowed_fds[fd] = true;
                 }
             }
@@ -669,14 +671,14 @@ void ZygiskContext::sanitize_fds() {
 
     // Close all forbidden fds to prevent crashing
     DIR *dir = opendir("/proc/self/fd");
-    if (dir == nullptr) {
-        PLOGE("Failed to open /proc/self/fd");
+    if (dir == NULL) {
+        PLOGE("Failed to open %s", "/proc/self/fd");
 
         return;
     }
 
     int dfd = dirfd(dir);
-    struct dirent *entry;
+    struct dirent const *entry;
     while ((entry = readdir(dir))) {
         int fd = parse_int(entry->d_name);
         if (fd < 0 || fd > MAX_FD_SIZE || fd == dfd || allowed_fds[fd]) continue;
@@ -692,88 +694,88 @@ void ZygiskContext::sanitize_fds() {
 void ZygiskContext::fork_post() {
     // Unblock SIGCHLD in case the original method didn't
     sigmask(SIG_UNBLOCK, SIGCHLD);
-    g_ctx = nullptr;
+    g_ctx = NULL;
 }
 
 bool load_modules_only() {
-  struct zygisk_modules ms;
-  if (rezygiskd_read_modules(&ms) == false) {
-    LOGE("Failed to read modules from zygiskd");
+    struct zygisk_modules ms;
+    if (rezygiskd_read_modules(&ms) == false) {
+        LOGE("Failed to read modules from zygiskd");
 
-    return false;
-  }
+        return false;
+    }
 
-  zygisk_modules = (struct rezygisk_module *)malloc(ms.modules_count * sizeof(struct rezygisk_module));
-  if (!zygisk_modules) {
-    LOGE("Failed to allocate memory for modules");
+    zygisk_modules = (struct rezygisk_module *)malloc(ms.modules_count * sizeof(struct rezygisk_module));
+    if (!zygisk_modules) {
+        LOGE("Failed to allocate memory for modules");
+
+        free_modules(&ms);
+
+        return false;
+    }
+
+    for (size_t i = 0; i < ms.modules_count; i++) {
+        char const* lib_path = ms.modules[i];
+
+        void *handle = dlopen(lib_path, RTLD_NOW);
+        if (!handle) {
+            LOGE("Failed to load module [%s]: %s", lib_path, dlerror());
+
+            continue;
+        }
+
+        void *entry = dlsym(handle, "zygisk_module_entry");
+        if (!entry) {
+            LOGE("Failed to find entry point in module [%s]: %s", lib_path, dlerror());
+
+            dlclose(handle);
+
+            continue;
+        }
+
+        zygisk_modules[zygisk_module_length].api.register_module = rezygisk_module_register;
+        zygisk_modules[zygisk_module_length].api.impl = (void *)zygisk_module_length;
+
+        zygisk_modules[zygisk_module_length].handle = handle;
+        zygisk_modules[zygisk_module_length].zygisk_module_entry = (void (*)(void *, void *))entry;
+
+        zygisk_modules[zygisk_module_length].base = solist_get_base(entry);
+        zygisk_modules[zygisk_module_length].size = solist_get_size(entry);
+
+        zygisk_modules[zygisk_module_length].deconstructors = solist_get_deconstructors(entry);
+
+        LOGD("Loaded module [%s]. Entry: %p, Base: %p, Size: %zu, Deconstructors: fini_func=%p, fini_array=%p (size: %zu)",
+            lib_path,
+            entry,
+            zygisk_modules[zygisk_module_length].base,
+            zygisk_modules[zygisk_module_length].size,
+            zygisk_modules[zygisk_module_length].deconstructors.fini_func,
+            zygisk_modules[zygisk_module_length].deconstructors.fini_array,
+            zygisk_modules[zygisk_module_length].deconstructors.fini_array_size);
+
+        zygisk_modules[zygisk_module_length].unload = false;
+
+        /* INFO: Early removal to avoid gaps in solist */
+        solist_drop_so_path(entry, false);
+
+        zygisk_module_length++;
+    }
+
+    solist_reset_counters(zygisk_module_length, zygisk_module_length);
 
     free_modules(&ms);
 
-    return false;
-  }
-
-  for (size_t i = 0; i < ms.modules_count; i++) {
-    char *lib_path = ms.modules[i];
-
-    void *handle = dlopen(lib_path, RTLD_NOW);
-    if (!handle) {
-      LOGE("Failed to load module [%s]: %s", lib_path, dlerror());
-
-      continue;
-    }
-
-    void *entry = dlsym(handle, "zygisk_module_entry");
-    if (!entry) {
-      LOGE("Failed to find entry point in module [%s]: %s", lib_path, dlerror());
-
-      dlclose(handle);
-
-      continue;
-    }
-
-    zygisk_modules[zygisk_module_length].api.register_module = rezygisk_module_register;
-    zygisk_modules[zygisk_module_length].api.impl = (void *)zygisk_module_length;
-
-    zygisk_modules[zygisk_module_length].handle = handle;
-    zygisk_modules[zygisk_module_length].zygisk_module_entry = (void (*)(void *, void *))entry;
-
-    zygisk_modules[zygisk_module_length].base = solist_get_base(entry);
-    zygisk_modules[zygisk_module_length].size = solist_get_size(entry);
-
-    zygisk_modules[zygisk_module_length].deconstructors = solist_get_deconstructors(entry);
-
-    LOGD("Loaded module [%s]. Entry: %p, Base: %p, Size: %zu, Deconstructors: fini_func=%p, fini_array=%p (size: %zu)",
-         lib_path,
-         entry,
-         zygisk_modules[zygisk_module_length].base,
-         zygisk_modules[zygisk_module_length].size,
-         zygisk_modules[zygisk_module_length].deconstructors.fini_func,
-         zygisk_modules[zygisk_module_length].deconstructors.fini_array,
-         zygisk_modules[zygisk_module_length].deconstructors.fini_array_size);
-
-    zygisk_modules[zygisk_module_length].unload = false;
-
-    /* INFO: Early removal to avoid gaps in solist */
-    solist_drop_so_path(entry, false);
-
-    zygisk_module_length++;
-  }
-
-  solist_reset_counters(zygisk_module_length, zygisk_module_length);
-
-  free_modules(&ms);
-
-  return true;
+    return true;
 }
 
 /* Zygisksu changed: Load module fds */
 void ZygiskContext::run_modules_pre() {
-  for (size_t i = 0; i < zygisk_module_length; i++) {
-    rezygisk_module_call_on_load(&zygisk_modules[i], env);
+    for (size_t i = 0; i < zygisk_module_length; i++) {
+        rezygisk_module_call_on_load(&zygisk_modules[i], env);
 
-    if (flags[APP_SPECIALIZE]) rezygisk_module_call_pre_app_specialize(&zygisk_modules[i], args.app);
-    else if (flags[SERVER_FORK_AND_SPECIALIZE]) rezygisk_module_call_pre_server_specialize(&zygisk_modules[i], args.server);
-  }
+        if (flags[APP_SPECIALIZE]) rezygisk_module_call_pre_app_specialize(&zygisk_modules[i], args.app);
+        else if (flags[SERVER_FORK_AND_SPECIALIZE]) rezygisk_module_call_pre_server_specialize(&zygisk_modules[i], args.server);
+    }
 }
 
 void ZygiskContext::run_modules_post() {
@@ -861,8 +863,8 @@ void ZygiskContext::app_specialize_pre() {
         env->ReleaseStringUTFChars(*args.app->app_data_dir, data_dir);
     }
 
-    info_flags = rezygiskd_get_process_flags(uid, (const char *const)process);
-     if (info_flags & PROCESS_IS_FIRST_STARTED) {
+    info_flags = rezygiskd_get_process_flags(uid, process);
+    if (info_flags & PROCESS_IS_FIRST_STARTED) {
         /* INFO: To ensure we are really using a clean mount namespace, we use
                    the first process it as reference for clean mount namespace,
                    before it even does something, so that it will be clean yet
@@ -887,7 +889,7 @@ void ZygiskContext::app_specialize_pre() {
     }
 
     /* INFO: Modules only have two "start off" points from Zygisk, preSpecialize and
-                postSpecialize. In preSpecialize, the process still has privileged 
+                postSpecialize. In preSpecialize, the process still has privileged
                 permissions, and therefore can execute mount/umount/setns functions.
                 If we update the mount namespace AFTER executing them, any mounts made
                 will be lost, and the process will not have access to them anymore.
@@ -906,7 +908,7 @@ void ZygiskContext::app_specialize_pre() {
         update_mnt_ns(Clean, false);
     }
 
-    /* INFO: Executed after setns to ensure a module can update the mounts of an 
+    /* INFO: Executed after setns to ensure a module can update the mounts of an
                 application without worrying about it being overwritten by setns.
     */
     run_modules_pre();
@@ -929,7 +931,7 @@ void ZygiskContext::app_specialize_post() {
 
     // Cleanups
     env->ReleaseStringUTFChars(*args.app->nice_name, process);
-    g_ctx = nullptr;
+    g_ctx = NULL;
 }
 
 bool ZygiskContext::exempt_fd(int fd) {
@@ -944,7 +946,7 @@ bool ZygiskContext::exempt_fd(int fd) {
 // -----------------------------------------------------------------
 
 void ZygiskContext::nativeSpecializeAppProcess_pre() {
-    process = env->GetStringUTFChars(*args.app->nice_name, nullptr);
+    process = env->GetStringUTFChars(*args.app->nice_name, NULL);
     LOGV("pre specialize [%s]", process);
     // App specialize does not check FD
     flags[SKIP_FD_SANITIZATION] = true;
@@ -963,7 +965,7 @@ void ZygiskContext::nativeForkSystemServer_pre() {
 
     fork_pre();
     if (!is_child())
-      return;
+        return;
 
     run_modules_pre();
     rezygiskd_system_server_started();
@@ -980,7 +982,7 @@ void ZygiskContext::nativeForkSystemServer_post() {
 }
 
 void ZygiskContext::nativeForkAndSpecialize_pre() {
-    process = env->GetStringUTFChars(*args.app->nice_name, nullptr);
+    process = env->GetStringUTFChars(*args.app->nice_name, NULL);
     LOGV("pre forkAndSpecialize [%s]", process);
     flags[APP_FORK_AND_SPECIALIZE] = true;
 
@@ -1003,9 +1005,9 @@ void ZygiskContext::nativeForkAndSpecialize_post() {
 
 ZygiskContext::~ZygiskContext() {
     // This global pointer points to a variable on the stack.
-    // Set this to nullptr to prevent leaking local variable.
+    // Set this to NULL to prevent leaking local variable.
     // This also disables most plt hooked functions.
-    g_ctx = nullptr;
+    g_ctx = NULL;
 
     if (!is_child())
         return;
@@ -1025,7 +1027,8 @@ ZygiskContext::~ZygiskContext() {
         }
     }
     delete jni_hook_list;
-    jni_hook_list = nullptr;
+    // Safety NULL to ensure no "use-after-free" scenario
+    jni_hook_list = NULL;
 
     // Strip out all API function pointers
     for (size_t i = 0; i < zygisk_module_length; i++) {
@@ -1062,7 +1065,7 @@ static void hook_register(dev_t dev, ino_t inode, const char *symbol, void *new_
 
 void hook_functions() {
     plt_hook_list = new vector<tuple<dev_t, ino_t, const char *, void **>>();
-    jni_hook_list = new map<string, vector<JNINativeMethod>>();
+    jni_hook_list = new map<string, vector<JNINativeMethod>, less<>>();
 
     ino_t android_runtime_inode = 0;
     dev_t android_runtime_dev = 0;
@@ -1132,7 +1135,7 @@ static void hook_unloader() {
     for (size_t i = 0; i < map_infos->length; i++) {
         struct lsplt_map_entry map = map_infos->maps[i];
 
-        if (strstr(map.path, "/libart.so") != nullptr) {
+        if (strstr(map.path, "/libart.so") != NULL) {
             art_inode = map.inode;
             art_dev = map.dev;
 
@@ -1177,6 +1180,7 @@ static void unhook_functions() {
         }
     }
     delete plt_hook_list;
+    plt_hook_list = NULL;
     if (!hook_commit(NULL)) {
         LOGE("Failed to restore plt_hook");
         should_unmap_zygisk = false;
