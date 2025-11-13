@@ -1,6 +1,6 @@
 # ReZygisk
 
-[印尼语](/READMEs/README_id-ID.md) | [越南语](/READMEs/README_vi-VN.md) | [巴西葡萄牙语](/READMEs/README_pt-BR.md) | [法语](/READMEs/README_fr-FR.md) | [日语](/READMEs/README_ja-JP.md)
+[印尼语](/READMEs/README_id-ID.md) | [越南语](/READMEs/README_vi-VN.md) | [巴西葡萄牙语](/READMEs/README_pt-BR.md) | [法语](/READMEs/README_fr-FR.md) | [日语](/READMEs/README_ja-JP.md) | [简体中文](/READMEs/README_zh_CN.md)
 
 ReZygisk 是 Zygisk Next 的一个分支，是 Zygisk 的独立实现，为 KernelSU、APatch 和 Magisk（官方版和 Kitsune 版）提供 Zygisk API 支持。
 
