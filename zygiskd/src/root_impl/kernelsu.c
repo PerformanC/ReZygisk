@@ -41,9 +41,15 @@ struct ksu_get_manager_uid_cmd {
   uint32_t uid;
 };
 
+struct ksu_set_feature_cmd {
+  uint32_t feature_id; // Input: feature ID (enum ksu_feature_id)
+  uint64_t value; // Input: feature value/state to set
+};
+
 #define KSU_IOCTL_UID_GRANTED_ROOT _IOC(_IOC_READ|_IOC_WRITE, 'K', 8, 0)
 #define KSU_IOCTL_UID_SHOULD_UMOUNT _IOC(_IOC_READ|_IOC_WRITE, 'K', 9, 0)
 #define KSU_IOCTL_GET_MANAGER_UID _IOC(_IOC_READ, 'K', 10, 0)
+#define KSU_IOCTL_SET_FEATURE _IOC(_IOC_WRITE, 'K', 14, 0)
 
 static enum kernelsu_variants variant = KOfficial;
 
@@ -106,6 +112,13 @@ void ksu_get_existence(struct root_impl_state *state) {
   }
 
   ksu_uses_new_ksuctl = true;
+  
+  struct ksu_set_feature_cmd cmd = {0};
+  cmd.feature_id = (uint32_t)1;
+  cmd.value = (uint64_t)0;
+
+  /* we don't care about the reply */
+  ioctl(ksu_fd, KSU_IOCTL_SET_FEATURE, &cmd);
 
   state->state = Supported;
 }
