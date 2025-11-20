@@ -414,7 +414,7 @@ void initialize_jni_hook() {
 
 // -----------------------------------------------------------------
 
-bool rezygisk_module_register(struct rezygisk_api *api, struct rezygisk_abi const* target_module) {
+bool rezygisk_module_register(struct rezygisk_api *api, struct rezygisk_abi const *target_module) {
     LOGD("Registering module with API version %ld", target_module->api_version);
 
     if (api == NULL || target_module == NULL)
@@ -595,7 +595,7 @@ void ZygiskContext::fork_pre() {
     /* INFO: Record all open fds */
     DIR *dir = opendir("/proc/self/fd");
     if (dir == NULL) {
-        PLOGE("Failed to open %s", "/proc/self/fd");
+        PLOGE("Failed to open /proc/self/fd");
 
         return;
     }
@@ -672,7 +672,7 @@ void ZygiskContext::sanitize_fds() {
     // Close all forbidden fds to prevent crashing
     DIR *dir = opendir("/proc/self/fd");
     if (dir == NULL) {
-        PLOGE("Failed to open %s", "/proc/self/fd");
+        PLOGE("Failed to open /proc/self/fd");
 
         return;
     }
@@ -1027,7 +1027,6 @@ ZygiskContext::~ZygiskContext() {
         }
     }
     delete jni_hook_list;
-    // Safety NULL to ensure no "use-after-free" scenario
     jni_hook_list = NULL;
 
     // Strip out all API function pointers

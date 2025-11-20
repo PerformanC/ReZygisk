@@ -115,6 +115,16 @@ enum rezygisk_options : uint32_t {
     DLCLOSE_MODULE_LIBRARY = 1
 };
 
+struct rezygisk_abi {
+    long api_version;
+    void *impl;
+
+    void (*pre_app_specialize)(void *, void *);
+    void (*post_app_specialize)(void *, const void *);
+    void (*pre_server_specialize)(void *, void *);
+    void (*post_server_specialize)(void *, const void *);
+};
+
 struct rezygisk_api {
     void *impl;
     bool (*register_module)(struct rezygisk_api *, struct rezygisk_abi const *);
@@ -135,16 +145,6 @@ struct rezygisk_api {
     uint32_t (*get_flags)();
 };
 
-struct rezygisk_abi {
-    long api_version;
-    void *impl;
-
-    void (*pre_app_specialize)(void *, void *);
-    void (*post_app_specialize)(void *, const void *);
-    void (*pre_server_specialize)(void *, void *);
-    void (*post_server_specialize)(void *, const void *);
-};
-
 struct rezygisk_module {
   struct rezygisk_abi abi;
   struct rezygisk_api api;
@@ -160,17 +160,18 @@ struct rezygisk_module {
   bool unload;
 };
 
-/* What follows are function definitions to be included wherever necessary.
-    As a reminder for best C practices, a function body should not be in a header
-    since they lead to ODR violations, resulting in UB since the compiled code *can* have duplicate defintions.
-    Therefore, we have only ONE of two choices:
-        1. Put the function declarations here and their respective definitions in a separate .c file;
-        2. Inline these function definitions in the header so as to allow multiple definitions.
+/*
+    INFO: What follows are function definitions to be included wherever necessary.
+            As a reminder for best C practices, a function body should not be in a header
+            since they lead to ODR violations, resulting in UB since the compiled code *can* have duplicate defintions.
+            Therefore, we have only ONE of two choices:
+              1. Put the function declarations here and their respective definitions in a separate .c file;
+              2. Inline these function definitions in the header so as to allow multiple definitions.
+          Doing otherwise, clang-tidy throws 'definitions-in-headers' warning.
 
-    Doing otherwise, clang-tidy throws this warning:
-    https://clang.llvm.org/extra/clang-tidy/checks/misc/definitions-in-headers.html
+    SOURCES:
+     - https://clang.llvm.org/extra/clang-tidy/checks/misc/definitions-in-headers.html
 */
-
 inline void rezygisk_module_call_on_load(struct rezygisk_module *m, void *env) {
     m->zygisk_module_entry((void *)&m->api, env);
 }

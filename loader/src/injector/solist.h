@@ -5,6 +5,7 @@
 extern "C" {
 #endif /* __cplusplus */
 
+#include <stdbool.h>
 #include <sys/types.h>
 
 typedef void SoInfo;

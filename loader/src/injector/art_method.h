@@ -14,11 +14,15 @@ static size_t art_method_size = 0;
 static size_t entry_point_offset = 0;
 static size_t data_offset = 0;
 
-/* Inlining these methods to ensure multiple definitions, avoiding ODR violations.
-  Check module.h for more info on why this matters.
-*/
-
 void *amethod_from_reflected_method(JNIEnv *env, jobject method);
+
+/*
+  INFO: Inlining these methods to ensure multiple definitions, avoiding ODR violations.
+          Check module.h for more info.
+
+  SOURCES:
+   - https://clang.llvm.org/extra/clang-tidy/checks/misc/definitions-in-headers.html
+*/
 
 inline bool amethod_init(JNIEnv *env) {
   jclass clazz = env->FindClass("java/lang/reflect/Executable");
