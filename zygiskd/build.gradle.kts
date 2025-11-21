@@ -26,19 +26,20 @@ val verCode: Int by rootProject.extra
 val verName: String by rootProject.extra
 val commitHash: String by rootProject.extra
 
+/* INFO: Due to a bug in NDK compiler, where it says "-Wno-fixed-enum-extension" option
+           doesn't exist, we must utilize "-Wno-unknown-warning-option". */
 val CStandardFlags = arrayOf(
   "-D_GNU_SOURCE", "-std=c99", "-Wpedantic", "-Wall", "-Wextra", "-Werror",
   "-Wformat", "-Wuninitialized", "-Wshadow", "-Wno-zero-length-array", 
-  "-Wconversion", "-Wno-fixed-enum-extension", "-Iroot_impl", "-llog",
-  "-DMIN_APATCH_VERSION=$minAPatchVersion",
+  "-Wno-fixed-enum-extension", "-Wno-unknown-warning-option", "-Wno-c23-extensions",
+  "-Wconversion", "-Iroot_impl", "-llog", "-DMIN_APATCH_VERSION=$minAPatchVersion",
   "-DMIN_KSU_VERSION=$minKsuVersion",
-  "-DMAX_KSU_VERSION=$maxKsuVersion",
   "-DMIN_MAGISK_VERSION=$minMagiskVersion",
   "-DZKSU_VERSION=\"$verName\""
 )
 
 val CFlagsRelease = arrayOf(
-  "-Wl,--strip-all", "-flto=thin", "-Ofast"
+  "-Wl,--strip-all", "-flto=thin", "-O3", "-ffast-math"
 )
 
 val CFlagsDebug = arrayOf(
