@@ -201,7 +201,7 @@ struct FileDescriptorInfo {
      - https://android.googlesource.com/platform/frameworks/base/+/refs/tags/android-14.0.0_r1/core/jni/fd_utils.cpp#544
      - https://android.googlesource.com/platform/frameworks/base/+/refs/tags/android-14.0.0_r1/core/jni/com_android_internal_os_Zygote.cpp#2329
 */
-DCL_HOOK_FUNC(void, _ZNK18FileDescriptorInfo14ReopenOrDetachERKNSt3__18functionIFvNS0_12basic_stringIcNS0_11char_traitsIcEENS0_9allocatorIcEEEEEEE, void *_this, void *fail_fn) {
+DCL_HOOK_FUNC(void, _ZNK18FileDescriptorInfo14ReopenOrDetach, void *_this, void *fail_fn) {
     const int fd = *(const int *)((uintptr_t)_this + offsetof(FileDescriptorInfo, fd));
     const std::string *file_path = (const std::string *)((uintptr_t)_this + offsetof(FileDescriptorInfo, file_path));
     const bool is_sock = *(const bool *)((uintptr_t)_this + offsetof(FileDescriptorInfo, is_sock));
@@ -221,7 +221,7 @@ DCL_HOOK_FUNC(void, _ZNK18FileDescriptorInfo14ReopenOrDetachERKNSt3__18functionI
     }
 
     bypass_fd_check:
-        old__ZNK18FileDescriptorInfo14ReopenOrDetachERKNSt3__18functionIFvNS0_12basic_stringIcNS0_11char_traitsIcEENS0_9allocatorIcEEEEEEE(_this, fail_fn);
+        old__ZNK18FileDescriptorInfo14ReopenOrDetach(_this, fail_fn);
 }
 
 // We cannot directly call `dlclose` to unload ourselves, otherwise when `dlclose` returns,
@@ -1047,19 +1047,25 @@ static bool hook_commit(struct lsplt_map_info *map_infos) {
     }
 }
 
-static void hook_register(dev_t dev, ino_t inode, const char *symbol, void *new_func, void **old_func) {
-    if (!lsplt_register_hook(dev, inode, symbol, new_func, old_func)) {
+static void hook_register(dev_t dev, ino_t inode, const char *symbol, bool is_prefix, void *new_func, void **old_func) {
+    bool res = false;
+    if (is_prefix) res = lsplt_register_hook_by_prefix(dev, inode, symbol, new_func, old_func);
+    else res = lsplt_register_hook(dev, inode, symbol, new_func, old_func);
+
+    if (!res) {
         LOGE("Failed to register plt_hook \"%s\"", symbol);
+
         return;
     }
+
     plt_hook_list->emplace_back(dev, inode, symbol, old_func);
 }
 
-#define PLT_HOOK_REGISTER_SYM(DEV, INODE, SYM, NAME) \
-    hook_register(DEV, INODE, SYM, (void*) new_##NAME, (void **) &old_##NAME)
+#define PLT_HOOK_REGISTER_SYM(DEV, INODE, SYM, NAME, IS_PREFIX) \
+    hook_register(DEV, INODE, SYM, IS_PREFIX, (void*) new_##NAME, (void **) &old_##NAME)
 
-#define PLT_HOOK_REGISTER(DEV, INODE, NAME) \
-    PLT_HOOK_REGISTER_SYM(DEV, INODE, #NAME, NAME)
+#define PLT_HOOK_REGISTER(DEV, INODE, NAME, IS_PREFIX) \
+    PLT_HOOK_REGISTER_SYM(DEV, INODE, #NAME, NAME, IS_PREFIX)
 
 void hook_functions() {
     plt_hook_list = new vector<tuple<dev_t, ino_t, const char *, void **>>();
@@ -1088,29 +1094,15 @@ void hook_functions() {
         break;
     }
 
-    PLT_HOOK_REGISTER(android_runtime_dev, android_runtime_inode, fork);
-    PLT_HOOK_REGISTER(android_runtime_dev, android_runtime_inode, strdup);
-    PLT_HOOK_REGISTER(android_runtime_dev, android_runtime_inode, property_get);
-    PLT_HOOK_REGISTER(android_runtime_dev, android_runtime_inode, _ZNK18FileDescriptorInfo14ReopenOrDetachERKNSt3__18functionIFvNS0_12basic_stringIcNS0_11char_traitsIcEENS0_9allocatorIcEEEEEEE);
-
-    /* INFO: Fallback to older symbol for ReopenOrDetach */
+    PLT_HOOK_REGISTER(android_runtime_dev, android_runtime_inode, fork, false);
+    PLT_HOOK_REGISTER(android_runtime_dev, android_runtime_inode, strdup, false);
+    PLT_HOOK_REGISTER(android_runtime_dev, android_runtime_inode, property_get, false);
+    PLT_HOOK_REGISTER(android_runtime_dev, android_runtime_inode, _ZNK18FileDescriptorInfo14ReopenOrDetach, true);
+    
     if (!hook_commit(map_infos)) {
-        LOGW("Failed to hook. Trying older symbol for ReopenOrDetach");
+        LOGE("Failed to commit plt_hook");
 
         plt_hook_list->clear();
-
-        PLT_HOOK_REGISTER(android_runtime_dev, android_runtime_inode, fork);
-        PLT_HOOK_REGISTER(android_runtime_dev, android_runtime_inode, strdup);
-        PLT_HOOK_REGISTER(android_runtime_dev, android_runtime_inode, property_get);
-        PLT_HOOK_REGISTER_SYM(android_runtime_dev, android_runtime_inode,
-                              "_ZNK18FileDescriptorInfo14ReopenOrDetachEPNSt3__112basic_stringIcNS0_11char_traitsIcEENS0_9allocatorIcEEEE",
-                              _ZNK18FileDescriptorInfo14ReopenOrDetachERKNSt3__18functionIFvNS0_12basic_stringIcNS0_11char_traitsIcEENS0_9allocatorIcEEEEEEE);
-
-        if (!hook_commit(map_infos)) {
-            LOGE("All methods of hooking failed");
-
-            plt_hook_list->clear();
-        }
     }
 
     lsplt_free_maps(map_infos);
@@ -1156,7 +1148,7 @@ static void hook_unloader() {
     } else {
         LOGD("hook_unloader called with libart.so [%zu:%lu]", art_dev, art_inode);
 
-        PLT_HOOK_REGISTER(art_dev, art_inode, pthread_attr_setstacksize);
+        PLT_HOOK_REGISTER(art_dev, art_inode, pthread_attr_setstacksize, false);
         hook_commit(map_infos);
     }
 
