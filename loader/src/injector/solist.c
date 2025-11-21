@@ -54,8 +54,12 @@ static inline void set_size(SoInfo *self, size_t size) {
 struct pdg ppdg = { 0 };
 
 static bool pdg_setup(ElfImg *img) {
+  /* INFO: Systems with both utilize *2, and the ones that lack *2, use *1. */
   ppdg.ctor = (void *(*)())getSymbAddress(img,  "__dl__ZN18ProtectedDataGuardC2Ev");
+  if (ppdg.ctor == NULL) ppdg.ctor = (void *(*)())getSymbAddress(img, "__dl__ZN18ProtectedDataGuardC1Ev");
+
   ppdg.dtor = (void *(*)())getSymbAddress(img, "__dl__ZN18ProtectedDataGuardD2Ev");
+  if (ppdg.dtor == NULL) ppdg.dtor = (void *(*)())getSymbAddress(img, "__dl__ZN18ProtectedDataGuardD1Ev");
 
   return ppdg.ctor != NULL && ppdg.dtor != NULL;
 }
