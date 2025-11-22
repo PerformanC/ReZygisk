@@ -105,8 +105,17 @@ mkdir "$MODPATH/webroot"
 ui_print "- Extracting webroot"
 unzip -o "$ZIPFILE" "webroot/*" -x "*.sha256" -d "$MODPATH"
 
-CPU_ABIS=$(getprop ro.system.product.cpu.abilist)
-CPU_ABIS=${CPU_ABIS:-$(getprop ro.product.cpu.abilist)}
+# INFO: Utilize the one with the biggest output, as some devices with Tango have the full list
+#         in ro.product.cpu.abilist but others only have a subset there, and the full list in
+#         ro.system.product.cpu.abilist
+CPU_ABIS_PROP1=$(getprop ro.system.product.cpu.abilist)
+CPU_ABIS_PROP2=$(getprop ro.product.cpu.abilist)
+
+if [ "${#CPU_ABIS_PROP2}" -gt "${#CPU_ABIS_PROP1}" ]; then
+  CPU_ABIS=$CPU_ABIS_PROP2
+else
+  CPU_ABIS=$CPU_ABIS_PROP1
+fi
 
 SUPPORTS_32BIT=false
 SUPPORTS_64BIT=false

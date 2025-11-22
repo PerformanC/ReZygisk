@@ -46,8 +46,18 @@ if [ -f $MODDIR/lib/libzygisk.so ];then
   chcon u:object_r:system_file:s0 $TMP_PATH/lib/libzygisk.so
 fi
 
-CPU_ABIS=$(getprop ro.system.product.cpu.abilist)
-CPU_ABIS=${CPU_ABIS:-$(getprop ro.product.cpu.abilist)}
+
+# INFO: Utilize the one with the biggest output, as some devices with Tango have the full list
+#         in ro.product.cpu.abilist but others only have a subset there, and the full list in
+#         ro.system.product.cpu.abilist
+CPU_ABIS_PROP1=$(getprop ro.system.product.cpu.abilist)
+CPU_ABIS_PROP2=$(getprop ro.product.cpu.abilist)
+
+if [ "${#CPU_ABIS_PROP2}" -gt "${#CPU_ABIS_PROP1}" ]; then
+  CPU_ABIS=$CPU_ABIS_PROP2
+else
+  CPU_ABIS=$CPU_ABIS_PROP1
+fi
 
 if [[ "$CPU_ABIS" == *"arm64-v8a"* || "$CPU_ABIS" == *"x86_64"* ]]; then
   ./bin/zygisk-ptrace64 monitor &

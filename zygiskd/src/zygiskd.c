@@ -47,25 +47,21 @@ enum Architecture {
 #define ZYGISKD_FILE PATH_MODULES_DIR "/rezygisk/bin/zygiskd" lp_select("32", "64")
 #define ZYGISKD_PATH "/data/adb/modules/rezygisk/bin/zygiskd" lp_select("32", "64")
 
-static enum Architecture get_arch(void) {
-  char system_arch[64] = { 0 };
-  get_property("ro.system.product.cpu.abilist", system_arch);
-
-  if (system_arch[0] == '\0')
-    get_property("ro.product.cpu.abilist", system_arch);
-
-  /* INFO: "PC" architectures should have priority because in an emulator
-             the native architecture should have priority over the emulated
-             architecture for "native" reasons. */
-  if (strstr(system_arch, "x86") != NULL) return lp_select(X86, X86_64);
-  if (strstr(system_arch, "arm") != NULL) return lp_select(ARM32, ARM64);
-
-  LOGE("Unsupported system architecture: %s\n", system_arch);
-  exit(1);
-}
+#ifdef __aarch64__
+  #define ARCH_STR "arm64-v8a"
+#elif __arm__
+  #define ARCH_STR "armeabi-v7a"
+#elif __x86_64__
+  #define ARCH_STR "x86_64"
+#elif __i386__
+  #define ARCH_STR "x86"
+#else
+  #error "Unsupported architecture"
+  #define ARCH_STR "unknown"
+#endif
 
 /* WARNING: Dynamic memory based */
-static void load_modules(enum Architecture arch, struct Context *restrict context) {
+static void load_modules(struct Context *restrict context) {
   context->len = 0;
   context->modules = NULL;
 
@@ -76,15 +72,7 @@ static void load_modules(enum Architecture arch, struct Context *restrict contex
     return;
   }
 
-  char arch_str[32];
-  switch (arch) {
-    case ARM64: { strcpy(arch_str, "arm64-v8a"); break; }
-    case X86_64: { strcpy(arch_str, "x86_64"); break; }
-    case ARM32: { strcpy(arch_str, "armeabi-v7a"); break; }
-    case X86: { strcpy(arch_str, "x86"); break; }
-  }
-
-  LOGI("Loading modules for architecture: %s\n", arch_str);
+  LOGI("Loading modules for architecture: " ARCH_STR);
 
   struct dirent *entry;
   while ((entry = readdir(dir)) != NULL) {
@@ -93,7 +81,7 @@ static void load_modules(enum Architecture arch, struct Context *restrict contex
 
     char *name = entry->d_name;
     char so_path[PATH_MAX];
-    snprintf(so_path, PATH_MAX, "/data/adb/modules/%s/zygisk/%s.so", name, arch_str);
+    snprintf(so_path, PATH_MAX, "/data/adb/modules/%s/zygisk/" ARCH_STR ".so", name);
 
     struct stat st;
     if (stat(so_path, &st) == -1) {
@@ -285,8 +273,7 @@ void zygiskd_start(char *restrict argv[]) {
 
     exit(EXIT_FAILURE);
   } else {
-    enum Architecture arch = get_arch();
-    load_modules(arch, &context);
+    load_modules(&context);
 
     unix_datagram_sendto(CONTROLLER_SOCKET, &(uint8_t){ DAEMON_SET_INFO }, sizeof(uint8_t));
 
@@ -475,19 +462,9 @@ void zygiskd_start(char *restrict argv[]) {
         ssize_t ret = write_size_t(client_fd, clen);
         ASSURE_SIZE_WRITE_BREAK("ReadModules", "len", ret, sizeof(clen));
 
-        enum Architecture arch = get_arch();
-
-        char arch_str[32];
-        switch (arch) {
-          case ARM64: { strcpy(arch_str, "arm64-v8a"); break; }
-          case X86_64: { strcpy(arch_str, "x86_64"); break; }
-          case ARM32: { strcpy(arch_str, "armeabi-v7a"); break; }
-          case X86: { strcpy(arch_str, "x86"); break; }
-        }
-
         for (size_t i = 0; i < clen; i++) {
           char lib_path[PATH_MAX];
-          snprintf(lib_path, PATH_MAX, "/data/adb/modules/%s/zygisk/%s.so", context.modules[i].name, arch_str);
+          snprintf(lib_path, PATH_MAX, "/data/adb/modules/%s/zygisk/" ARCH_STR ".so", context.modules[i].name);
 
           if (write_string(client_fd, lib_path) == -1) {
             LOGE("Failed writing module path.\n");
