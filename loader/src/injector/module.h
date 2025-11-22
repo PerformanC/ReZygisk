@@ -1,7 +1,10 @@
 #ifndef MODULE_H
 #define MODULE_H
 
-#include "logging.h"
+#include <string.h>
+
+#include <jni.h>
+
 #include "solist.h"
 
 #define REZYGISK_API_VERSION 5
@@ -112,9 +115,19 @@ enum rezygisk_options : uint32_t {
     DLCLOSE_MODULE_LIBRARY = 1
 };
 
+struct rezygisk_abi {
+    long api_version;
+    void *impl;
+
+    void (*pre_app_specialize)(void *, void *);
+    void (*post_app_specialize)(void *, const void *);
+    void (*pre_server_specialize)(void *, void *);
+    void (*post_server_specialize)(void *, const void *);
+};
+
 struct rezygisk_api {
     void *impl;
-    bool (*register_module)(struct rezygisk_api *, struct rezygisk_abi *);
+    bool (*register_module)(struct rezygisk_api *, struct rezygisk_abi const *);
 
     void (*hook_jni_native_methods)(JNIEnv *, const char *, JNINativeMethod *, int);
     union {
@@ -132,16 +145,6 @@ struct rezygisk_api {
     uint32_t (*get_flags)();
 };
 
-struct rezygisk_abi {
-    long api_version;
-    void *impl;
-
-    void (*pre_app_specialize)(void *, void *);
-    void (*post_app_specialize)(void *, const void *);
-    void (*pre_server_specialize)(void *, void *);
-    void (*post_server_specialize)(void *, const void *);
-};
-
 struct rezygisk_module {
   struct rezygisk_abi abi;
   struct rezygisk_api api;
@@ -157,11 +160,23 @@ struct rezygisk_module {
   bool unload;
 };
 
-void rezygisk_module_call_on_load(struct rezygisk_module *m, void *env) {
+/*
+    INFO: What follows are function definitions to be included wherever necessary.
+            As a reminder for best C practices, a function body should not be in a header
+            since they lead to ODR violations, resulting in UB since the compiled code *can* have duplicate defintions.
+            Therefore, we have only ONE of two choices:
+              1. Put the function declarations here and their respective definitions in a separate .c file;
+              2. Inline these function definitions in the header so as to allow multiple definitions.
+          Doing otherwise, clang-tidy throws 'definitions-in-headers' warning.
+
+    SOURCES:
+     - https://clang.llvm.org/extra/clang-tidy/checks/misc/definitions-in-headers.html
+*/
+inline void rezygisk_module_call_on_load(struct rezygisk_module *m, void *env) {
     m->zygisk_module_entry((void *)&m->api, env);
 }
 
-void rezygisk_module_call_pre_app_specialize(struct rezygisk_module *m, struct app_specialize_args_v5 *args) {
+inline void rezygisk_module_call_pre_app_specialize(struct rezygisk_module *m, struct app_specialize_args_v5 *args) {
     switch (m->abi.api_version) {
         case 1:
         case 2: {
@@ -204,7 +219,7 @@ void rezygisk_module_call_pre_app_specialize(struct rezygisk_module *m, struct a
     }
 }
 
-void rezygisk_module_call_post_app_specialize(struct rezygisk_module *m, const struct app_specialize_args_v5 *args) {
+inline void rezygisk_module_call_post_app_specialize(struct rezygisk_module *m, const struct app_specialize_args_v5 *args) {
     switch (m->abi.api_version) {
         case 1:
         case 2: {
@@ -247,11 +262,11 @@ void rezygisk_module_call_post_app_specialize(struct rezygisk_module *m, const s
     }
 }
 
-void rezygisk_module_call_pre_server_specialize(struct rezygisk_module *m, struct server_specialize_args_v1 *args) {
+inline void rezygisk_module_call_pre_server_specialize(struct rezygisk_module *m, struct server_specialize_args_v1 *args) {
     m->abi.pre_server_specialize(m->abi.impl, args);
 }
 
-void rezygisk_module_call_post_server_specialize(struct rezygisk_module *m, const struct server_specialize_args_v1 *args) {
+inline void rezygisk_module_call_post_server_specialize(struct rezygisk_module *m, const struct server_specialize_args_v1 *args) {
     m->abi.post_server_specialize(m->abi.impl, args);
 }
 

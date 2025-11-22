@@ -5,16 +5,26 @@
 extern "C" {
 #endif /* __cplusplus */
 
+#include <jni.h>
+
 #include "logging.h"
 
-inline static jfieldID art_method_field = nullptr;
-inline static size_t art_method_size = 0;
-inline static size_t entry_point_offset = 0;
-inline static size_t data_offset = 0;
+static jfieldID art_method_field = NULL;
+static size_t art_method_size = 0;
+static size_t entry_point_offset = 0;
+static size_t data_offset = 0;
 
 void *amethod_from_reflected_method(JNIEnv *env, jobject method);
 
-bool amethod_init(JNIEnv *env) {
+/*
+  INFO: Inlining these methods to ensure multiple definitions, avoiding ODR violations.
+          Check module.h for more info.
+
+  SOURCES:
+   - https://clang.llvm.org/extra/clang-tidy/checks/misc/definitions-in-headers.html
+*/
+
+inline bool amethod_init(JNIEnv *env) {
   jclass clazz = env->FindClass("java/lang/reflect/Executable");
   if (!clazz) {
     LOGE("Failed to found Executable");
@@ -22,7 +32,7 @@ bool amethod_init(JNIEnv *env) {
     return false;
   }
 
-  if (art_method_field = env->GetFieldID(clazz, "artMethod", "J"); !art_method_field) {
+  if (!(art_method_field = env->GetFieldID(clazz, "artMethod", "J"))) {
     LOGE("Failed to find artMethod field");
 
     env->DeleteLocalRef(clazz);
@@ -72,7 +82,7 @@ bool amethod_init(JNIEnv *env) {
   env->DeleteLocalRef(second_ctor);
   env->DeleteLocalRef(constructors);
 
-  art_method_size = (size_t)(second - first);
+  art_method_size = second - first;
   LOGD("ArtMethod size: %zu", art_method_size);
   if ((4 * 9 + 3 * sizeof(void *)) < art_method_size) {
     LOGE("ArtMethod size exceeds maximum assume. There may be something wrong.");
@@ -88,11 +98,11 @@ bool amethod_init(JNIEnv *env) {
   return true;
 }
 
-void *amethod_get_data(uintptr_t self) {
-  return *(void **)((uintptr_t)self + data_offset);
+inline void *amethod_get_data(uintptr_t self) {
+  return *(void **)(self + data_offset);
 }
 
-void *amethod_from_reflected_method(JNIEnv *env, jobject method) {
+inline void *amethod_from_reflected_method(JNIEnv *env, jobject method) {
   if (art_method_field) {
     return (void *)env->GetLongField(method, art_method_field);
   } else {

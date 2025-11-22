@@ -5,6 +5,9 @@
 extern "C" {
 #endif /* __cplusplus */
 
+#include <stdbool.h>
+#include <sys/types.h>
+
 typedef void SoInfo;
 
 #define FuncType(name) void (*name)
@@ -20,7 +23,7 @@ struct soinfo_deconstructor {
   void (**fini_array)();
 };
 
-/* 
+/*
   INFO: When dlopen'ing a library, the system will save information of the
           opened library so a structure called soinfo, which contains another
           called solist, a list with the information of opened objects.
@@ -45,7 +48,7 @@ struct soinfo_deconstructor {
 */
 bool solist_drop_so_path(void *lib_memory, bool unload);
 
-/* 
+/*
   INFO: When dlopen'ing a library, the system will increment 1 to a global
           counter that tracks the amount of libraries ever loaded in that process,
           the same happening in dlclose.
