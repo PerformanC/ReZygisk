@@ -1,0 +1,77 @@
+# ReZygisk
+
+[印尼语](/READMEs/README_id-ID.md) | [越南语](/READMEs/README_vi-VN.md) | [巴西葡萄牙语](/READMEs/README_pt-BR.md) | [法语](/READMEs/README_fr-FR.md) | [日语](/READMEs/README_ja-JP.md) | [简体中文](/READMEs/README_zh_CN.md)
+
+ReZygisk 是 Zygisk Next 的一个分支，是 Zygisk 的独立实现，为 KernelSU、APatch 和 Magisk（官方版和 Kitsune 版）提供 Zygisk API 支持。
+
+它旨在将代码库完全现代化并重写为 C 语言，以更宽松且对 FOSS（自由开源软件）友好的许可证，实现更高效、更快速的 Zygisk API。
+
+## 为什么？
+
+Zygisk Next 的最新版本不是开源的，其代码完全由其开发者保留。这不仅限制了我们为项目做出贡献的能力，也使得代码审计变得不可能，这是一个重大的安全隐患，因为 Zygisk Next 是一个以超级用户 (root) 权限运行的模块，可以访问整个系统。
+
+Zygisk Next 的开发者是 Android 社区中著名且值得信赖的，然而，这并不意味着代码没有恶意或漏洞。我们 (PerformanC) 理解他们保留代码闭源的原因，但我们持相反的观点。
+
+## 优势
+
+- **FOSS (永远开源)**
+
+## 依赖项
+
+| 工具              | 描述                               |
+|-------------------|-----------------------------------|
+| `Android NDK`     | Android 原生开发工具包             |
+
+### C++ 依赖项
+
+| 依赖项        | 描述                             |
+|--------------|----------------------------------|
+| `lsplt`      | Android 的简单 PLT Hook 库        |
+
+## 安装
+
+### 1. 选择正确的 zip 文件
+
+选择正确的构建版本/zip 文件很重要，因为它将决定 ReZygisk 的隐藏性和稳定性。不过，这并不是一项艰巨的任务：
+
+*   `release` 版本应该是大多数情况下的选择，它移除了应用层级的日志记录，并提供更优化的二进制文件。
+*   `debug` 版本则相反，它包含大量日志记录且没有优化。因此，**你应仅在调试目的**以及**为创建 Issue 而获取日志时**使用它。
+
+至于分支，你应始终使用 `main` 分支，除非开发者另有说明，或者你想测试即将推出的功能并知晓其中涉及的风险。
+
+### 2. 刷入 zip 文件
+
+选择正确的版本后，你应该使用当前的 root 管理器（如 Magisk 或 KernelSU）刷入它。你可以进入 root 管理器的 `模块` 部分，然后选择你下载的 zip 文件来完成此操作。
+
+刷入后，检查安装日志以确保没有错误。如果一切正常，你可以重启设备。
+
+> [!WARNING]
+> Magisk 用户应禁用内置的 Zygisk，因为它会与 ReZygisk 冲突。这可以通过进入 Magisk 的 `设置` 部分并禁用 `Zygisk` 选项来完成。
+
+### 3. 验证安装
+
+重启后，你可以通过检查 root 管理器 `模块` 部分中的模块描述来验证 ReZygisk 是否正常工作。描述应指示必要的守护进程正在运行。例如，如果你的环境同时支持 64 位和 32 位，它应类似于这样：`[monitor: 😋 tracing, zygote64: 😋 injected, daemon64: 😋 running (...) zygote32: 😋 injected, daemon32: 😋 running (...)] Standalone implementation of Zygisk.`
+
+## 翻译
+
+目前有两种不同的方式可以为 ReZygisk 贡献翻译：
+
+*   **README 的翻译**：你可以在 `READMEs` 文件夹中创建一个新文件，遵循命名约定 `README_<语言>.md`，其中 `<语言>` 是语言代码（例如，巴西葡萄牙语为 `README_pt-BR.md`），并向 `main` 分支提交一个包含你更改的 pull request。
+*   **ReZygisk WebUI 的翻译**：你应该首先贡献到我们的 [Crowdin](https://crowdin.com/project/rezygisk)。一旦获得批准，请从那里检索 `.json` 文件，并提交一个包含你更改的 pull request——将 `.json` 文件添加到 `webroot/lang` 文件夹，并将你的署名按字母顺序添加到 `TRANSLATOR.md` 文件中。
+
+## 支持
+
+对于任何与 ReZygisk 或其他 PerformanC 项目相关的问题，欢迎随时加入以下任一频道：
+
+*   Discord 频道: [PerformanC](https://discord.gg/uPveNfTuCJ)
+*   ReZygisk Telegram 频道: [@rezygisk](https://t.me/rezygisk)
+*   PerformanC Telegram 频道: [@performancorg](https://t.me/performancorg)
+*   PerformanC Signal 群组: [@performanc](https://signal.group/#CjQKID3SS8N5y4lXj3VjjGxVJnzNsTIuaYZjj3i8UhipAS0gEhAedxPjT5WjbOs6FUuXptcT)
+
+## 贡献
+
+向 ReZygisk 做贡献必须遵循 PerformanC 的 [贡献指南](https://github.com/PerformanC/contributing)。遵守其安全策略、行为准则和语法标准。
+
+## 许可证
+
+ReZygisk 主要根据 Dr-TSNG 的 GPL 授权，同时 PerformanC 组织对重写的代码也采用 AGPL 3.0 授权。你可以在 [开源倡议组织 (Open Source Initiative)](https://opensource.org/licenses/AGPL-3.0) 上了解更多相关信息。
