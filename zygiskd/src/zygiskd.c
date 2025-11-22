@@ -484,7 +484,7 @@ void zygiskd_start(char *restrict argv[]) {
           LOGE("Invalid module index: %zu\n", index);
 
           ret = write_uint8_t(client_fd, 0);
-          ASSURE_SIZE_WRITE_BREAK("RequestCompanionSocket", "response", ret, sizeof(int));
+          ASSURE_SIZE_WRITE_BREAK("RequestCompanionSocket", "response", ret, sizeof(uint8_t));
 
           close(client_fd);
 
@@ -528,7 +528,7 @@ void zygiskd_start(char *restrict argv[]) {
             LOGE(" - Failed to send companion fd socket of module \"%s\"\n", module->name);
 
             ret = write_uint8_t(client_fd, 0);
-            ASSURE_SIZE_WRITE_BREAK("RequestCompanionSocket", "response", ret, sizeof(int));
+            ASSURE_SIZE_WRITE_BREAK("RequestCompanionSocket", "response", ret, sizeof(uint8_t));
 
             close(module->companion);
             module->companion = -1;
@@ -540,7 +540,7 @@ void zygiskd_start(char *restrict argv[]) {
           LOGE(" - Failed to spawn companion for module \"%s\"\n", module->name);
 
           ret = write_uint8_t(client_fd, 0);
-          ASSURE_SIZE_WRITE_BREAK("RequestCompanionSocket", "response", ret, sizeof(int));
+          ASSURE_SIZE_WRITE_BREAK("RequestCompanionSocket", "response", ret, sizeof(uint8_t));
 
           /* INFO: RequestCompanionSocket by default doesn't close the client_fd */
           close(client_fd);
@@ -557,7 +557,7 @@ void zygiskd_start(char *restrict argv[]) {
           LOGE("Invalid module index: %zu\n", index);
 
           ret = write_uint8_t(client_fd, 0);
-          ASSURE_SIZE_WRITE_BREAK("GetModuleDir", "response", ret, sizeof(int));
+          ASSURE_SIZE_WRITE_BREAK("GetModuleDir", "response", ret, sizeof(uint8_t));
 
           close(client_fd);
 

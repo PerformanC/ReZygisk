@@ -32,8 +32,11 @@ zygisk_companion_entry load_module(int fd) {
   snprintf(path, sizeof(path), "/proc/self/fd/%d", fd);
 
   void *handle = dlopen(path, RTLD_NOW);
+  if (!handle) {
+    LOGE("Failed to dlopen module: %s\n", dlerror());
 
-  if (!handle) return NULL;
+    return NULL;
+  }
 
   void *entry = dlsym(handle, "zygisk_companion_entry");
   if (!entry) {
@@ -154,7 +157,7 @@ void companion_entry(int fd) {
 
     ret = write_uint8_t(client_fd, 1);
     if (ret != sizeof(uint8_t)) {
-      LOGE("Failed to sent client_fd in ZygiskdCompanion: Expected %zu, got %zd\n", sizeof(uint8_t), ret);
+      LOGE("Failed to send client_fd in ZygiskdCompanion: Expected %zu, got %zd\n", sizeof(uint8_t), ret);
 
       free(args);
       close(client_fd);
