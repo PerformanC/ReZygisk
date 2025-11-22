@@ -103,7 +103,7 @@ async function getModuleNames(modules) {
     rezygisk_state.innerHTML = translations.page.home.status.notWorking
     rezygisk_icon_state.innerHTML = '<img class="dimc" src="assets/cross.svg">'
 
-    rootCss.style.setProperty('--bright', '#766000')
+    rootCss.style.setProperty('--status-bar', '#766000')
 
     /* INFO: Hide zygote divs */
     zygote_divs.forEach((zygote_div) => {
@@ -130,7 +130,7 @@ async function getModuleNames(modules) {
     rezygisk_state.innerHTML = translations.page.home.status.notWorking
     rezygisk_icon_state.innerHTML = '<img class="dimc" src="assets/cross.svg">'
 
-    rootCss.style.setProperty('--bright', '#766000')
+    rootCss.style.setProperty('--status-bar', '#766000')
 
     /* INFO: Hide zygote divs */
     zygote_divs.forEach((zygote_div) => {
@@ -148,10 +148,10 @@ async function getModuleNames(modules) {
   root_impl.innerHTML = ReZygiskState.root
 
   switch (ReZygiskState.monitor.state) {
-    case 0: monitor_status.innerHTML = translations.page.actions.status.tracing; break;
-    case 1: monitor_status.innerHTML = translations.page.actions.status.stopping; break;
-    case 2: monitor_status.innerHTML = translations.page.actions.status.stopped; break;
-    case 3: monitor_status.innerHTML = translations.page.actions.status.exiting; break;
+    case '0': monitor_status.innerHTML = translations.page.actions.status.tracing; break;
+    case '1': monitor_status.innerHTML = translations.page.actions.status.stopping; break;
+    case '2': monitor_status.innerHTML = translations.page.actions.status.stopped; break;
+    case '3': monitor_status.innerHTML = translations.page.actions.status.exiting; break;
     default: monitor_status.innerHTML = translations.page.actions.status.unknown;
   }
 
@@ -199,12 +199,12 @@ async function getModuleNames(modules) {
   } else if (expectedWorking === actuallyWorking) {
     rezygisk_state.innerHTML = translations.page.home.status.ok
 
-    rootCss.style.setProperty('--bright', '#3a4857')
+    rootCss.style.setProperty('--status-bar', '#545454')
     rezygisk_icon_state.innerHTML = '<img class="brightc" src="assets/tick.svg">'
   } else {
     rezygisk_state.innerHTML = translations.page.home.status.partially
 
-    rootCss.style.setProperty('--bright', '#766000')
+    rootCss.style.setProperty('--status-bar', '#766000')
     rezygisk_icon_state.innerHTML = '<img class="brightc" src="assets/warn.svg">'
   }
 

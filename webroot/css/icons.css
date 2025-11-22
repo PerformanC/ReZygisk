@@ -1,30 +1,39 @@
 /* Dark */
 #ni_home {
-  background: url(../assets/home.svg);
+  background: url(../assets/home/outlined.svg);
   width: 24px;
   height: 24px;
   z-index: 10;
+  filter: invert(1);
 }
 
 #ni_modules {
-  background: url(../assets/module.svg);
+  background: url(../assets/modules/outlined.svg);
   width: 24px;
   height: 24px;
   z-index: 10;
+  filter: invert(1);
 }
 
 #ni_actions {
-  background: url(../assets/action.svg);
+  background: url(../assets/actions/outlined.svg);
   width: 24px;
   height: 24px;
   z-index: 10;
+  filter: invert(1);
 }
 
 #ni_settings {
-  background: url(../assets/settings.svg);
+  background: url(../assets/settings/outlined.svg);
   width: 24px;
   height: 24px;
   z-index: 10;
+  filter: invert(1);
+}
+
+/* Light */
+.light_icon_mode {
+  filter: invert(0) !important;
 }
 
 #ec_icon {
@@ -32,31 +41,6 @@
   z-index: 40;
 }
 
-/* Light */
-#ni_home.light {
-  background: url(../assets_light/home.svg);
-  width: 24px;
-  height: 24px;
-  z-index: 10;
-}
+/* .fill {
 
-#ni_modules.light {
-  background: url(../assets_light/module.svg);
-  width: 24px;
-  height: 24px;
-  z-index: 10;
-}
-
-#ni_actions.light {
-  background: url(../assets_light/action.svg);
-  width: 24px;
-  height: 24px;
-  z-index: 10;
-}
-
-#ni_settings.light {
-  background: url(../assets_light/settings.svg);
-  width: 24px;
-  height: 24px;
-  z-index: 10;
-}
+} */

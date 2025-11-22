@@ -1,20 +1,21 @@
 :root {
-  --background: #181c20;
+  --background: #141414;
   --font: #fff;
   --desc: #c9c9c9;
-  --bright: #8d1d19;
-  --dim: #1d2327;
+  --dim: #1c1c1c;
   --error: #8d1d19;
-  --icon: #48565e;
-  --icon-bc: #2b3338;
+  --icon: #494949;
+  --icon-bc: #292929;
   --small-card: var(--icon-bc);
   --button: var(--background);
-  --desktop-navbar: #252b31;
-  --desktop-navicon: #333d42;
+  --desktop-navbar: #252525;
+  --desktop-navicon: #3a3a3a;
   /* Locked Color */
   --lock-desc: #c9c9c9;
   --lock: #fff;
   --font-family: 'Poppins', sans-serif;
+  /* Status bar color */
+  --status-bar: #8d1d19;
 }
 
 * {
@@ -280,12 +281,12 @@ a {
 
 /* Card type */
 .bright {
-  border: 5px solid var(--bright);
-  background: var(--bright);
+  border: 5px solid var(--status-bar);
+  background: var(--status-bar);
 }
 
 .brightc {
-  background: var(--bright);
+  background: var(--status-bar);
   word-break: break-word;
 }
 

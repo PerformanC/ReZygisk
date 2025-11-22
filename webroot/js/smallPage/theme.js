@@ -2,7 +2,6 @@ import { smallPageDisabler } from '../smallPageDesabler.js'
 import { setAmoled } from '../themes/amoled.js'
 import { setDark } from '../themes/dark.js'
 import { setLight } from '../themes/light.js'
-import { setMonochrome } from '../themes/monochrome.js'
 
 // INFO: requirement variables
 let sys_theme
@@ -11,7 +10,6 @@ const themeList = {
   amoled: () => setAmoled(true),
   dark: () => setDark(true),
   light: () => setLight(true),
-  monochrome: () => setMonochrome(true),
   system: (unavaliable) => {
     const isDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
     if (isDark && unavaliable) setDark() 

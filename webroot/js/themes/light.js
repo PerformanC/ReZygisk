@@ -16,8 +16,8 @@ const sp_errorh_close = document.getElementById('sp_errorh_close')
 
 export function setLight(chooseSet) {
   rootCss.style.setProperty('--background', '#f2f2f2')
-  rootCss.style.setProperty('--font', '#181c20')
-  rootCss.style.setProperty('--desc', '#484d53')
+  rootCss.style.setProperty('--font', '#222222ff')
+  rootCss.style.setProperty('--desc', '#535353ff')
   rootCss.style.setProperty('--dim', '#e0e0e0')
   rootCss.style.setProperty('--icon', '#acacac')
   rootCss.style.setProperty('--desktop-navbar', '#fefefe')

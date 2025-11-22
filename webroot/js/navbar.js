@@ -5,6 +5,7 @@ setData('home', navbar_data_tag)
 
 document.getElementById('panel_home').classList.toggle('show')
 document.getElementById(`nibg_home`).classList.toggle('show')
+document.getElementById(`ni_home`).style.background = 'url(./assets/home/filled.svg)'
 
 document.querySelectorAll('[name=navbutton]').forEach((element) => {
   element.addEventListener('click', (event) => {
@@ -27,19 +28,23 @@ document.querySelectorAll('[name=navbutton]').forEach((element) => {
 
     /* INFO: Disable icon on old state */
     const pre_input = document.getElementById(`n_${previous}`)
+    const pre_icon = document.getElementById(`ni_${previous}`)
     const pre_background = document.getElementById(`nibg_${previous}`)
 
     document.getElementById(`panel_${previous}`).classList.remove('show')
     pre_input.removeAttribute('checked')
     pre_background.classList.remove('show')
+    pre_icon.style.background = ''
 
     /* INFO: Enable icon on new state */
     const curr_input = document.getElementById(`n_${value}`)
+    const curr_icon = document.getElementById(`ni_${value}`)
     const i_background = document.getElementById(`nibg_${value}`)
 
     document.getElementById(`panel_${value}`).classList.toggle('show')
     curr_input.setAttribute('checked', '')
     i_background.classList.toggle('show')
+    curr_icon.style.background = `url(./assets/${value}/filled.svg)`
 
     setData(value, navbar_data_tag)
   })
