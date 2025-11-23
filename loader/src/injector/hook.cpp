@@ -367,11 +367,10 @@ void initialize_jni_hook() {
             void *h = dlopen(map.path, RTLD_LAZY);
             if (!h) {
                 LOGW("cannot dlopen libnativehelper.so: %s", dlerror());
+                break;
             }
-            else {
-                get_created_java_vms = reinterpret_cast<decltype(get_created_java_vms)>(dlsym(h, "JNI_GetCreatedJavaVMs"));
-                dlclose(h);
-            }
+            get_created_java_vms = reinterpret_cast<decltype(get_created_java_vms)>(dlsym(h, "JNI_GetCreatedJavaVMs"));
+            dlclose(h);
             break;
         }
 
@@ -548,7 +547,7 @@ void ZygiskContext::plt_hook_process_regex() {
             for (auto const &ign: ignore_info) {
                 if (regexec(&ign.regex, map.path, 0, NULL, 0) != 0)
                     continue;
-                else if (ign.symbol.empty() || ign.symbol == reg.symbol) {
+                if (ign.symbol.empty() || ign.symbol == reg.symbol) {
                     ignored = true;
                     break;
                 }
