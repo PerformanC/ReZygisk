@@ -13,15 +13,15 @@
 
 #define LOGI(...)                                              \
   __android_log_print(ANDROID_LOG_INFO, LOG_TAG, __VA_ARGS__); \
-  printf(__VA_ARGS__);
+  printf(__VA_ARGS__)
 
 #define LOGW(...)                                                \
   __android_log_print(ANDROID_LOG_WARN, LOG_TAG, __VA_ARGS__);   \
-  printf(__VA_ARGS__);
+  printf(__VA_ARGS__)
 
 #define LOGE(...)                                                \
   __android_log_print(ANDROID_LOG_ERROR , LOG_TAG, __VA_ARGS__); \
-  printf(__VA_ARGS__);
+  printf(__VA_ARGS__)
 
 #define ASSURE_SIZE_WRITE(area_name, subarea_name, sent_size, expected_size)                                     \
   if (sent_size != (ssize_t)(expected_size)) {                                                                   \

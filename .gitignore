@@ -1,6 +1,7 @@
+.clangd
+.cxx
 .gradle
 .idea
-.cxx
 .vscode
 build
 local.properties

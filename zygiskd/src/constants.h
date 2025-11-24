@@ -1,11 +1,9 @@
 #ifndef CONSTANTS_H
 #define CONSTANTS_H
 
-#include <android/log.h>
+#include <stdbool.h>
 
-#define bool _Bool
-#define true 1
-#define false 0
+#include <android/log.h>
 
 #if (defined(__LP64__) || defined(_LP64))
   #define lp_select(a, b) b

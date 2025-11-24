@@ -2,6 +2,7 @@
 #define COMMON_H
 
 #include <stdint.h>
+#include <sys/types.h>
 
 #include "../constants.h"
 

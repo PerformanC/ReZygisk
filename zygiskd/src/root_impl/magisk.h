@@ -1,7 +1,7 @@
 #ifndef MAGISK_H
 #define MAGISK_H
 
-#include "../constants.h"
+#include "common.h"
 
 enum magisk_variants {
   MOfficial,

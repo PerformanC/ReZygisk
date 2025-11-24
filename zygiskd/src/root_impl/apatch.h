@@ -1,7 +1,7 @@
 #ifndef APATCH_H
 #define APATCH_H
 
-#include "../constants.h"
+#include "common.h"
 
 void apatch_get_existence(struct root_impl_state *state);
 

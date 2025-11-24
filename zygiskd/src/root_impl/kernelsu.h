@@ -1,7 +1,7 @@
 #ifndef KERNELSU_H
 #define KERNELSU_H
 
-#include "../constants.h"
+#include "common.h"
 
 enum kernelsu_variants {
   KOfficial,
