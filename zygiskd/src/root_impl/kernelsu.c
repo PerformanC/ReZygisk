@@ -65,7 +65,7 @@ void ksu_get_existence(struct root_impl_state *state) {
     int reply_ok = 0;
 
     int version = 0;
-    prctl((signed int)KSU_INSTALL_MAGIC1, CMD_GET_VERSION, &version, 0, &reply_ok);
+    prctl(KSU_INSTALL_MAGIC1, CMD_GET_VERSION, &version, 0, &reply_ok);
 
     if (version == 0) state->state = Abnormal;
     else if (version >= MIN_KSU_VERSION) {
@@ -87,17 +87,17 @@ void ksu_get_existence(struct root_impl_state *state) {
       state->state = Supported;
 
       char mode[16] = { 0 };
-      prctl((signed int)KSU_INSTALL_MAGIC1, CMD_HOOK_MODE, mode, NULL, &reply_ok);
+      prctl(KSU_INSTALL_MAGIC1, CMD_HOOK_MODE, mode, NULL, &reply_ok);
 
       if (mode[0] != '\0') state->variant = KNext;
       else state->variant = KOfficial;
 
       variant = state->variant;
 
-      /* INFO: CMD_GET_MANAGER_UID is a KernelSU Next feature, however we won't 
+      /* INFO: CMD_GET_MANAGER_UID is a KernelSU Next feature, however we won't
                 limit to KernelSU Next only in case other forks wish to implement
                 it. */
-      prctl((signed int)KSU_INSTALL_MAGIC1, CMD_GET_MANAGER_UID, NULL, NULL, &reply_ok);
+      prctl(KSU_INSTALL_MAGIC1, CMD_GET_MANAGER_UID, NULL, NULL, &reply_ok);
 
       if (reply_ok == KSU_INSTALL_MAGIC1) {
         LOGI("KernelSU implementation supports CMD_GET_MANAGER_UID.\n");
@@ -139,7 +139,7 @@ bool ksu_uid_granted_root(uid_t uid) {
     return granted;
   }
 
-  struct ksu_uid_granted_root_cmd cmd = { 
+  struct ksu_uid_granted_root_cmd cmd = {
     .uid = uid,
     .granted = 0
   };

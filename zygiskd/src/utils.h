@@ -1,6 +1,7 @@
 #ifndef UTILS_H
 #define UTILS_H
 
+#include <stdio.h>
 #include <sys/types.h>
 
 #include "constants.h"
@@ -84,7 +85,7 @@ void unix_datagram_sendto(const char *restrict path, void *restrict buf, size_t 
 
 int chcon(const char *path, const char *restrict context);
 
-int unix_listener_from_path(char *path);
+int unix_listener_from_path(char const *path);
 
 ssize_t write_fd(int fd, int sendfd);
 int read_fd(int fd);

@@ -23,7 +23,7 @@ void apatch_get_existence(struct root_impl_state *state) {
     return;
   }
 
-  char *PATH = getenv("PATH");
+  char const *PATH = getenv("PATH");
   if (PATH == NULL) {
     LOGE("Failed to get PATH environment variable: %s\n", strerror(errno));
     errno = 0;
@@ -103,7 +103,7 @@ bool _apatch_get_package_config(struct packages_config *restrict config) {
     return false;
   }
 
-  while (fgets(line, sizeof(line), fp) != NULL) { 
+  while (fgets(line, sizeof(line), fp) != NULL) {
     struct package_config *tmp_configs = realloc(config->configs, (config->size + 1) * sizeof(struct package_config));
     if (tmp_configs == NULL) {
       LOGE("Failed to realloc APatch config struct: %s\n", strerror(errno));
@@ -117,13 +117,13 @@ bool _apatch_get_package_config(struct packages_config *restrict config) {
 
     config->configs[config->size].process = strdup(strtok(line, ","));
 
-    char *exclude_str = strtok(NULL, ",");
+    char const *exclude_str = strtok(NULL, ",");
     if (exclude_str == NULL) continue;
 
-    char *allow_str = strtok(NULL, ",");
+    char const *allow_str = strtok(NULL, ",");
     if (allow_str == NULL) continue;
 
-    char *uid_str = strtok(NULL, ",");
+    char const *uid_str = strtok(NULL, ",");
     if (uid_str == NULL) continue;
 
     config->configs[config->size].uid = (uid_t)atoi(uid_str);

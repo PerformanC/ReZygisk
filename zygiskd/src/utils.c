@@ -157,7 +157,7 @@ int chcon(const char *restrict path, const char *context) {
   return system(command);
 }
 
-int unix_listener_from_path(char *restrict path) {
+int unix_listener_from_path(char const *restrict path) {
   if (remove(path) == -1 && errno != ENOENT) {
     LOGE("remove: %s\n", strerror(errno));
 
@@ -200,7 +200,7 @@ int unix_listener_from_path(char *restrict path) {
 ssize_t write_fd(int fd, int sendfd) {
   char cmsgbuf[CMSG_SPACE(sizeof(int))];
   char buf[1] = { 0 };
-  
+
   struct iovec iov = {
     .iov_base = buf,
     .iov_len = 1
@@ -312,7 +312,7 @@ ssize_t read_string(int fd, char *restrict buf, size_t buf_size) {
 
     return -1;
   }
-  
+
   if (str_len > buf_size - 1) {
     LOGE("Failed to read string: Buffer is too small (%zu > %zu - 1).\n", str_len, buf_size);
 

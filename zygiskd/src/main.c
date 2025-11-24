@@ -1,7 +1,5 @@
-#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <errno.h>
 
 #include <android/log.h>
 
@@ -61,7 +59,7 @@ int main(int argc, char *argv[]) {
     }
   }
 
-  if (switch_mount_namespace((pid_t)1) == false) {
+  if (switch_mount_namespace(1) == false) {
     LOGE("Failed to switch mount namespace\n");
 
     return 1;
