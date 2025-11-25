@@ -14,6 +14,11 @@
 
 #include "kernelsu.h"
 
+const char *ksu_manager_paths[] = {
+  "/data/user_de/0/me.weishu.kernelsu",
+  "/data/user_de/0/com.rifsxd.ksunext",
+};
+
 /* INFO: It would be presumed it is a unsigned int,
            so we need to cast it to signed int to
            avoid any potential UB.
@@ -195,8 +200,12 @@ bool ksu_uid_is_manager(uid_t uid) {
     }
 
     const char *manager_path = NULL;
-    if (variant == KOfficial) manager_path = "/data/user_de/0/me.weishu.kernelsu";
-    else if (variant == KNext) manager_path = "/data/user_de/0/com.rifsxd.ksunext";
+    if (0 <= variant && variant < KNOVARIANT) manager_path = ksu_manager_paths[variant];
+    else {
+      /* INFO: In theory, manager_path won't ever be NULL, but this'll serve as a fallthrough. */
+      LOGE("KSU manager variant not supported\n");
+      return false;
+    }
 
     struct stat s;
     if (stat(manager_path, &s) == -1) {
@@ -211,7 +220,7 @@ bool ksu_uid_is_manager(uid_t uid) {
     return s.st_uid == uid;
   }
 
-  /* INFO: If it uses ioctl, it already has support to get managet UID operation */
+  /* INFO: If it uses ioctl, it already has support to get manager UID operation */
   struct ksu_get_manager_uid_cmd cmd;
   if (ioctl(ksu_fd, KSU_IOCTL_GET_MANAGER_UID, &cmd) == -1) {
     LOGE("Failed to ioctl KSU_IOCTL_GET_MANAGER_UID: %s\n", strerror(errno));

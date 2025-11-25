@@ -103,6 +103,7 @@ bool _apatch_get_package_config(struct packages_config *restrict config) {
     return false;
   }
 
+  char *saveptr = NULL;
   while (fgets(line, sizeof(line), fp) != NULL) {
     struct package_config *tmp_configs = realloc(config->configs, (config->size + 1) * sizeof(struct package_config));
     if (tmp_configs == NULL) {
@@ -115,17 +116,27 @@ bool _apatch_get_package_config(struct packages_config *restrict config) {
     }
     config->configs = tmp_configs;
 
-    config->configs[config->size].process = strdup(strtok(line, ","));
+    char const *process_str = strtok_r(line, ",", &saveptr);
+    if (process_str == NULL) continue;
 
-    char const *exclude_str = strtok(NULL, ",");
+    char const *exclude_str = strtok_r(NULL, ",", &saveptr);
     if (exclude_str == NULL) continue;
 
-    char const *allow_str = strtok(NULL, ",");
+    char const *allow_str = strtok_r(NULL, ",", &saveptr);
     if (allow_str == NULL) continue;
 
-    char const *uid_str = strtok(NULL, ",");
+    char const *uid_str = strtok_r(NULL, ",", &saveptr);
     if (uid_str == NULL) continue;
 
+    config->configs[config->size].process = strdup(process_str);
+    if (config->configs[config->size].process == NULL) {
+      LOGE("Failed to strdup for the process `%s`: %s\n", process_str, strerror(errno));
+
+      _apatch_free_package_config(config);
+      fclose(fp);
+
+      return false;
+    }
     config->configs[config->size].uid = (uid_t)atoi(uid_str);
     config->configs[config->size].root_granted = strcmp(allow_str, "1") == 0;
     config->configs[config->size].umount_needed = strcmp(exclude_str, "1") == 0;

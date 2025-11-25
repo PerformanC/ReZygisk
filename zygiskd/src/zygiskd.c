@@ -119,6 +119,11 @@ static void load_modules(struct Context *restrict context) {
     }
 
     context->modules[context->len].name = strdup(name);
+    if (context->modules[context->len].name == NULL) {
+      LOGE("Failed to strdup for the module `%s`: %s\n", name, strerror(errno));
+
+      return;
+    }
     context->modules[context->len].lib_fd = lib_fd;
     context->modules[context->len].companion = -1;
     context->len++;
@@ -269,7 +274,7 @@ void zygiskd_start(char *restrict argv[]) {
 
     uint32_t msg_len = (uint32_t)strlen(msg);
     unix_datagram_sendto(CONTROLLER_SOCKET, &msg_len, sizeof(msg_len));
-    unix_datagram_sendto(CONTROLLER_SOCKET, (void *)msg, msg_len);
+    unix_datagram_sendto(CONTROLLER_SOCKET, msg, msg_len);
 
     exit(EXIT_FAILURE);
   } else {

@@ -5,7 +5,8 @@
 
 enum kernelsu_variants {
   KOfficial,
-  KNext
+  KNext,
+  KNOVARIANT,
 };
 
 void ksu_get_existence(struct root_impl_state *state);

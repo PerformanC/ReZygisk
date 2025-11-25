@@ -33,7 +33,7 @@ ssize_t write_loop(int fd, const void *buf, size_t count) {
 ssize_t read_loop(int fd, void *buf, size_t count) {
   ssize_t read_bytes = 0;
   while (read_bytes < (ssize_t)count) {
-    ssize_t ret = read(fd, (char *)buf + read_bytes, count - read_bytes);
+    ssize_t ret = read(fd, buf + read_bytes, count - read_bytes);
     if (ret == -1) {
       if (errno == EINTR || errno == EAGAIN) continue;
 

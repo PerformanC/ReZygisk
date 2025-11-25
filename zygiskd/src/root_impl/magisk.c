@@ -14,11 +14,11 @@
 
 #include "magisk.h"
 
-char *supported_variants[] = {
+const char *supported_variants[] = {
   "kitsune"
 };
 
-char *magisk_managers[] = {
+const char *magisk_managers[] = {
   "com.topjohnwu.magisk",
   "io.github.huskydg.magisk"
 };
@@ -157,8 +157,7 @@ bool magisk_uid_should_umount(const char *const process) {
     return false;
   }
 
-  if (is_using_sulist) return result[0] == '\0';
-  else return result[0] != '\0';
+  return is_using_sulist ? result[0] == '\0' : result[0] != '\0';
 }
 
 bool magisk_uid_is_manager(uid_t uid) {

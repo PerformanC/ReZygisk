@@ -81,7 +81,7 @@ void get_property(const char *name, char *restrict output);
 
 void set_socket_create_context(const char *restrict context);
 
-void unix_datagram_sendto(const char *restrict path, void *restrict buf, size_t len);
+void unix_datagram_sendto(const char *restrict path, const void *restrict buf, size_t len);
 
 int chcon(const char *path, const char *restrict context);
 
