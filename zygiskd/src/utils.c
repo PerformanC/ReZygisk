@@ -157,7 +157,7 @@ int chcon(const char *restrict path, const char *context) {
   return system(command);
 }
 
-int unix_listener_from_path(char const *restrict path) {
+int unix_listener_from_path(const char *restrict path) {
   if (remove(path) == -1 && errno != ENOENT) {
     LOGE("remove: %s\n", strerror(errno));
 

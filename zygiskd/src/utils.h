@@ -85,7 +85,7 @@ void unix_datagram_sendto(const char *restrict path, const void *restrict buf, s
 
 int chcon(const char *path, const char *restrict context);
 
-int unix_listener_from_path(char const *path);
+int unix_listener_from_path(const char *path);
 
 ssize_t write_fd(int fd, int sendfd);
 int read_fd(int fd);
