@@ -199,14 +199,7 @@ bool ksu_uid_is_manager(uid_t uid) {
       return uid == manager_uid;
     }
 
-    const char *manager_path = NULL;
-    if (0 <= variant && variant < KNOVARIANT) manager_path = ksu_manager_paths[variant];
-    else {
-      /* INFO: In theory, manager_path won't ever be NULL, but this'll serve as a fallthrough. */
-      LOGE("KSU manager variant not supported\n");
-      return false;
-    }
-
+    const char *manager_path = ksu_manager_paths[variant];
     struct stat s;
     if (stat(manager_path, &s) == -1) {
       if (errno != ENOENT) {

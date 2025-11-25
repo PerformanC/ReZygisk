@@ -103,8 +103,8 @@ bool _apatch_get_package_config(struct packages_config *restrict config) {
     return false;
   }
 
-  char *saveptr = NULL;
   while (fgets(line, sizeof(line), fp) != NULL) {
+    char *saveptr = NULL;
     struct package_config *tmp_configs = realloc(config->configs, (config->size + 1) * sizeof(struct package_config));
     if (tmp_configs == NULL) {
       LOGE("Failed to realloc APatch config struct: %s\n", strerror(errno));
