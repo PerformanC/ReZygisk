@@ -23,7 +23,7 @@ void apatch_get_existence(struct root_impl_state *state) {
     return;
   }
 
-  char const *PATH = getenv("PATH");
+  const char *PATH = getenv("PATH");
   if (PATH == NULL) {
     LOGE("Failed to get PATH environment variable: %s\n", strerror(errno));
     errno = 0;
@@ -116,16 +116,16 @@ bool _apatch_get_package_config(struct packages_config *restrict config) {
     }
     config->configs = tmp_configs;
 
-    char const *process_str = strtok_r(line, ",", &saveptr);
+    const char *process_str = strtok_r(line, ",", &saveptr);
     if (process_str == NULL) continue;
 
-    char const *exclude_str = strtok_r(NULL, ",", &saveptr);
+    const char *exclude_str = strtok_r(NULL, ",", &saveptr);
     if (exclude_str == NULL) continue;
 
-    char const *allow_str = strtok_r(NULL, ",", &saveptr);
+    const char *allow_str = strtok_r(NULL, ",", &saveptr);
     if (allow_str == NULL) continue;
 
-    char const *uid_str = strtok_r(NULL, ",", &saveptr);
+    const char *uid_str = strtok_r(NULL, ",", &saveptr);
     if (uid_str == NULL) continue;
 
     config->configs[config->size].process = strdup(process_str);
