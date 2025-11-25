@@ -5,6 +5,9 @@
 
 #include <jni.h>
 
+#include <csoloader.h>
+
+#include "logging.h"
 #include "solist.h"
 
 #define REZYGISK_API_VERSION 5
@@ -149,13 +152,8 @@ struct rezygisk_module {
   struct rezygisk_abi abi;
   struct rezygisk_api api;
 
-  void *handle;
+  struct csoloader lib;
   void (*zygisk_module_entry)(void *, void *);
-
-  void *base;
-  size_t size;
-
-  struct soinfo_deconstructor deconstructors;
 
   bool unload;
 };

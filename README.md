@@ -22,11 +22,12 @@ The Zygisk Next developers are famous and trusted in the Android community, howe
 |-----------------|----------------------------------------|
 | `Android NDK`   | Native Development Kit for Android     |
 
-### C++ Dependencies
+### C Dependencies
 
-| Dependency | Description                   |
-|------------|-------------------------------|
-| `lsplt`    | Simple PLT Hook for Android   |
+| Dependency  | Description                   |
+|-------------|-------------------------------|
+| `LSPLt`     | Simple PLT Hook for Android   |
+| `CSOLoader` | SOTA Linux custom linker      |
 
 ## Installation
 

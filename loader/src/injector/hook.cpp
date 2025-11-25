@@ -716,18 +716,17 @@ bool load_modules_only() {
     for (size_t i = 0; i < ms.modules_count; i++) {
         char const* lib_path = ms.modules[i];
 
-        void *handle = dlopen(lib_path, RTLD_NOW);
-        if (!handle) {
-            LOGE("Failed to load module [%s]: %s", lib_path, dlerror());
+        if (!csoloader_load(&zygisk_modules[zygisk_module_length].lib, lib_path)) {
+          LOGE("Failed to load module [%s]", lib_path);
 
-            continue;
+          continue;
         }
 
-        void *entry = dlsym(handle, "zygisk_module_entry");
+        void *entry = csoloader_get_symbol(&zygisk_modules[zygisk_module_length].lib, "zygisk_module_entry");
         if (!entry) {
-            LOGE("Failed to find entry point in module [%s]: %s", lib_path, dlerror());
+          LOGE("Failed to find entry point in module [%s]", lib_path);
 
-            dlclose(handle);
+          csoloader_unload(&zygisk_modules[zygisk_module_length].lib);
 
             continue;
         }
@@ -735,32 +734,16 @@ bool load_modules_only() {
         zygisk_modules[zygisk_module_length].api.register_module = rezygisk_module_register;
         zygisk_modules[zygisk_module_length].api.impl = (void *)zygisk_module_length;
 
-        zygisk_modules[zygisk_module_length].handle = handle;
         zygisk_modules[zygisk_module_length].zygisk_module_entry = (void (*)(void *, void *))entry;
 
-        zygisk_modules[zygisk_module_length].base = solist_get_base(entry);
-        zygisk_modules[zygisk_module_length].size = solist_get_size(entry);
-
-        zygisk_modules[zygisk_module_length].deconstructors = solist_get_deconstructors(entry);
-
-        LOGD("Loaded module [%s]. Entry: %p, Base: %p, Size: %zu, Deconstructors: fini_func=%p, fini_array=%p (size: %zu)",
-            lib_path,
-            entry,
-            zygisk_modules[zygisk_module_length].base,
-            zygisk_modules[zygisk_module_length].size,
-            zygisk_modules[zygisk_module_length].deconstructors.fini_func,
-            zygisk_modules[zygisk_module_length].deconstructors.fini_array,
-            zygisk_modules[zygisk_module_length].deconstructors.fini_array_size);
+        LOGD("Loaded module [%s]. Entry: %p",
+           lib_path,
+           entry);
 
         zygisk_modules[zygisk_module_length].unload = false;
 
-        /* INFO: Early removal to avoid gaps in solist */
-        solist_drop_so_path(entry, false);
-
-        zygisk_module_length++;
+      zygisk_module_length++;
     }
-
-    solist_reset_counters(zygisk_module_length, zygisk_module_length);
 
     free_modules(&ms);
 
@@ -787,25 +770,10 @@ void ZygiskContext::run_modules_post() {
         if (flags[APP_SPECIALIZE]) rezygisk_module_call_post_app_specialize(m, args.app);
         else if (flags[SERVER_FORK_AND_SPECIALIZE]) rezygisk_module_call_post_server_specialize(m, args.server);
 
-        /* INFO: If module is unloaded by dlclose, there's no need to
-                   hide it from soinfo manually. */
         if (!m->unload) continue;
 
-        /* INFO: Deconstructors are called in the inverted order, and following fini array then fini
-                    function order. It must not change. */
-        for (size_t j = m->deconstructors.fini_array_size; j > 0; j--) {
-            void (*destructor)(void) = m->deconstructors.fini_array[j - 1];
-            if (destructor) {
-                LOGD("Calling destructor %p for module %p", (void *)destructor, (void *)m->zygisk_module_entry);
-
-                destructor();
-            }
-        }
-
-        if (m->deconstructors.fini_func) m->deconstructors.fini_func();
-
-        if (munmap(m->base, m->size) == -1) {
-            PLOGE("Failed to unmap module library at %p with size %zu", m->base, m->size);
+        if (csoloader_unload(&m->lib) == false) {
+            LOGE("Failed to unload module library");
 
             continue;
         }
@@ -1100,9 +1068,17 @@ void hook_functions() {
     PLT_HOOK_REGISTER(android_runtime_dev, android_runtime_inode, _ZNK18FileDescriptorInfo14ReopenOrDetach, true);
     
     if (!hook_commit(map_infos)) {
-        LOGE("Failed to commit plt_hook");
-
         plt_hook_list->clear();
+
+        PLT_HOOK_REGISTER(android_runtime_dev, android_runtime_inode, fork, false);
+        PLT_HOOK_REGISTER(android_runtime_dev, android_runtime_inode, strdup, false);
+        PLT_HOOK_REGISTER(android_runtime_dev, android_runtime_inode, property_get, false);
+
+        if (hook_commit(map_infos)) {
+            LOGW("Hooked without ReopenOrDetach hook! Umounting overlays will cause problems");
+        } else {
+            LOGE("Failed to hook neccessary symbols to function");
+        }
     }
 
     lsplt_free_maps(map_infos);

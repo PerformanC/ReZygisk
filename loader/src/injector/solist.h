@@ -17,13 +17,7 @@ struct pdg {
   void *(*dtor)();
 };
 
-struct soinfo_deconstructor {
-  void (*fini_func)();
-  size_t fini_array_size;
-  void (**fini_array)();
-};
-
-/*
+/* 
   INFO: When dlopen'ing a library, the system will save information of the
           opened library so a structure called soinfo, which contains another
           called solist, a list with the information of opened objects.
@@ -46,7 +40,7 @@ struct soinfo_deconstructor {
   SOURCES:
    - https://android.googlesource.com/platform/bionic/+/refs/heads/android15-release/linker/linker.cpp#1712
 */
-bool solist_drop_so_path(void *lib_memory, bool unload);
+bool solist_drop_so_path(void *lib_memory);
 
 /*
   INFO: When dlopen'ing a library, the system will increment 1 to a global
@@ -67,34 +61,7 @@ bool solist_drop_so_path(void *lib_memory, bool unload);
    - https://android.googlesource.com/platform/bionic/+/refs/heads/android15-release/linker/linker.cpp#1944
    - https://android.googlesource.com/platform/bionic/+/refs/heads/android15-release/linker/linker.cpp#3413
 */
-void solist_reset_counters(size_t load, size_t unload);
-
-/*
-  INFO: Helper function to get the size of the mappings of a loaded library.
-
-  SOURCES:
-   - https://android.googlesource.com/platform/bionic/+/refs/heads/android15-release/linker/linker_soinfo.h#171
-*/
-ssize_t solist_get_size(void *lib_memory);
-
-/*
-  INFO: Helper function to get the base of the loaded library, or, in other words
-          the start of the first mapping of the loaded library.
-
-  SOURCES:
-   - https://android.googlesource.com/platform/bionic/+/refs/heads/android15-release/linker/linker_soinfo.h#170
-*/
-void *solist_get_base(void *lib_memory);
-
-/*
-  INFO: Helper function to get the callback to the loaded library deconstructors (fini).
-
-  SOURCES:
-   - https://android.googlesource.com/platform/bionic/+/refs/heads/android15-release/linker/linker_soinfo.h#219
-   - https://android.googlesource.com/platform/bionic/+/refs/heads/android15-release/linker/linker_soinfo.h#220
-   - https://android.googlesource.com/platform/bionic/+/refs/heads/android15-release/linker/linker_soinfo.h#222
-*/
-struct soinfo_deconstructor solist_get_deconstructors(void *lib_memory);
+void solist_reset_counters(size_t libs_loaded);
 
 #ifdef __cplusplus
 }

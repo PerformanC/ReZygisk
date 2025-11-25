@@ -1,3 +1,6 @@
 [submodule "LSPlt"]
 	path = loader/src/external/lsplt
 	url = https://github.com/PerformanC/LSPlt
+[submodule "CSOLoader"]
+	path = loader/src/external/csoloader
+	url = https://github.com/ThePedroo/CSOLoader
