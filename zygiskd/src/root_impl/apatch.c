@@ -115,17 +115,17 @@ bool _apatch_get_package_config(struct packages_config *restrict config) {
     }
     config->configs = tmp_configs;
 
-    char *saveptr = NULL;
-    const char *process_str = strtok_r(line, ",", &saveptr);
+    char *save_ptr = NULL;
+    const char *process_str = strtok_r(line, ",", &save_ptr);
     if (process_str == NULL) continue;
 
-    const char *exclude_str = strtok_r(NULL, ",", &saveptr);
+    const char *exclude_str = strtok_r(NULL, ",", &save_ptr);
     if (exclude_str == NULL) continue;
 
-    const char *allow_str = strtok_r(NULL, ",", &saveptr);
+    const char *allow_str = strtok_r(NULL, ",", &save_ptr);
     if (allow_str == NULL) continue;
 
-    const char *uid_str = strtok_r(NULL, ",", &saveptr);
+    const char *uid_str = strtok_r(NULL, ",", &save_ptr);
     if (uid_str == NULL) continue;
 
     config->configs[config->size].process = strdup(process_str);
