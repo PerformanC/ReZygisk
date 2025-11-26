@@ -104,7 +104,6 @@ bool _apatch_get_package_config(struct packages_config *restrict config) {
   }
 
   while (fgets(line, sizeof(line), fp) != NULL) {
-    char *saveptr = NULL;
     struct package_config *tmp_configs = realloc(config->configs, (config->size + 1) * sizeof(struct package_config));
     if (tmp_configs == NULL) {
       LOGE("Failed to realloc APatch config struct: %s\n", strerror(errno));
@@ -116,6 +115,7 @@ bool _apatch_get_package_config(struct packages_config *restrict config) {
     }
     config->configs = tmp_configs;
 
+    char *saveptr = NULL;
     const char *process_str = strtok_r(line, ",", &saveptr);
     if (process_str == NULL) continue;
 
