@@ -124,7 +124,7 @@ static bool solist_init() {
   return true;
 
   solist_init_error:
-  ElfImg_destroy(linker);
+    ElfImg_destroy(linker);
 
   heuristics_done = true;
 
