@@ -96,7 +96,7 @@ size_t calculate_valid_symtabs_amount(ElfImg *img) {
     return 0;
   }
 
-  char *symtab_strings = offsetOf_char(img->header, img->symstr_offset_for_symtab);
+  const char *symtab_strings = offsetOf_char(img->header, img->symstr_offset_for_symtab);
 
   for (ElfW(Off) i = 0; i < img->symtab_count; i++) {
     const char *sym_name = symtab_strings + img->symtab_start[i].st_name;
@@ -242,7 +242,7 @@ ElfImg *ElfImg_create(const char *elf, void *base) {
   ElfW(Shdr) *dynsym_shdr = NULL;
   ElfW(Shdr) *symtab_shdr = NULL;
 
-  char *section_str = NULL;
+  const char *section_str = NULL;
   if (img->section_header && img->header->e_shstrndx != SHN_UNDEF) {
     if (img->header->e_shstrndx < img->header->e_shnum) {
       ElfW(Shdr) *shstrtab_hdr = img->section_header + img->header->e_shstrndx;
@@ -258,7 +258,7 @@ ElfImg *ElfImg_create(const char *elf, void *base) {
     uintptr_t shoff = (uintptr_t)img->section_header;
     for (int i = 0; i < img->header->e_shnum; i++, shoff += img->header->e_shentsize) {
       ElfW(Shdr) *section_h = (ElfW(Shdr *))shoff;
-      char *sname = section_str ? (section_h->sh_name + section_str) : "<?>";
+      const char *sname = section_str ? (section_h->sh_name + section_str) : "<?>";
       size_t entsize = section_h->sh_entsize;
 
       switch (section_h->sh_type) {
@@ -460,7 +460,7 @@ bool _load_symtabs(ElfImg *img) {
     return false;
   }
 
-  char *symtab_strings = offsetOf_char(img->header, img->symstr_offset_for_symtab);
+  const char *symtab_strings = offsetOf_char(img->header, img->symstr_offset_for_symtab);
   size_t current_valid_index = 0;
 
   for (ElfW(Off) pos = 0; pos < img->symtab_count; pos++) {
@@ -530,10 +530,10 @@ ElfW(Addr) GnuLookup(ElfImg *restrict img, const char *name, uint32_t hash, unsi
     return 0;
   }
 
-  char *strings = (char *)img->strtab_start;
+  const char *strings = (char *)img->strtab_start;
   uint32_t chain_val = img->gnu_chain_[sym_index - img->gnu_symndx_];
 
-  ElfW(Word) dynsym_count = img->dynsym->sh_size / img->dynsym->sh_entsize;
+  ElfW(Xword) dynsym_count = img->dynsym->sh_size / img->dynsym->sh_entsize;
   if (sym_index >= dynsym_count) {
     LOGE("Symbol index %u out of bounds", sym_index);
 
@@ -549,7 +549,7 @@ ElfW(Addr) GnuLookup(ElfImg *restrict img, const char *name, uint32_t hash, unsi
   }
 
   if ((((chain_val ^ hash) >> 1) == 0 && strcmp(name, strings + sym->st_name) == 0) && sym->st_shndx != SHN_UNDEF) {
-    unsigned int type = ELF_ST_TYPE(sym->st_info);
+    unsigned char type = ELF_ST_TYPE(sym->st_info);
     if (sym_type) *sym_type = type;
 
     return sym->st_value;
@@ -574,7 +574,7 @@ ElfW(Addr) GnuLookup(ElfImg *restrict img, const char *name, uint32_t hash, unsi
     }
 
     if ((((chain_val ^ hash) >> 1) == 0 && strcmp(name, strings + sym->st_name) == 0) && sym->st_shndx != SHN_UNDEF) {
-      unsigned int type = ELF_ST_TYPE(sym->st_info);
+      unsigned char type = ELF_ST_TYPE(sym->st_info);
       if (sym_type) *sym_type = type;
 
       return sym->st_value;
@@ -588,13 +588,13 @@ ElfW(Addr) ElfLookup(ElfImg *restrict img, const char *restrict name, uint32_t h
   if (img->nbucket_ == 0 || !img->bucket_ || !img->chain_ || !img->dynsym_start || !img->strtab_start)
     return 0;
 
-  char *strings = (char *)img->strtab_start;
+  const char *strings = (char *)img->strtab_start;
 
   for (size_t n = img->bucket_[hash % img->nbucket_]; n != STN_UNDEF; n = img->chain_[n]) {
     ElfW(Sym) *sym = img->dynsym_start + n;
 
     if (strcmp(name, strings + sym->st_name) == 0 && sym->st_shndx != SHN_UNDEF) {
-      unsigned int type = ELF_ST_TYPE(sym->st_info);
+      unsigned char type = ELF_ST_TYPE(sym->st_info);
       if (sym_type) *sym_type = type;
 
       return sym->st_value;
@@ -625,7 +625,7 @@ ElfW(Addr) LinearLookup(ElfImg *img, const char *restrict name, unsigned char *s
     if (img->symtabs_[i].sym->st_shndx == SHN_UNDEF)
       continue;
 
-    unsigned int type = ELF_ST_TYPE(img->symtabs_[i].sym->st_info);
+    unsigned char type = ELF_ST_TYPE(img->symtabs_[i].sym->st_info);
     if (sym_type) *sym_type = type;
 
     return img->symtabs_[i].sym->st_value;
@@ -661,7 +661,7 @@ ElfW(Addr) LinearLookupByPrefix(ElfImg *img, const char *prefix, unsigned char *
     if (img->symtabs_[i].sym->st_shndx == SHN_UNDEF)
       continue;
 
-    unsigned int type = ELF_ST_TYPE(img->symtabs_[i].sym->st_info);
+    unsigned char type = ELF_ST_TYPE(img->symtabs_[i].sym->st_info);
     if (sym_type) *sym_type = type;
 
     return img->symtabs_[i].sym->st_value;
@@ -756,12 +756,12 @@ ElfW(Addr) getSymbOffset(ElfImg *img, const char *name, unsigned char *sym_type)
          This function is based on AOSP's (Android Open Source Project) code, and resolves the
            indirect symbol, leading to the correct, most appropriate for the hardware, symbol.
 
-    SOURCES: 
+    SOURCES:
      - https://android.googlesource.com/platform/bionic/+/refs/tags/android-16.0.0_r1/linker/linker.cpp#2594
      - https://android.googlesource.com/platform/bionic/+/tags/android-16.0.0_r1/libc/bionic/bionic_call_ifunc_resolver.cpp#41
 */
 static ElfW(Addr) handle_indirect_symbol(ElfImg *img, ElfW(Off) offset) {
-  ElfW(Addr) resolver_addr = (ElfW(Addr))((uintptr_t)img->base + offset - img->bias);
+  ElfW(Addr) resolver_addr = ((uintptr_t)img->base + offset - img->bias);
 
   #ifdef __aarch64__
     typedef ElfW(Addr) (*ifunc_resolver_t)(uint64_t, struct __ifunc_arg_t *);
@@ -800,7 +800,7 @@ ElfW(Addr) getSymbAddress(ElfImg *img, const char *name) {
     return handle_indirect_symbol(img, offset);
   }
 
-  return (ElfW(Addr))((uintptr_t)img->base + offset - img->bias);
+  return ((uintptr_t)img->base + offset - img->bias);
 }
 
 ElfW(Addr) getSymbAddressByPrefix(ElfImg *img, const char *prefix) {
@@ -815,7 +815,7 @@ ElfW(Addr) getSymbAddressByPrefix(ElfImg *img, const char *prefix) {
     return handle_indirect_symbol(img, offset);
   }
 
-  return (ElfW(Addr))((uintptr_t)img->base + offset - img->bias);
+  return ((uintptr_t)img->base + offset - img->bias);
 }
 
 void *getSymbValueByPrefix(ElfImg *img, const char *prefix) {

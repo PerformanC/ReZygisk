@@ -25,7 +25,7 @@ int rezygiskd_connect(uint8_t retry) {
     .sun_path = { 0 }
   };
 
-  /* 
+  /*
     INFO: Application must assume that sun_path can hold _POSIX_PATH_MAX characters.
 
     Sources:
@@ -73,7 +73,7 @@ uint32_t rezygiskd_get_process_flags(uid_t uid, const char *const process) {
   }
 
   write_uint8_t(fd, (uint8_t)GetProcessFlags);
-  write_uint32_t(fd, (uint32_t)uid);
+  write_uint32_t(fd, uid);
   write_string(fd, process);
 
   uint32_t res = 0;
