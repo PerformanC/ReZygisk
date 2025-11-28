@@ -90,7 +90,7 @@ struct ZygiskContext {
     vector<IgnoreInfo> ignore_info;
 
     ZygiskContext(JNIEnv *env, void *args) :
-        env(env), args{args}, process(nullptr), pid(-1), info_flags(0),
+        env(env), args{args}, process(NULL), pid(-1), info_flags(0),
         hook_info_lock(PTHREAD_MUTEX_INITIALIZER)
     {
         g_ctx = this;
@@ -714,7 +714,7 @@ bool load_modules_only() {
     }
 
     for (size_t i = 0; i < ms.modules_count; i++) {
-        char const* lib_path = ms.modules[i];
+        const char *lib_path = ms.modules[i];
 
         if (!csoloader_load(&zygisk_modules[zygisk_module_length].lib, lib_path)) {
           LOGE("Failed to load module [%s]", lib_path);
@@ -1066,7 +1066,7 @@ void hook_functions() {
     PLT_HOOK_REGISTER(android_runtime_dev, android_runtime_inode, strdup, false);
     PLT_HOOK_REGISTER(android_runtime_dev, android_runtime_inode, property_get, false);
     PLT_HOOK_REGISTER(android_runtime_dev, android_runtime_inode, _ZNK18FileDescriptorInfo14ReopenOrDetach, true);
-    
+
     if (!hook_commit(map_infos)) {
         plt_hook_list->clear();
 

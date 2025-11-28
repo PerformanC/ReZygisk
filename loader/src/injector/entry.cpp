@@ -4,9 +4,7 @@
 #include "solist.h"
 #include "zygisk.hpp"
 
-using namespace std;
-
-void *start_addr = nullptr;
+void *start_addr = NULL;
 size_t block_size = 0;
 
 extern "C" [[gnu::visibility("default")]]
