@@ -22,11 +22,12 @@ Các nhà phát triển Zygisk Next đều là những người nổi tiếng v�
 |---------------------------|-------------------------------------------|
 | `Android NDK`             | Bộ công cụ phát triển cốt lõi cho Android |
 
-### Các công cụ/thư viện của C++ được sử dụng
+### Các công cụ/thư viện của C được sử dụng
 
-| Thư Viện   | Mô Tả                                        |
-|------------|----------------------------------------------|
-| `lsplt`    | Công cụ **móc** vào PLT đơn giản cho Android |
+| Thư Viện    | Mô Tả                                        |
+|-------------|----------------------------------------------|
+| `lsplt`     | Công cụ **móc** vào PLT đơn giản cho Android |
+| `CSOLoader` | Linker tùy biến **tối tân** của Linux        |
 
 ## Cài Đặt
 
@@ -37,9 +38,9 @@ Chọn đúng tệp bản dựng / zip là một điều tất yếu, bởi nó 
 - `release` bản này sẽ được chọn trong hầy hết các trường hợp sử dụng, bản này loại bỏ nhật ký phát triển cấp độ ứng dụng và cung cấp các tệp nhị phân được tối ưu hóa hơn.
 - `debug`,  bản này tuy nhiên không được tối ưu và đi kèm với nó là ghi lại nhật ký phát triển khá nhiều. Vì lý do này, **chỉ nên sử dụng khi cần gỡ lỗi** và **khi cần ghi lại nhật lý để tạo báo về lỗi hoặc gì đó**.
 
-As for branches, you should always use the `main` branch, unless told otherwise by the developers, or if you want to test upcoming features and are aware of the risks involved.
+Đối với nhánh, bạn nên sử dụng nhánh `main` là chính, trừ khi các nhà phát triển nói bạn sử dụng nhánh khác, hoặc khi bạn muốn kiểm thử những tính năng mới và bạn đã biết được những rủi ro liên quan đến thiết bị của bạn.
 
-### 2. Flash the zip
+### 2. Flash tệp zip
 
 Sau khi chọn một bản dựng phù hợp với bạn, điều cần làm là flash nó bằng trình quản lý root như Magisk hay KernelSU. Bạn có thể làm điều này bằng cách vào mục `Mô-đun / Module` của trình quản lý root của bạn và chọn tệp zip vừa tải xuống.
 
