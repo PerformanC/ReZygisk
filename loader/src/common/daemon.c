@@ -57,7 +57,7 @@ bool rezygiskd_ping() {
     return false;
   }
 
-  write_uint8_t(fd, (uint8_t)PingHeartbeat);
+  write_uint8_t(fd, PingHeartbeat);
 
   close(fd);
 
@@ -72,7 +72,7 @@ uint32_t rezygiskd_get_process_flags(uid_t uid, const char *const process) {
     return 0;
   }
 
-  write_uint8_t(fd, (uint8_t)GetProcessFlags);
+  write_uint8_t(fd, GetProcessFlags);
   write_uint32_t(fd, uid);
   write_string(fd, process);
 
@@ -96,7 +96,7 @@ void rezygiskd_get_info(struct rezygisk_info *info) {
 
   info->running = true;
 
-  write_uint8_t(fd, (uint8_t)GetInfo);
+  write_uint8_t(fd, GetInfo);
 
   uint32_t flags = 0;
   read_uint32_t(fd, &flags);
