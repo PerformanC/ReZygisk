@@ -117,7 +117,7 @@ void rezygiskd_get_info(struct rezygisk_info *info) {
     return;
   }
 
-  info->modules.modules = (char **)malloc(sizeof(char *) * info->modules.modules_count);
+  info->modules.modules = malloc(sizeof(*info->modules.modules) * info->modules.modules_count);
   if (!info->modules.modules) {
     PLOGE("allocating modules name memory");
 
