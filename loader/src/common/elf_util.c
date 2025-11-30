@@ -503,7 +503,7 @@ bool _load_symtabs(ElfImg *img) {
   return true;
 }
 
-ElfW(Addr) GnuLookup(ElfImg *restrict img, const char *name, uint32_t hash, unsigned char *sym_type) {
+ElfW(Addr) GnuLookup(ElfImg *restrict img, const char *name, uint32_t hash, unsigned int *sym_type) {
   if (img->gnu_nbucket_ == 0 || img->gnu_bloom_size_ == 0 || !img->gnu_bloom_filter_ || !img->gnu_bucket_ || !img->gnu_chain_ || !img->dynsym_start || !img->strtab_start)
     return 0;
 
@@ -530,7 +530,7 @@ ElfW(Addr) GnuLookup(ElfImg *restrict img, const char *name, uint32_t hash, unsi
     return 0;
   }
 
-  const char *strings = (char *)img->strtab_start;
+  const char *strings = img->strtab_start;
   uint32_t chain_val = img->gnu_chain_[sym_index - img->gnu_symndx_];
 
   ElfW(Xword) dynsym_count = img->dynsym->sh_size / img->dynsym->sh_entsize;
@@ -549,7 +549,7 @@ ElfW(Addr) GnuLookup(ElfImg *restrict img, const char *name, uint32_t hash, unsi
   }
 
   if ((((chain_val ^ hash) >> 1) == 0 && strcmp(name, strings + sym->st_name) == 0) && sym->st_shndx != SHN_UNDEF) {
-    unsigned char type = ELF_ST_TYPE(sym->st_info);
+    unsigned int type = ELF_ST_TYPE(sym->st_info);
     if (sym_type) *sym_type = type;
 
     return sym->st_value;
@@ -574,7 +574,7 @@ ElfW(Addr) GnuLookup(ElfImg *restrict img, const char *name, uint32_t hash, unsi
     }
 
     if ((((chain_val ^ hash) >> 1) == 0 && strcmp(name, strings + sym->st_name) == 0) && sym->st_shndx != SHN_UNDEF) {
-      unsigned char type = ELF_ST_TYPE(sym->st_info);
+      unsigned int type = ELF_ST_TYPE(sym->st_info);
       if (sym_type) *sym_type = type;
 
       return sym->st_value;
@@ -584,7 +584,7 @@ ElfW(Addr) GnuLookup(ElfImg *restrict img, const char *name, uint32_t hash, unsi
   return 0;
 }
 
-ElfW(Addr) ElfLookup(ElfImg *restrict img, const char *restrict name, uint32_t hash, unsigned char *sym_type) {
+ElfW(Addr) ElfLookup(ElfImg *restrict img, const char *restrict name, uint32_t hash, unsigned int *sym_type) {
   if (img->nbucket_ == 0 || !img->bucket_ || !img->chain_ || !img->dynsym_start || !img->strtab_start)
     return 0;
 
@@ -594,7 +594,7 @@ ElfW(Addr) ElfLookup(ElfImg *restrict img, const char *restrict name, uint32_t h
     ElfW(Sym) *sym = img->dynsym_start + n;
 
     if (strcmp(name, strings + sym->st_name) == 0 && sym->st_shndx != SHN_UNDEF) {
-      unsigned char type = ELF_ST_TYPE(sym->st_info);
+      unsigned int type = ELF_ST_TYPE(sym->st_info);
       if (sym_type) *sym_type = type;
 
       return sym->st_value;
@@ -604,7 +604,7 @@ ElfW(Addr) ElfLookup(ElfImg *restrict img, const char *restrict name, uint32_t h
   return 0;
 }
 
-ElfW(Addr) LinearLookup(ElfImg *img, const char *restrict name, unsigned char *sym_type) {
+ElfW(Addr) LinearLookup(ElfImg *img, const char *restrict name, unsigned int *sym_type) {
   if (!_load_symtabs(img)) {
     LOGE("Failed to load symtabs for linear lookup of %s", name);
 
@@ -625,7 +625,7 @@ ElfW(Addr) LinearLookup(ElfImg *img, const char *restrict name, unsigned char *s
     if (img->symtabs_[i].sym->st_shndx == SHN_UNDEF)
       continue;
 
-    unsigned char type = ELF_ST_TYPE(img->symtabs_[i].sym->st_info);
+    unsigned int type = ELF_ST_TYPE(img->symtabs_[i].sym->st_info);
     if (sym_type) *sym_type = type;
 
     return img->symtabs_[i].sym->st_value;
@@ -634,7 +634,7 @@ ElfW(Addr) LinearLookup(ElfImg *img, const char *restrict name, unsigned char *s
   return 0;
 }
 
-ElfW(Addr) LinearLookupByPrefix(ElfImg *img, const char *prefix, unsigned char *sym_type) {
+ElfW(Addr) LinearLookupByPrefix(ElfImg *img, const char *prefix, unsigned int *sym_type) {
   if (!_load_symtabs(img)) {
     LOGE("Failed to load symtabs for linear lookup by prefix of %s", prefix);
 
@@ -661,7 +661,7 @@ ElfW(Addr) LinearLookupByPrefix(ElfImg *img, const char *prefix, unsigned char *
     if (img->symtabs_[i].sym->st_shndx == SHN_UNDEF)
       continue;
 
-    unsigned char type = ELF_ST_TYPE(img->symtabs_[i].sym->st_info);
+    unsigned int type = ELF_ST_TYPE(img->symtabs_[i].sym->st_info);
     if (sym_type) *sym_type = type;
 
     return img->symtabs_[i].sym->st_value;
@@ -670,7 +670,7 @@ ElfW(Addr) LinearLookupByPrefix(ElfImg *img, const char *prefix, unsigned char *
   return 0;
 }
 
-ElfW(Addr) getSymbOffset(ElfImg *img, const char *name, unsigned char *sym_type) {
+ElfW(Addr) getSymbOffset(ElfImg *img, const char *name, unsigned int *sym_type) {
   ElfW(Addr) offset = 0;
 
   offset = GnuLookup(img, name, GnuHash(name), sym_type);
@@ -789,7 +789,7 @@ static ElfW(Addr) handle_indirect_symbol(ElfImg *img, ElfW(Off) offset) {
 }
 
 ElfW(Addr) getSymbAddress(ElfImg *img, const char *name) {
-  unsigned char sym_type = 0;
+  unsigned int sym_type = 0;
   ElfW(Addr) offset = getSymbOffset(img, name, &sym_type);
 
   if (offset == 0 || !img->base) return 0;
@@ -804,7 +804,7 @@ ElfW(Addr) getSymbAddress(ElfImg *img, const char *name) {
 }
 
 ElfW(Addr) getSymbAddressByPrefix(ElfImg *img, const char *prefix) {
-  unsigned char sym_type = 0;
+  unsigned int sym_type = 0;
   ElfW(Addr) offset = LinearLookupByPrefix(img, prefix, &sym_type);
 
   if (offset == 0 || !img->base) return 0;
