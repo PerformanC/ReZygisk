@@ -143,7 +143,7 @@ void ElfImg_destroy(ElfImg *img) {
 
 
 ElfImg *ElfImg_create(const char *elf, void *base) {
-  ElfImg *img = (ElfImg *)calloc(1, sizeof(ElfImg));
+  ElfImg *img = calloc(1, sizeof(*img));
   if (!img) {
     LOGE("Failed to allocate memory for ElfImg");
 
@@ -342,6 +342,12 @@ ElfImg *ElfImg_create(const char *elf, void *base) {
 
           break;
         }
+        default: {
+          LOGE("Section header type not supported");
+
+          ElfImg_destroy(img);
+          return NULL;
+        }
       }
     }
   }
@@ -357,7 +363,7 @@ ElfImg *ElfImg_create(const char *elf, void *base) {
       if (linked_strtab->sh_type == SHT_STRTAB) {
         img->strtab = linked_strtab;
         img->symstr_offset = linked_strtab->sh_offset;
-        img->strtab_start = (void *)offsetOf_char(img->header, img->symstr_offset);
+        img->strtab_start = offsetOf_char(img->header, img->symstr_offset);
       } else {
         LOGW("Section %u linked by .dynsym is not SHT_STRTAB (type %u)", dynsym_shdr->sh_link, linked_strtab->sh_type);
       }
@@ -453,7 +459,7 @@ bool _load_symtabs(ElfImg *img) {
     return false;
   }
 
-  img->symtabs_ = (struct symtabs *)calloc(valid_symtabs_amount, sizeof(struct symtabs));
+  img->symtabs_ = calloc(valid_symtabs_amount, sizeof(*img->symtabs_));
   if (!img->symtabs_) {
     LOGE("Failed to allocate memory for symtabs array");
 
