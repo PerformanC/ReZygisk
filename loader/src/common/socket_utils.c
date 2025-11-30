@@ -119,14 +119,14 @@ char *read_string(int fd) {
 
   char *buf = malloc(str_len + 1);
   if (buf == NULL) {
-    PLOGE("allocate memory for string");
+    PLOGE("memory allocation for string");
 
     return NULL;
   }
 
   read_bytes = read_loop(fd, buf, str_len);
   if (read_bytes != (ssize_t)str_len) {
-    LOGE("Failed to read string: Promised bytes doesn't exist (%zd != %zu).\n", read_bytes, str_len);
+    LOGE("Failed to read string: Promised bytes don't exist (%zd != %zu).\n", read_bytes, str_len);
 
     free(buf);
 

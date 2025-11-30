@@ -48,7 +48,7 @@ struct rezygisk_info {
   bool running;
 };
 
-enum mount_namespace_state {
+enum mount_namespace_state : uint8_t {
   Clean,
   Mounted
 };

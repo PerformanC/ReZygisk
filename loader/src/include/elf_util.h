@@ -2,7 +2,6 @@
 #define ELF_UTIL_H
 
 #include <stdbool.h>
-#include <string.h>
 #include <link.h>
 #include <sys/types.h>
 #include <pthread.h> // Added for threading primitives
@@ -61,7 +60,7 @@ void ElfImg_destroy(ElfImg *img);
 
 ElfImg *ElfImg_create(const char *elf, void *base);
 
-ElfW(Addr) getSymbOffset(ElfImg *img, const char *name, unsigned char *sym_type);
+ElfW(Addr) getSymbOffset(ElfImg *img, const char *name, unsigned int *sym_type);
 
 ElfW(Addr) getSymbAddress(ElfImg *img, const char *name);
 
