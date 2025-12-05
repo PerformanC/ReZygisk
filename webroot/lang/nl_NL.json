@@ -1,30 +1,11 @@
 {
   "langName": "Nederlands",
-  "global": {
-    "unknown": "Onbekend"
-  },
-  "smallPage": {
-    "language": {
-      "header": "Kies uw nieuwe taal"
-    },
-    "theme": {
-      "header": "Kies uw nieuwe thema",
-      "dark": "Donker",
-      "light": "Licht",
-      "system": "Systeem Gebaseerd"
-    },
-    "errorh": {
-      "buttons": {
-        "copy": "KOPIËREN",
-        "clear": "VERWIJDER ALLE LOGS"
-      },
-      "header": "Foutmelding Geschiedenis",
-      "placeholder": "Er is hier geen foutlogboek geregistreerd!"
-    }
-  },
-  "page": {
+  "pages": {
     "home": {
-      "header": "Thuis",
+      "title": "Thuis",
+      "unknown": "Onbekend",
+      "androidVersion": "Android Version",
+			"linuxKernelVersion": "Linux Kernel Version",
       "status": {
         "notWorking": "Werkt Niet",
         "ok": "Werkt",
@@ -40,54 +21,67 @@
         }
       }
     },
+    "actions": {
+      "title": "Acties",
+      "monitor": {
+        "title": "Bewaken",
+        "status": {
+          "tracing": "Traceren",
+          "stopping": "Bezig met Stoppen",
+          "stopped": "Gestopt",
+          "exiting": "Wordt Beëindigd",
+          "unknown": "Onbekend"
+        },
+        "button": {
+          "pause": "Pauzeren",
+          "stop": "Stoppen",
+          "start": "Starten"
+        }
+      }
+    },
     "modules": {
-      "header": "Modules",
+      "title": "Modules",
       "notAvaliable": "Geen modules die Zygisk gebruiken.",
       "arch": "Architectuur: "
     },
     "settings": {
-      "header": "Instellingen",
-      "font": {
-        "header": "Systeem lettertype inschakelen",
-        "description": "Deze optie zal het systeemlettertype inschakelen in huidige WebUI. Opmerking: Kan niet compatibel zijn met FlipFont"
+      "title": "Instellingen",
+      "language": {
+        "title": "Taal wijzigen",
+        "description": "Change the language of the WebUI to the selected one."
+      },
+      "fullscreen": {
+        "title": "Disable fullscreen mode in WebUI",
+        "description": "This option will make the WebUI not fill the whole screen."
       },
       "theme": {
-        "header": "Systeem thema",
-        "description": "Kies uw systeemthema voor huidige WebUI"
+        "title": "Change WebUI theme",
+        "description": "Choose your system theme for current WebUI"
       },
-      "language": {
-        "header": "Taal wijzigen",
-        "description": "Verander naar nieuwe taal"
+      "font": {
+        "title": "Systeem lettertype inschakelen",
+        "description": "Deze optie zal het systeemlettertype inschakelen in huidige WebUI. Opmerking: Kan niet compatibel zijn met FlipFont"
       },
-      "logs": {
-        "header": "Foutmelding Geschiedenis",
-        "description": "Al uw foutenlogboek weergeven"
-      },
-      "credits": {
-        "module": "Module Ontwikkelaar",
-        "original": "Originele Module Ontwikkelaar",
-        "web": "WebUI Ontwikkelaar"
-      },
-      "license": {
-        "module": "Module Licentie",
-        "web": "WebUI Licentie"
-      }
+      "moduleDevelopers": "Module Developer(s)",
+      "WebUIDevelopers": "WebUI Developer(s)",
+      "orginalDevelopers": "Original Module Developer(s)",
+      "moduleLicense": "Module License",
+      "WebUILicense": "WebUI License"
     },
-    "actions": {
-      "header": "Acties",
-      "monitorButton": {
-        "pause": "Pauzeren",
-        "stop": "Stoppen",
-        "start": "Starten"
-      },
-      "monitor": "Bewaken",
-      "status": {
-        "tracing": "Traceren",
-        "stopping": "Bezig met Stoppen",
-        "stopped": "Gestopt",
-        "exiting": "Wordt Beëindigd",
-        "unknown": "Onbekend"
+    "mini_settings_language": {
+      "title": "Taal wijzigen"
+    },
+    "mini_settings_theme": {
+      "title": "Change WebUI theme",
+      "theme": {
+        "dark": "Dark Theme",
+        "light": "Light Theme",
+        "amoled": "Amoled Theme",
+        "system_based": "System Based Theme"
       }
     }
+  },
+  "globals": {
+    "unknown": "Onbekend"
   }
 }

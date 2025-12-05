@@ -31,16 +31,29 @@
   filter: invert(1);
 }
 
+.back_icon {
+  background: url(../assets/back.svg);
+  width: 24px;
+  height: 24px;
+  z-index: 10;
+  filter: invert(1);
+}
+
+.close_icon {
+  background: url(../assets/back.svg);
+  width: 24px;
+  height: 24px;
+  z-index: 10;
+  filter: invert(1);
+}
+
+.back_icon {
+  background: url(../assets/back.svg);
+  z-index: 10;
+  filter: invert(1);
+}
+
 /* Light */
 .light_icon_mode {
-  filter: invert(0) !important;
+  filter: invert(0.3) !important;
 }
-
-#ec_icon {
-  background: url(../assets/ec-icon.svg);
-  z-index: 40;
-}
-
-/* .fill {
-
-} */

@@ -1,0 +1,54 @@
+/* INFO: Code shared with settings page */
+.dimc {
+  background: var(--dim);
+  word-break: break-word;
+}
+
+.liste {
+  justify-content: space-between;
+  align-self: center;
+  display: flex;
+}
+
+.center {
+  justify-content: center;
+  align-self: center;
+  display: flex;
+}
+
+.button_list {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  column-gap: 20px;
+}
+
+.button {
+  padding: 1em 0 1em 0;
+  border-radius: 30px;
+  transition: transform 0.1s ease-in-out;
+  background-color: var(--button);
+}
+
+.button:active {
+  transform: scale(90%) 
+}
+
+/* Responsive CSS */
+@media only screen and (max-width: 600px) {
+  .button_list {
+    display: grid;
+    grid-template-columns: 1fr;
+    column-gap: 20px;
+  }
+  .button {
+    padding: 2em 0 2em 0;
+    border-radius: 20px;
+    margin: 0.5em 0 0.5em;
+    transition: transform 0.15s ease-in-out;
+    background-color: var(--button);
+    font-size: 18px;
+  }
+  .button:active {
+    transform: scale(90%) 
+  }
+}

@@ -1,8 +1,8 @@
-.clangd
-.cxx
 .gradle
 .idea
+.cxx
 .vscode
 build
 local.properties
 Cargo.lock
+webroot_legacy/
