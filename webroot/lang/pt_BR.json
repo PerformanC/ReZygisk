@@ -51,7 +51,7 @@
         "description": "Mudar a linguagem da WebUI para a selecionada."
       },
       "fullscreen": {
-        "title": "Disabilitar a tela cheia na WebUI",
+        "title": "Desabilitar a tela cheia na WebUI",
         "description": "Essa opção fai fazer a WebUI não ocupar a tela inteira."
       },
       "theme": {
