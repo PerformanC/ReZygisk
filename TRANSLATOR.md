@@ -13,6 +13,7 @@
 - **ms_MS** by [@sheeplag (crowdin)](https://crowdin.com/profile/sheeplag)
 - **nl_NL** by [@DragoWing (crowdin)](https://crowdin.com/profile/DragoWing)
 - **pt_BR** by [@ThePedroo](https://github.com/ThePedroo)
+   - a part of **pt_BR** by [@CharaDreemurrDT](https://github.com/CharaDreemurrDT)
 - [Removed due to missing translation] **ro_RO** by [@ExtremeXT](https://github.com/ExtremeXT)
 - **ru_RU** by [@Emulond](https://github.com/Emulond) & [@AJleKcAHgP68](https://github.com/AJleKcAHgP68)
 - **tr_TR** by [@witchfuneral](https://github.com/witchfuneral)
