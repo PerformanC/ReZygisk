@@ -1,19 +1,38 @@
 {
   "langName": "Español (México)",
-  "pages": {
+  "global": {
+    "unknown": "Desconocido"
+  },
+  "smallPage": {
+    "language": {
+      "header": "Selecciona tu nuevo idioma"
+    },
+    "theme": {
+      "header": "Elige tu nuevo tema",
+      "dark": "Oscuro",
+      "light": "Claro",
+      "system": "Predeterminado del sistema"
+    },
+    "errorh": {
+      "buttons": {
+        "copy": "COPIAR",
+        "clear": "BORRAR REGISTROS"
+      },
+      "header": "Historial de errores",
+      "placeholder": "¡No hay errores registrados aquí!"
+    }
+  },
+  "page": {
     "home": {
-      "title": "Inicio",
-      "unknown": "Desconocido",
-      "androidVersion": "Android Version",
-			"linuxKernelVersion": "Linux Kernel Version",
+      "header": "Inicio",
       "status": {
-        "notWorking": "No funcionando",
+        "notWorking": "No funciona",
         "ok": "Funcionando",
-        "partially": "Funcionando parcialmente"
+        "partially": "Funciona parcialmente"
       },
       "info": {
         "version": "Versión",
-        "root": "Implementación de root",
+        "root": "Implementación root",
         "zygote": {
           "injected": "Inyectado",
           "notInjected": "No inyectado",
@@ -21,67 +40,54 @@
         }
       }
     },
-    "actions": {
-      "title": "Acciones",
-      "monitor": {
-        "title": "Monitor",
-        "status": {
-          "tracing": "Trazando",
-          "stopping": "Deteniendo",
-          "stopped": "Detenido",
-          "exiting": "Saliendo",
-          "unknown": "Desconocido"
-        },
-        "button": {
-          "pause": "Pausar",
-          "stop": "Detener",
-          "start": "Iniciar"
-        }
-      }
-    },
     "modules": {
-      "title": "Módulos",
-      "notAvaliable": "No hay módulos que usen Zygisk aquí.",
+      "header": "Módulos",
+      "notAvaliable": "No hay módulos usando Zygisk aquí.",
       "arch": "Arquitectura: "
     },
+    "actions": {
+      "header": "Acciones",
+      "monitorButton": {
+        "start": "Iniciar",
+        "stop": "Detener",
+        "pause": "Pausar"
+      },
+      "monitor": "Monitor",
+      "status": {
+        "tracing": "Rastreando",
+        "stopping": "Deteniendo",
+        "stopped": "Detenido",
+        "exiting": "Saliendo",
+        "unknown": "Desconocido"
+      }
+    },
     "settings": {
-      "title": "Ajustes",
-      "language": {
-        "title": "Cambiar idioma",
-        "description": "Change the language of the WebUI to the selected one."
-      },
-      "fullscreen": {
-        "title": "Disable fullscreen mode in WebUI",
-        "description": "This option will make the WebUI not fill the whole screen."
-      },
-      "theme": {
-        "title": "Change WebUI theme",
-        "description": "Choose your system theme for current WebUI"
-      },
+      "header": "Ajustes",
       "font": {
-        "title": "Activar fuente del sistema",
-        "description": "Esta opción habilitará la fuente del sistema en el WebUI actual. NOTA: Puede no ser compatible con FlipFont"
+        "header": "Activar fuente del sistema",
+        "description": "Esta opción habilitará la fuente del sistema en la WebUI actual. NOTA: Puede no ser compatible con FlipFont."
       },
-      "moduleDevelopers": "Module Developer(s)",
-      "WebUIDevelopers": "WebUI Developer(s)",
-      "orginalDevelopers": "Original Module Developer(s)",
-      "moduleLicense": "Module License",
-      "WebUILicense": "WebUI License"
-    },
-    "mini_settings_language": {
-      "title": "Cambiar idioma"
-    },
-    "mini_settings_theme": {
-      "title": "Change WebUI theme",
       "theme": {
-        "dark": "Dark Theme",
-        "light": "Light Theme",
-        "amoled": "Amoled Theme",
-        "system_based": "System Based Theme"
+        "header": "Tema del sistema",
+        "description": "Elige el tema del sistema para la WebUI actual"
+      },
+      "language": {
+        "header": "Cambiar idioma",
+        "description": "Selecciona tu nuevo idioma"
+      },
+      "logs": {
+        "header": "Historial de errores",
+        "description": "Consulta todos tus registros de errores"
+      },
+      "credits": {
+        "module": "Desarrollador del módulo",
+        "original": "Desarrollador original del módulo",
+        "web": "Desarrollador de la WebUI"
+      },
+      "license": {
+        "module": "Licencia del módulo",
+        "web": "Licencia de la WebUI"
       }
     }
-  },
-  "globals": {
-    "unknown": "Desconocido"
   }
 }
