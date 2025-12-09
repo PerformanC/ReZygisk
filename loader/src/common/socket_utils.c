@@ -30,7 +30,7 @@ ssize_t write_loop(int fd, const void *buf, size_t count) {
   return written;
 }
 
-ssize_t read_loop(int fd, void *buf, size_t count) {
+ssize_t read_loop(int fd, void *const buf, size_t count) {
   ssize_t read_bytes = 0;
   while (read_bytes < (ssize_t)count) {
     ssize_t ret = read(fd, buf + read_bytes, count - read_bytes);
@@ -89,7 +89,7 @@ int read_fd(int fd) {
   return sendfd;
 }
 
-ssize_t write_string(int fd, const char *str) {
+ssize_t write_string(int fd, const char *const str) {
   size_t str_len = strlen(str);
   ssize_t write_bytes = write_loop(fd, &str_len, sizeof(size_t));
   if (write_bytes != (ssize_t)sizeof(size_t)) {
@@ -100,7 +100,7 @@ ssize_t write_string(int fd, const char *str) {
 
   write_bytes = write_loop(fd, str, str_len);
   if (write_bytes != (ssize_t)str_len) {
-    LOGE("Failed to write string: Promised bytes doesn't exist (%zd != %zu).\n", write_bytes, str_len);
+    LOGE("Failed to write string: size mismatch (%zd != %zu).\n", write_bytes, str_len);
 
     return -1;
   }
@@ -126,7 +126,7 @@ char *read_string(int fd) {
 
   read_bytes = read_loop(fd, buf, str_len);
   if (read_bytes != (ssize_t)str_len) {
-    LOGE("Failed to read string: Promised bytes don't exist (%zd != %zu).\n", read_bytes, str_len);
+    LOGE("Failed to read string: size mismatch (%zd != %zu).\n", read_bytes, str_len);
 
     free(buf);
 
