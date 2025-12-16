@@ -5,7 +5,7 @@
 - **en_US** by [@PerformanC (The PerformanC Organization)](https://github.com/PerformanC)
 - **es_AR** by [@Flopster101](https://github.com/Flopster101)
 - **es_ES** by [@LuchoModzzz](https://github.com/Lxchoooo)
-- **es_MX** by [@LuchoModzzz](https://github.com/Lxchoooo)
+- **es_MX** by [@LuchoModzzz](https://github.com/Lxchoooo) & [Berserkr2k] (https://github.com/Berserkr2k)
 - **fr_FR** by [@GhostFRR](https://github.com/GhostFRR)
 - **id_ID** by [@bpanca05](https://github.com/bpanca05) & [@LuckyKiddos](https://github.com/GuitarHeroStyles)
 - **it_IT** by [@thasave14](https://github.com/thasave14)

@@ -6,7 +6,7 @@ const availableLanguages = [
   'en_US', // @PerformanC
   'es_AR', // @Flopster101
   'es_ES', // @LuchoModzzz
-  'es_MX', // @LuchoModzzz
+  'es_MX', // @LuchoModzzz / @Berserkr2k
   'fr_FR', // @GhostFRR
   'id_ID', // @bpanca05 / @LuckyKiddos
   'it_IT', // @thasave14
