@@ -171,6 +171,7 @@ void rezygiskd_get_info(struct rezygisk_info *info) {
     info_cleanup:
       info->modules.modules_count = i;
       free_rezygisk_info(info);
+      break;
   }
 
   close(fd);

@@ -70,7 +70,7 @@ int dl_cb(struct dl_phdr_info *info, size_t size, void *data) {
   if (info->dlpi_name == NULL)
     return 0;
 
-  ElfImg *img = (ElfImg *)data;
+  ElfImg *img = data;
 
   if (strstr(info->dlpi_name, img->elf)) {
     img->base = (void *)info->dlpi_addr;
@@ -112,20 +112,83 @@ size_t calculate_valid_symtabs_amount(ElfImg *img) {
   return count;
 }
 
+void _unload_symtabs(ElfImg *img, size_t valid_symtabs_amount) {
+  for (size_t i = 0; i < valid_symtabs_amount; i++) {
+    free(img->symtabs_[i].name);
+  }
+
+  free(img->symtabs_);
+  img->symtabs_ = NULL;
+}
+
+bool _load_symtabs(ElfImg *img) {
+  if (img->symtabs_) return true;
+
+  if (!img->symtab_start || img->symstr_offset_for_symtab == 0 || img->symtab_count == 0) {
+    LOGE("Cannot load symtabs: .symtab section or its string table not found/valid.");
+
+    return false;
+  }
+
+  size_t valid_symtabs_amount = calculate_valid_symtabs_amount(img);
+  if (valid_symtabs_amount == 0) {
+    LOGW("No valid symbols (FUNC/OBJECT with size > 0) found in .symtab for %s", img->elf);
+
+    return false;
+  }
+
+  img->symtabs_ = calloc(valid_symtabs_amount, sizeof(*img->symtabs_));
+  if (!img->symtabs_) {
+    LOGE("Failed to allocate memory for symtabs array");
+
+    return false;
+  }
+
+  const char *symtab_strings = offsetOf_char(img->header, img->symstr_offset_for_symtab);
+  size_t current_valid_index = 0;
+
+  for (ElfW(Off) pos = 0; pos < img->symtab_count; pos++) {
+    ElfW(Sym) *current_sym = &img->symtab_start[pos];
+    unsigned int st_type = ELF_ST_TYPE(current_sym->st_info);
+
+    if ((st_type == STT_FUNC || st_type == STT_OBJECT) && current_sym->st_size > 0 && current_sym->st_name != 0) {
+      const char *st_name = symtab_strings + current_sym->st_name;
+      if (!st_name)
+        continue;
+
+      ElfW(Shdr) *symtab_str_shdr = img->section_header + img->symtab->sh_link;
+      if (current_sym->st_name >= symtab_str_shdr->sh_size) {
+        LOGE("Symbol name offset out of bounds");
+
+        continue;
+      }
+
+      img->symtabs_[current_valid_index].name = strdup(st_name);
+      if (!img->symtabs_[current_valid_index].name) {
+        LOGE("Failed to duplicate symbol name: %s", st_name);
+
+        _unload_symtabs(img, current_valid_index);
+
+        return false;
+      }
+
+      img->symtabs_[current_valid_index].sym = current_sym;
+
+      current_valid_index++;
+      if (current_valid_index == valid_symtabs_amount) break;
+    }
+  }
+
+  return true;
+}
+
 
 void ElfImg_destroy(ElfImg *img) {
   if (!img) return;
 
   if (img->symtabs_) {
     size_t valid_symtabs_amount = calculate_valid_symtabs_amount(img);
-    if (valid_symtabs_amount > 0) {
-      for (size_t i = 0; i < valid_symtabs_amount; i++) {
-        free(img->symtabs_[i].name);
-      }
-    }
-
-    free(img->symtabs_);
-    img->symtabs_ = NULL;
+    _unload_symtabs(img, valid_symtabs_amount);
   }
 
   if (img->elf) {
@@ -208,7 +271,7 @@ ElfImg *ElfImg_create(const char *elf, void *base) {
     return NULL;
   }
 
-  img->header = (ElfW(Ehdr) *)mmap(NULL, img->size, PROT_READ, MAP_PRIVATE, fd, 0);
+  img->header = mmap(NULL, img->size, PROT_READ, MAP_PRIVATE, fd, 0);
 
   close(fd);
 
@@ -441,72 +504,6 @@ ElfImg *ElfImg_create(const char *elf, void *base) {
     LOGW("No hash table (.gnu.hash or .hash) found in %s. Dynamic symbol lookup might be slow or fail.", elf);
 
   return img;
-}
-
-bool _load_symtabs(ElfImg *img) {
-  if (img->symtabs_) return true;
-
-  if (!img->symtab_start || img->symstr_offset_for_symtab == 0 || img->symtab_count == 0) {
-    LOGE("Cannot load symtabs: .symtab section or its string table not found/valid.");
-
-    return false;
-  }
-
-  size_t valid_symtabs_amount = calculate_valid_symtabs_amount(img);
-  if (valid_symtabs_amount == 0) {
-    LOGW("No valid symbols (FUNC/OBJECT with size > 0) found in .symtab for %s", img->elf);
-
-    return false;
-  }
-
-  img->symtabs_ = calloc(valid_symtabs_amount, sizeof(*img->symtabs_));
-  if (!img->symtabs_) {
-    LOGE("Failed to allocate memory for symtabs array");
-
-    return false;
-  }
-
-  const char *symtab_strings = offsetOf_char(img->header, img->symstr_offset_for_symtab);
-  size_t current_valid_index = 0;
-
-  for (ElfW(Off) pos = 0; pos < img->symtab_count; pos++) {
-    ElfW(Sym) *current_sym = &img->symtab_start[pos];
-    unsigned int st_type = ELF_ST_TYPE(current_sym->st_info);
-
-    if ((st_type == STT_FUNC || st_type == STT_OBJECT) && current_sym->st_size > 0 && current_sym->st_name != 0) {
-      const char *st_name = symtab_strings + current_sym->st_name;
-      if (!st_name)
-        continue;
-
-      ElfW(Shdr) *symtab_str_shdr = img->section_header + img->symtab->sh_link;
-      if (current_sym->st_name >= symtab_str_shdr->sh_size) {
-        LOGE("Symbol name offset out of bounds");
-
-        continue;
-      }
-
-      img->symtabs_[current_valid_index].name = strdup(st_name);
-      if (!img->symtabs_[current_valid_index].name) {
-        LOGE("Failed to duplicate symbol name: %s", st_name);
-
-        for(size_t k = 0; k < current_valid_index; ++k) {
-          free(img->symtabs_[k].name);
-        }
-
-        free(img->symtabs_);
-        img->symtabs_ = NULL;
-
-        return false;
-      }
-
-      img->symtabs_[current_valid_index].sym = current_sym;
-
-      current_valid_index++;
-      if (current_valid_index == valid_symtabs_amount) break;
-    }
-  }
-
-  return true;
 }
 
 ElfW(Addr) GnuLookup(ElfImg *restrict img, const char *name, uint32_t hash, unsigned int *sym_type) {
