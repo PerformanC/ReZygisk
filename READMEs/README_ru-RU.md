@@ -1,6 +1,6 @@
 # ReZygisk
 
-[English](../README.md)|[Bahasa Indonesia](/READMEs/README_id-ID.md)|[Tiếng Việt](/READMEs/README_vi-VN.md)|[Português Brasileiro](/READMEs/README_pt-BR.md)|[French](/READMEs/README_fr-FR.md)|[日本語](/READMEs/README_ja-JP.md)|[العربية السعودية](/READMEs/README_ar-SA.md)
+[English](../README.md)
 
 ReZygisk — форк Zygisk Next, самостоятельной реализации Zygisk, обеспечивающей поддержку API Zygisk для KernelSU, APatch и Magisk (официального и Kitsune).
 
