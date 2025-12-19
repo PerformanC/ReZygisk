@@ -406,10 +406,7 @@ ElfImg *ElfImg_create(const char *elf, void *base) {
           break;
         }
         default: {
-          LOGE("Section header type not supported");
-
-          ElfImg_destroy(img);
-          return NULL;
+          LOGW("Section header type not supported: %s(%d)", sname, section_h->sh_type);
         }
       }
     }
