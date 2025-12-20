@@ -25,7 +25,7 @@ int rezygiskd_connect(uint8_t retry) {
     .sun_path = { 0 }
   };
 
-  /* 
+  /*
     INFO: Application must assume that sun_path can hold _POSIX_PATH_MAX characters.
 
     Sources:
@@ -57,7 +57,7 @@ bool rezygiskd_ping() {
     return false;
   }
 
-  write_uint8_t(fd, (uint8_t)PingHeartbeat);
+  write_uint8_t(fd, PingHeartbeat);
 
   close(fd);
 
@@ -72,8 +72,8 @@ uint32_t rezygiskd_get_process_flags(uid_t uid, const char *const process) {
     return 0;
   }
 
-  write_uint8_t(fd, (uint8_t)GetProcessFlags);
-  write_uint32_t(fd, (uint32_t)uid);
+  write_uint8_t(fd, GetProcessFlags);
+  write_uint32_t(fd, uid);
   write_string(fd, process);
 
   uint32_t res = 0;
@@ -96,7 +96,7 @@ void rezygiskd_get_info(struct rezygisk_info *info) {
 
   info->running = true;
 
-  write_uint8_t(fd, (uint8_t)GetInfo);
+  write_uint8_t(fd, GetInfo);
 
   uint32_t flags = 0;
   read_uint32_t(fd, &flags);
@@ -117,7 +117,7 @@ void rezygiskd_get_info(struct rezygisk_info *info) {
     return;
   }
 
-  info->modules.modules = (char **)malloc(sizeof(char *) * info->modules.modules_count);
+  info->modules.modules = malloc(sizeof(*info->modules.modules) * info->modules.modules_count);
   if (!info->modules.modules) {
     PLOGE("allocating modules name memory");
 
@@ -158,23 +158,19 @@ void rezygiskd_get_info(struct rezygisk_info *info) {
 
       break;
     }
+    fclose(module_prop);
 
     if (info->modules.modules[i] == NULL) {
       PLOGE("failed to read module name from %s", module_path);
 
-      fclose(module_prop);
-
       goto info_cleanup;
     }
-
-    fclose(module_prop);
 
     continue;
 
     info_cleanup:
       info->modules.modules_count = i;
       free_rezygisk_info(info);
-
       break;
   }
 
@@ -198,12 +194,12 @@ bool rezygiskd_read_modules(struct zygisk_modules *modules) {
     return false;
   }
 
-  write_uint8_t(fd, (uint8_t)ReadModules);
+  write_uint8_t(fd, ReadModules);
 
   size_t len = 0;
   read_size_t(fd, &len);
 
-  modules->modules = malloc(len * sizeof(char *));
+  modules->modules = malloc(len * sizeof(*modules->modules));
   if (!modules->modules) {
     PLOGE("allocating modules name memory");
 
@@ -247,7 +243,7 @@ int rezygiskd_connect_companion(size_t index) {
     return -1;
   }
 
-  write_uint8_t(fd, (uint8_t)RequestCompanionSocket);
+  write_uint8_t(fd, RequestCompanionSocket);
   write_size_t(fd, index);
 
   uint8_t res = 0;
@@ -269,7 +265,7 @@ int rezygiskd_get_module_dir(size_t index) {
     return -1;
   }
 
-  write_uint8_t(fd, (uint8_t)GetModuleDir);
+  write_uint8_t(fd, GetModuleDir);
   write_size_t(fd, index);
 
   int dirfd = read_fd(fd);
@@ -288,7 +284,7 @@ void rezygiskd_zygote_restart() {
     return;
   }
 
-  if (!write_uint8_t(fd, (uint8_t)ZygoteRestart))
+  if (!write_uint8_t(fd, ZygoteRestart))
     PLOGE("Failed to request ZygoteRestart");
 
   close(fd);
@@ -302,7 +298,7 @@ void rezygiskd_system_server_started() {
     return;
   }
 
-  if (!write_uint8_t(fd, (uint8_t)SystemServerStarted))
+  if (!write_uint8_t(fd, SystemServerStarted))
     PLOGE("Failed to request SystemServerStarted");
 
   close(fd);
@@ -316,9 +312,9 @@ bool rezygiskd_update_mns(enum mount_namespace_state nms_state, char *buf, size_
     return false;
   }
 
-  write_uint8_t(fd, (uint8_t)UpdateMountNamespace);
-  write_uint32_t(fd, (uint32_t)getpid());
-  write_uint8_t(fd, (uint8_t)nms_state);
+  write_uint8_t(fd, UpdateMountNamespace);
+  write_uint32_t(fd, getpid());
+  write_uint8_t(fd, nms_state);
 
   uint32_t target_pid = 0;
   if (read_uint32_t(fd, &target_pid) < 0) {
