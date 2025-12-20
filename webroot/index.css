@@ -1,0 +1,114 @@
+.loader {
+  border: 6px solid var(--icon-bc);
+  border-top: 6px solid var(--icon);
+  border-radius: 50%;
+  width: 3em;
+  height: 3em;
+  animation: spin 0.8s linear infinite;
+}
+
+#loading_screen {
+  position: fixed;
+  width: 100%;
+  height: 100%;
+  left: 0;
+  top: 0;
+  background: var(--background);
+  z-index: 10;
+  justify-content: center;
+  display: flex;
+  align-items: center;
+}
+
+.nav_dimc {
+  background: var(--dim);
+  word-break: break-word;
+}
+
+.radios input[type=radio] {
+  display: none;
+}
+
+.radio input[type=radio] {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+#navbar_support_div {
+  position: fixed;
+}
+
+#navbar {
+  display: flex;
+  position: fixed;
+  align-items: center;
+  justify-content: space-between;
+  background-color: var(--dim);
+  left: 0; right: 0; bottom: 0;
+  padding: 20px 25px;
+  font-size: 20px;
+}
+
+.navtitle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: small;
+  margin-top: 8px;
+  opacity: 1;
+}
+
+.navicon {
+  background: var(--small-card);
+  display: flex;
+  width: 0;
+  height: 30px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50px;
+  animation: closeNav 0.15s;
+}
+
+.navicon.show {
+  width: 65px;
+  animation: openNav 0.15s;
+}
+
+@media (min-width:961px)  {
+  #navbar {
+    background-color: var(--desktop-navbar);
+    transform: scale(0.85);
+    left: auto; 
+    right: auto;
+    margin-bottom: 15px;
+    border-radius: 60px;
+    padding: 10px 10px;
+  }
+  .navtitle {
+    display: none;
+  }
+  .navicon_support {
+    border-radius: 60px;
+  }
+  #navbar_support_div {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+  }
+  .navicon {
+    background: var(--desktop-navicon);
+    height: 65px;
+    animation: closeNavDesktop 0.15s;
+  }
+  .navicon.show {
+    animation: openNavDesktop 0.15s;
+  }
+  .nav_dimc {
+    background: var(--desktop-navbar);
+  }
+}

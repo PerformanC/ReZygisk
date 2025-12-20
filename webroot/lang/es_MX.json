@@ -5,34 +5,34 @@
   },
   "smallPage": {
     "language": {
-      "header": "Elige tu nuevo tema"
+      "header": "Selecciona tu nuevo idioma"
     },
     "theme": {
       "header": "Elige tu nuevo tema",
       "dark": "Oscuro",
       "light": "Claro",
-      "system": "Basado en el sistema"
+      "system": "Predeterminado del sistema"
     },
     "errorh": {
       "buttons": {
         "copy": "COPIAR",
-        "clear": "BORRAR TODOS LOS REGISTROS"
+        "clear": "BORRAR REGISTROS"
       },
       "header": "Historial de errores",
-      "placeholder": "¡No se registró ningún error aquí!"
+      "placeholder": "¡No hay errores registrados aquí!"
     }
   },
   "page": {
     "home": {
       "header": "Inicio",
       "status": {
-        "notWorking": "No funcionando",
+        "notWorking": "No funciona",
         "ok": "Funcionando",
-        "partially": "Funcionando parcialmente"
+        "partially": "Funciona parcialmente"
       },
       "info": {
         "version": "Versión",
-        "root": "Implementación de root",
+        "root": "Implementación root",
         "zygote": {
           "injected": "Inyectado",
           "notInjected": "No inyectado",
@@ -42,26 +42,42 @@
     },
     "modules": {
       "header": "Módulos",
-      "notAvaliable": "No hay módulos que usen Zygisk aquí.",
+      "notAvaliable": "No hay módulos usando Zygisk aquí.",
       "arch": "Arquitectura: "
+    },
+    "actions": {
+      "header": "Acciones",
+      "monitorButton": {
+        "start": "Iniciar",
+        "stop": "Detener",
+        "pause": "Pausar"
+      },
+      "monitor": "Monitor",
+      "status": {
+        "tracing": "Rastreando",
+        "stopping": "Deteniendo",
+        "stopped": "Detenido",
+        "exiting": "Saliendo",
+        "unknown": "Desconocido"
+      }
     },
     "settings": {
       "header": "Ajustes",
       "font": {
         "header": "Activar fuente del sistema",
-        "description": "Esta opción habilitará la fuente del sistema en el WebUI actual. NOTA: Puede no ser compatible con FlipFont"
+        "description": "Esta opción habilitará la fuente del sistema en la WebUI actual. NOTA: Puede no ser compatible con FlipFont."
       },
       "theme": {
         "header": "Tema del sistema",
-        "description": "Elige el tema del sistema para el WebUI actual"
+        "description": "Elige el tema del sistema para la WebUI actual"
       },
       "language": {
         "header": "Cambiar idioma",
-        "description": "Cambia a tu nuevo idioma."
+        "description": "Selecciona tu nuevo idioma"
       },
       "logs": {
         "header": "Historial de errores",
-        "description": "Ver todos tus registros de errores"
+        "description": "Consulta todos tus registros de errores"
       },
       "credits": {
         "module": "Desarrollador del módulo",
@@ -71,22 +87,6 @@
       "license": {
         "module": "Licencia del módulo",
         "web": "Licencia de la WebUI"
-      }
-    },
-    "actions": {
-      "header": "Acciones",
-      "monitorButton": {
-        "pause": "Pausar",
-        "stop": "Detener",
-        "start": "Iniciar"
-      },
-      "monitor": "Monitor",
-      "status": {
-        "tracing": "Trazando",
-        "stopping": "Deteniendo",
-        "stopped": "Detenido",
-        "exiting": "Saliendo",
-        "unknown": "Desconocido"
       }
     }
   }
