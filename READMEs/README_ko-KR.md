@@ -51,7 +51,7 @@ Zygisk Next 개발자들은 Android 커뮤니티에서 유명하고 신뢰받고
 
 ### 3. 설치 확인
 
-재부팅 후, ROOT 관리자의 `모듈` 섹션에서 모듈 설명을 확인하여 ReZygisk가 올바르게 작동하는지 확인할 수 있습니다. 설명에는 필요한 데몬이 실행 중임이 표시되어야 합니다. 예를 들어, 64비트와 32비트를 모두 지원하는 환경이라면 다음과 같이 보일 것입니다: `[Monitor: ✅, ReZygisk 64-bit: ✅, ReZygisk 32-bit: ✅] 독립형 Zygisk 구현체`
+재부팅 후, ROOT 관리자의 `모듈` 섹션에서 모듈 설명을 확인하여 ReZygisk가 올바르게 작동하는지 확인할 수 있습니다. 설명에는 필요한 데몬이 실행 중임이 표시되어야 합니다. 예를 들어, 64비트와 32비트를 모두 지원하는 환경이라면 다음과 같이 보일 것입니다: `[Monitor: ✅, ReZygisk 64-bit: ✅, ReZygisk 32-bit: ✅] Standalone implementation of Zygisk.`
 
 ## 번역
 
