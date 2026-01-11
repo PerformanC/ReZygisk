@@ -202,3 +202,4 @@ if [ "$HUAWEI_MAPLE_ENABLED" == "1" ]; then
   ui_print "- Add ro.maple.enable=0"
   echo "ro.maple.enable=0" >>"$MODPATH/system.prop"
 fi
+cp "$MODPATH/module.prop" "$MODPATH/module.prop.bak"
