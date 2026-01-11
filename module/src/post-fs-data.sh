@@ -1,5 +1,7 @@
 #!/system/bin/sh
 
+cat /data/adb/modules/rezygisk/module.prop.bak > /data/adb/modules/rezygisk/module.prop
+
 MODDIR=${0%/*}
 if [ "$ZYGISK_ENABLED" ]; then
   exit 0
