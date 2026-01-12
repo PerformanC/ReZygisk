@@ -1,30 +1,11 @@
 {
   "langName": "Español",
-  "global": {
-    "unknown": "Desconocido"
-  },
-  "smallPage": {
-    "language": {
-      "header": "Selecciona tu nuevo idioma"
-    },
-    "theme": {
-      "header": "Elige tu nuevo tema",
-      "dark": "Oscuro",
-      "light": "Claro",
-      "system": "Basado en el sistema"
-    },
-    "errorh": {
-      "buttons": {
-        "copy": "COPIAR",
-        "clear": "BORRAR TODOS LOS REGISTROS"
-      },
-      "header": "Historial de errores",
-      "placeholder": "¡No se registró ningún error aquí!"
-    }
-  },
-  "page": {
+  "pages": {
     "home": {
-      "header": "Inicio",
+      "title": "Inicio",
+      "unknown": "Desconocido",
+      "androidVersion": "Android Version",
+			"linuxKernelVersion": "Linux Kernel Version",
       "status": {
         "notWorking": "No funciona",
         "ok": "Funcionando",
@@ -40,54 +21,67 @@
         }
       }
     },
+    "actions": {
+      "title": "Acciones",
+      "monitor": {
+        "title": "Monitor",
+        "status": {
+          "tracing": "Trazando",
+          "stopping": "Deteniendo",
+          "stopped": "Detenido",
+          "exiting": "Saliendo",
+          "unknown": "Desconocido"
+        },
+        "button": {
+          "pause": "Pausar",
+          "stop": "Detener",
+          "start": "Iniciar"
+        }
+      }
+    },
     "modules": {
-      "header": "Módulos",
+      "title": "Módulos",
       "notAvaliable": "No hay módulos que usen Zygisk aquí.",
       "arch": "Arquitectura: "
     },
     "settings": {
-      "header": "Ajustes",
-      "font": {
-        "header": "Activar fuente del sistema",
-        "description": "Esta opción habilitará la fuente del sistema en el WebUI actual. NOTA: Puede no ser compatible con FlipFont"
+      "title": "Ajustes",
+      "language": {
+        "title": "Cambiar idioma",
+        "description": "Change the language of the WebUI to the selected one."
+      },
+      "fullscreen": {
+        "title": "Disable fullscreen mode in WebUI",
+        "description": "This option will make the WebUI not fill the whole screen."
       },
       "theme": {
-        "header": "Tema del sistema",
-        "description": "Elija el tema del sistema para el WebUI actual"
+        "title": "Change WebUI theme",
+        "description": "Choose your system theme for current WebUI"
       },
-      "language": {
-        "header": "Cambiar idioma",
-        "description": "Selecciona tu nuevo idioma"
+      "font": {
+        "title": "Activar fuente del sistema",
+        "description": "Esta opción habilitará la fuente del sistema en el WebUI actual. NOTA: Puede no ser compatible con FlipFont"
       },
-      "logs": {
-        "header": "Historial de errores",
-        "description": "Ver todos tus registros de errores"
-      },
-      "credits": {
-        "module": "Desarrollador del módulo",
-        "original": "Desarrollador original del módulo",
-        "web": "Desarrollador de la WebUI"
-      },
-      "license": {
-        "module": "Licencia del módulo",
-        "web": "Licencia de la WebUI"
-      }
+      "moduleDevelopers": "Module Developer(s)",
+      "WebUIDevelopers": "WebUI Developer(s)",
+      "orginalDevelopers": "Original Module Developer(s)",
+      "moduleLicense": "Module License",
+      "WebUILicense": "WebUI License"
     },
-    "actions": {
-      "header": "Acciones",
-      "monitorButton": {
-        "pause": "Pausar",
-        "stop": "Detener",
-        "start": "Iniciar"
-      },
-      "monitor": "Monitor",
-      "status": {
-        "tracing": "Trazando",
-        "stopping": "Deteniendo",
-        "stopped": "Detenido",
-        "exiting": "Saliendo",
-        "unknown": "Desconocido"
+    "mini_settings_language": {
+      "title": "Cambiar idioma"
+    },
+    "mini_settings_theme": {
+      "title": "Change WebUI theme",
+      "theme": {
+        "dark": "Dark Theme",
+        "light": "Light Theme",
+        "amoled": "Amoled Theme",
+        "system_based": "System Based Theme"
       }
     }
+  },
+  "globals": {
+    "unknown": "Desconocido"
   }
 }

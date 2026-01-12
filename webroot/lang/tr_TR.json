@@ -1,30 +1,11 @@
 {
   "langName": "Türkçe (Türkiye)",
-  "global": {
-    "unknown": "Bilinmiyor"
-  },
-  "smallPage": {
-    "language": {
-      "header": "Yeni dilinizi seçin"
-    },
-    "theme": {
-      "header": "Yeni temanızı seçin",
-      "dark": "Koyu",
-      "light": "Açık",
-      "system": "Sistem Tabanlı"
-    },
-    "errorh": {
-      "buttons": {
-        "copy": "KOPYALA",
-        "clear": "BÜTÜN KAYITLARI SİL"
-      },
-      "header": "Hata Geçmişi",
-      "placeholder": "Burada kaydedilmiş hata yok!"
-    }
-  },
-  "page": {
+  "pages": {
     "home": {
-      "header": "Anasayfa",
+      "title": "Anasayfa",
+      "unknown": "Bilinmiyor",
+      "androidVersion": "Android Version",
+			"linuxKernelVersion": "Linux Kernel Version",
       "status": {
         "notWorking": "Aktif Değil",
         "ok": "Aktif",
@@ -40,54 +21,67 @@
         }
       }
     },
+    "actions": {
+      "title": "Hareketler",
+      "monitor": {
+        "title": "Monitör",
+        "status": {
+          "tracing": "İzleniyor",
+          "stopping": "Durduluyor",
+          "stopped": "Durdu",
+          "exiting": "Çıkılıyor",
+          "unknown": "Bilinmiyor"
+        },
+        "button": {
+          "start": "Başlat",
+          "stop": "Bitir",
+          "pause": "Durdur"
+        }
+      }
+    },
     "modules": {
-      "header": "Modüller",
+      "title": "Modüller",
       "notAvaliable": "Burada Zygisk kullanan modül yok.",
       "arch": "Mimari: "
     },
-    "actions": {
-      "header": "Hareketler",
-      "monitorButton": {
-        "start": "Başlat",
-        "stop": "Bitir",
-        "pause": "Durdur"
-      },
-      "monitor": "Monitör",
-      "status": {
-        "tracing": "İzleniyor",
-        "stopping": "Durduluyor",
-        "stopped": "Durdu",
-        "exiting": "Çıkılıyor",
-        "unknown": "Bilinmiyor"
-      }
-    },
     "settings": {
-      "header": "Ayarlar",
-      "font": {
-        "header": "Sistem yazı tipini aktifleştir",
-        "description": "Bu seçenek anlık WebUI (Web Arayüzü) için sistem yazıt tipini aktifleştirir. NOT: FlipFont ile uyumlu olmayabilir!"
+      "title": "Ayarlar",
+      "language": {
+        "title": "Dil değiştir",
+        "description": "Change the language of the WebUI to the selected one."
+      },
+      "fullscreen": {
+        "title": "Disable fullscreen mode in WebUI",
+        "description": "This option will make the WebUI not fill the whole screen."
       },
       "theme": {
-        "header": "Sistem Teması",
-        "description": "Anlık WebUI için sistem temanı seç"
+        "title": "Change WebUI theme",
+        "description": "Choose your system theme for current WebUI"
       },
-      "language": {
-        "header": "Dil değiştir",
-        "description": "Yeni dilini seç"
+      "font": {
+        "title": "Sistem yazı tipini aktifleştir",
+        "description": "Bu seçenek anlık WebUI (Web Arayüzü) için sistem yazıt tipini aktifleştirir. NOT: FlipFont ile uyumlu olmayabilir!"
       },
-      "logs": {
-        "header": "Hata Geçmişi",
-        "description": "Bütün hata kayıtlarını görüntüle"
-      },
-      "credits": {
-        "module": "Modül Geliştiricisi",
-        "original": "Orijinal Modül Geliştiricisi",
-        "web": "WebUI Geliştiricisi"
-      },
-      "license": {
-        "module": "Modül Lisansı",
-        "web": "WebUI Lisansı"
+      "moduleDevelopers": "Module Developer(s)",
+      "WebUIDevelopers": "WebUI Developer(s)",
+      "orginalDevelopers": "Original Module Developer(s)",
+      "moduleLicense": "Module License",
+      "WebUILicense": "WebUI License"
+    },
+    "mini_settings_language": {
+      "title": "Dil değiştir"
+    },
+    "mini_settings_theme": {
+      "title": "Change WebUI theme",
+      "theme": {
+        "dark": "Dark Theme",
+        "light": "Light Theme",
+        "amoled": "Amoled Theme",
+        "system_based": "System Based Theme"
       }
     }
+  },
+  "globals": {
+    "unknown": "Bilinmiyor"
   }
 }

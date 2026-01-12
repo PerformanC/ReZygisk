@@ -1,30 +1,11 @@
 {
   "langName": "Bahasa Indonesia (Indonesia)",
-  "global": {
-    "unknown": "Tidak diketahui"
-  },
-  "smallPage": {
-    "language": {
-      "header": "Pilih bahasa baru Anda"
-    },
-    "theme": {
-      "header": "Pilih tema baru Anda",
-      "dark": "Gelap",
-      "light": "Terang",
-      "system": "Bawaan Sistem"
-    },
-    "errorh": {
-      "buttons": {
-        "copy": "SALIN",
-        "clear": "BERSIHKAN SEMUA LOG"
-      },
-      "header": "Log Error",
-      "placeholder": "Tidak ada log error tercatat disini!"
-    }
-  },
-  "page": {
+  "pages": {
     "home": {
-      "header": "Beranda",
+      "title": "Beranda",
+      "unknown": "Tidak diketahui",
+      "androidVersion": "Android Version",
+			"linuxKernelVersion": "Linux Kernel Version",
       "status": {
         "notWorking": "Tidak Bekerja",
         "ok": "Bekerja",
@@ -40,54 +21,67 @@
         }
       }
     },
+    "actions": {
+      "title": "Tindakan",
+      "monitor": {
+        "title": "Monitor",
+        "status": {
+          "tracing": "Melacak",
+          "stopping": "Menghentikan",
+          "stopped": "Terhenti",
+          "exiting": "Terkeluar",
+          "unknown": "Tidak diketahui"
+        },
+        "button": {
+          "pause": "Jeda",
+          "stop": "Berhenti",
+          "start": "Mulai"
+        }
+      }
+    },
     "modules": {
-      "header": "Modul",
+      "title": "Modul",
       "notAvaliable": "Tidak ada modul yang menggunakan Zygisk disini.",
       "arch": "Arsitektur: "
     },
     "settings": {
-      "header": "Pengaturan",
-      "font": {
-        "header": "Gunakan Font Sistem",
-        "description": "Opsi ini akan mengaktifkan font sistem pada WebUI saat ini. (Mungkin tidak kompatibel dengan FlipFont)"
+      "title": "Pengaturan",
+      "language": {
+        "title": "Ubah Bahasa",
+        "description": "Change the language of the WebUI to the selected one."
+      },
+      "fullscreen": {
+        "title": "Disable fullscreen mode in WebUI",
+        "description": "This option will make the WebUI not fill the whole screen."
       },
       "theme": {
-        "header": "Tema Sistem",
-        "description": "Pilih tema untuk tampilan WebUI Anda saat ini"
+        "title": "Change WebUI theme",
+        "description": "Choose your system theme for current WebUI"
       },
-      "language": {
-        "header": "Ubah Bahasa",
-        "description": "Ubah ke bahasa baru Anda"
+      "font": {
+        "title": "Gunakan Font Sistem",
+        "description": "Opsi ini akan mengaktifkan font sistem pada WebUI saat ini. (Mungkin tidak kompatibel dengan FlipFont)"
       },
-      "logs": {
-        "header": "Log Error",
-        "description": "Lihat semua log Error Anda"
-      },
-      "credits": {
-        "module": "Developer Modul",
-        "original": "Developer Modul Asli",
-        "web": "Developer WebUI"
-      },
-      "license": {
-        "module": "Lisensi Modul",
-        "web": "Lisensi WebUI"
-      }
+      "moduleDevelopers": "Module Developer(s)",
+      "WebUIDevelopers": "WebUI Developer(s)",
+      "orginalDevelopers": "Original Module Developer(s)",
+      "moduleLicense": "Module License",
+      "WebUILicense": "WebUI License"
     },
-    "actions": {
-      "header": "Tindakan",
-      "monitorButton": {
-        "pause": "Jeda",
-        "stop": "Berhenti",
-        "start": "Mulai"
-      },
-      "monitor": "Monitor",
-      "status": {
-        "tracing": "Melacak",
-        "stopping": "Menghentikan",
-        "stopped": "Terhenti",
-        "exiting": "Terkeluar",
-        "unknown": "Tidak diketahui"
+    "mini_settings_language": {
+      "title": "Ubah Bahasa"
+    },
+    "mini_settings_theme": {
+      "title": "Change WebUI theme",
+      "theme": {
+        "dark": "Dark Theme",
+        "light": "Light Theme",
+        "amoled": "Amoled Theme",
+        "system_based": "System Based Theme"
       }
     }
+  },
+  "globals": {
+    "unknown": "Tidak diketahui"
   }
 }

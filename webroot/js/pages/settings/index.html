@@ -1,0 +1,109 @@
+<div class="panel">
+  <div class="header">ReZygisk: {{title}} </div>
+
+  <!-- INFO: Change language -->
+  <div id="lang_page_toggle" class="small_card dimc card_animation">
+    <div class="dimc" style="display: inline-block;">
+      <div class="dimc content" style="font-size: 1.1em; padding-left: 5px; padding-top: 6px; padding-bottom: 2px;">
+        {{language.title}}
+      </div>
+      <div class="dimc desc" style="font-size: 0.9em; padding-left: 5px; padding-bottom: 6px;">
+        {{language.description}}
+      </div>
+    </div>
+  </div>
+
+  <div id="theme_page_toggle" style="margin-top: 15px;" class="small_card dimc card_animation">
+    <div class="dimc" style="display: inline-block;">
+      <div class="dimc content" style="font-size: 1.1em; padding-left: 5px; padding-top: 6px; padding-bottom: 2px;">
+        {{theme.title}}
+      </div>
+      <div class="dimc desc" style="font-size: 0.9em; padding-left: 5px; padding-bottom: 6px;">
+        {{theme.description}}
+      </div>
+    </div>
+  </div>
+
+  <div class="small_card dimc" style="margin-top: 15px;">
+    <div class="action_card">
+      <div class="dimc content action_card_title">
+        {{fullscreen.title}}
+      </div>
+      <div class="dimc desc action_card_description">
+        {{fullscreen.description}}
+      </div>
+    </div>
+
+    <label class="switch dimc">
+      <input id="rz_webui_fullscreen_switch" type="checkbox">
+      <span class="slider"></span>
+    </label>
+  </div>
+  
+  <div class="small_card dimc" style="margin-top: 15px;">
+    <div class="action_card">
+      <div class="dimc content action_card_title">
+        {{font.title}}
+      </div>
+      <div class="dimc desc action_card_description">
+        {{font.description}}
+      </div>
+    </div>
+
+    <label class="switch dimc">
+      <input id="rz_webui_font_switch" type="checkbox">
+      <span class="slider"></span>
+    </label>
+  </div>
+
+  <!-- INFO: Credit card -->
+  <div class="dim card" style="margin-top: 15px;">
+    <div class="dimc content">
+      <div id="mcre_title" class="dimc" style="font-size: 1.1em">{{moduleDevelopers}}</div>
+      <div class="dimc" style="font-size: 0.9em; margin-top: 3px; align-items: center; display: flex;">
+        <div credit-link="github.com/PerformanC" class="dimc desc" style="margin-left: 2px; cursor: pointer;">
+          The PerformanC Organization
+        </div>
+      </div>
+    </div>
+
+    <div class="dimc content" style="margin-top: 6px;">
+      <div id="omcre_title" class="dimc" style="font-size: 1.1em">{{orginalDevelopers}}</div>
+      <div class="dimc" style="font-size: 0.9em; margin-top: 3px; align-items: center; display: flex;">
+        <div credit-link="github.com/Dr-TSNG" class="dimc desc" style="cursor: pointer;">
+          Nullptr
+        </div>
+        <div class="dimc desc">,</div>
+        <div credit-link="github.com/5ec1cff" class="dimc desc" style="margin-left: 2px; cursor: pointer;">
+          5ec1cff
+        </div>
+      </div>
+    </div>
+
+    <div class="dimc" style="margin-top: 6px;">
+      <div id="webcre_title" class="dimc" style="font-size: 1.1em">{{WebUIDevelopers}}</div>
+      <div class="dimc" style="font-size: 0.9em; margin-top: 3px; align-items: center; display: flex;">
+        <div credit-link="github.com/ThePedroo" class="dimc desc" style="cursor: pointer;">
+          ThePedroo
+        </div>
+        <div class="dimc desc">,</div>
+        <div credit-link="github.com/RainyXeon" class="dimc desc" style="margin-left: 2px; cursor: pointer;">
+          RainyXeon
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- INFO: License card -->
+  <div class="dim card" style="margin-top: 15px;">
+    <div class="dimc content">
+      <div id="mlic_title" class="dimc" style="font-size: 1.1em">{{moduleLicense}}</div>
+      <div class="dimc desc" style="font-size: 0.9em; margin-top: 3px;">GPL (Nullptr), BSD 2-Clause</div>
+    </div>
+
+    <div class="dimc" style="margin-top: 6px;">
+      <div id="mweb_title" class="dimc" style="font-size: 1.1em">{{WebUILicense}}</div>
+      <div class="dimc desc" style="font-size: 0.9em; margin-top: 3px;">AGPL 3</div>
+    </div>
+  </div>
+</div>

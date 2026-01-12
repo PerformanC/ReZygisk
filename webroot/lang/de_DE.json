@@ -1,30 +1,11 @@
 {
   "langName": "Deutsch",
-  "global": {
-    "unknown": "Unbekannt"
-  },
-  "smallPage": {
-    "language": {
-      "header": "Neue Sprache wählen"
-    },
-    "theme": {
-      "header": "Neues Theme wählen",
-      "dark": "Dunkel",
-      "light": "Hell",
-      "system": "System Basiert"
-    },
-    "errorh": {
-      "buttons": {
-        "copy": "Kopieren",
-        "clear": "ALLE LOGS LÖSCHEN"
-      },
-      "header": "Fehler Verlauf",
-      "placeholder": "Es wurde kein Fehlerprotokoll aufgezeichnet!"
-    }
-  },
-  "page": {
+  "pages": {
     "home": {
-      "header": "Startseite",
+      "title": "Startseite",
+      "unknown": "Unbekannt",
+      "androidVersion": "Android Version",
+			"linuxKernelVersion": "Linux Kernel Version",
       "status": {
         "notWorking": "Funktioniert nicht",
         "ok": "Funktioniert",
@@ -40,54 +21,67 @@
         }
       }
     },
+    "actions": {
+      "title": "Aktionen",
+      "monitor": {
+        "title": "Überwachen",
+        "status": {
+          "tracing": "Nachverfolgung",
+          "stopping": "Beenden",
+          "stopped": "Beendet",
+          "exiting": "Wird Beendet",
+          "unknown": "Unbekannt"
+        },
+        "button": {
+          "pause": "Pause",
+          "stop": "Stopp",
+          "start": "Start"
+        }
+      }
+    },
     "modules": {
-      "header": "Module",
+      "title": "Module",
       "notAvaliable": "Kein Modul nutzt Zygisk.",
       "arch": "Architektur: "
     },
     "settings": {
-      "header": "Einstellungen",
-      "font": {
-        "header": "Systemschriftart aktivieren",
-        "description": "Diese Option aktiviert die Systemschriftart in der aktuellen WebUI. HINWEIS: Möglicherweise nicht kompatibel mit FlipFont"
+      "title": "Einstellungen",
+      "language": {
+        "title": "Sprache auswählen",
+        "description": "Change the language of the WebUI to the selected one."
+      },
+      "fullscreen": {
+        "title": "Disable fullscreen mode in WebUI",
+        "description": "This option will make the WebUI not fill the whole screen."
       },
       "theme": {
-        "header": "System Theme",
-        "description": "Wählen Sie Ihr System-Theme für die aktuelle WebUI"
+        "title": "Change WebUI theme",
+        "description": "Choose your system theme for current WebUI"
       },
-      "language": {
-        "header": "Sprache auswählen",
-        "description": "Wechsel zu deiner neuen Sprache"
+      "font": {
+        "title": "Systemschriftart aktivieren",
+        "description": "Diese Option aktiviert die Systemschriftart in der aktuellen WebUI. HINWEIS: Möglicherweise nicht kompatibel mit FlipFont"
       },
-      "logs": {
-        "header": "Fehler Verlauf",
-        "description": "Zeige den Fehler Verlauf"
-      },
-      "credits": {
-        "module": "Modul Entwickler",
-        "original": "Original Modul Entwickler",
-        "web": "WebUI Entwickler"
-      },
-      "license": {
-        "module": "Modul Lizenz",
-        "web": "WebUI Lizenz"
-      }
+      "moduleDevelopers": "Module Developer(s)",
+      "WebUIDevelopers": "WebUI Developer(s)",
+      "orginalDevelopers": "Original Module Developer(s)",
+      "moduleLicense": "Module License",
+      "WebUILicense": "WebUI License"
     },
-    "actions": {
-      "header": "Aktionen",
-      "monitorButton": {
-        "pause": "Pause",
-        "stop": "Stopp",
-        "start": "Start"
-      },
-      "monitor": "Überwachen",
-      "status": {
-        "tracing": "Nachverfolgung",
-        "stopping": "Beenden",
-        "stopped": "Beendet",
-        "exiting": "Wird Beendet",
-        "unknown": "Unbekannt"
+    "mini_settings_language": {
+      "title": "Sprache auswählen"
+    },
+    "mini_settings_theme": {
+      "title": "Change WebUI theme",
+      "theme": {
+        "dark": "Dark Theme",
+        "light": "Light Theme",
+        "amoled": "Amoled Theme",
+        "system_based": "System Based Theme"
       }
     }
+  },
+  "globals": {
+    "unknown": "Unbekannt"
   }
 }

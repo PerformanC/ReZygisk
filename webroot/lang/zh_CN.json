@@ -1,30 +1,11 @@
 {
   "langName": "简体中文 (中国)",
-  "global": {
-    "unknown": "未知"
-  },
-  "smallPage": {
-    "language": {
-      "header": "选择语言"
-    },
-    "theme": {
-      "header": "选择主题风格",
-      "dark": "暗色",
-      "light": "浅色",
-      "system": "跟随系统"
-    },
-    "errorh": {
-      "buttons": {
-        "copy": "复制",
-        "clear": "清空日志"
-      },
-      "header": "错误日志",
-      "placeholder": "暂时没有错误日志"
-    }
-  },
-  "page": {
+  "pages": {
     "home": {
-      "header": "主页",
+      "title": "主页",
+      "unknown": "未知",
+      "androidVersion": "Android Version",
+			"linuxKernelVersion": "Linux Kernel Version",
       "status": {
         "notWorking": "未运行",
         "ok": "运行中",
@@ -40,54 +21,67 @@
         }
       }
     },
+    "actions": {
+      "title": "操作",
+      "monitor": {
+        "title": "监视器",
+        "status": {
+          "tracing": "追踪中",
+          "stopping": "正在停止",
+          "stopped": "已停止",
+          "exiting": "正在退出",
+          "unknown": "未知"
+        },
+        "button": {
+          "start": "启动",
+          "stop": "停止",
+          "pause": "暂停"
+        }
+      }
+    },
     "modules": {
-      "header": "模块",
+      "title": "模块",
       "notAvaliable": "目前没有模块使用Zygisk",
       "arch": "架构: "
     },
-    "actions": {
-      "header": "操作",
-      "monitorButton": {
-        "start": "启动",
-        "stop": "停止",
-        "pause": "暂停"
-      },
-      "monitor": "监视器",
-      "status": {
-        "tracing": "追踪中",
-        "stopping": "正在停止",
-        "stopped": "已停止",
-        "exiting": "正在退出",
-        "unknown": "未知"
-      }
-    },
     "settings": {
-      "header": "设置",
-      "font": {
-        "header": "启用系统字体",
-        "description": "此选项会在Web界面启用系统字体。可能与FlipFont不兼容。"
+      "title": "设置",
+      "language": {
+        "title": "语言",
+        "description": "Change the language of the WebUI to the selected one."
+      },
+      "fullscreen": {
+        "title": "Disable fullscreen mode in WebUI",
+        "description": "This option will make the WebUI not fill the whole screen."
       },
       "theme": {
-        "header": "主题",
-        "description": "选择Web界面的主题风格"
+        "title": "Change WebUI theme",
+        "description": "Choose your system theme for current WebUI"
       },
-      "language": {
-        "header": "语言",
-        "description": "切换不同的语言"
+      "font": {
+        "title": "启用系统字体",
+        "description": "此选项会在Web界面启用系统字体。可能与FlipFont不兼容。"
       },
-      "logs": {
-        "header": "错误日志",
-        "description": "浏览所有错误日志"
-      },
-      "credits": {
-        "module": "模块开发者",
-        "original": "源模块开发者",
-        "web": "Web界面开发者"
-      },
-      "license": {
-        "module": "模块开源许可",
-        "web": "Web界面开源许可"
+      "moduleDevelopers": "Module Developer(s)",
+      "WebUIDevelopers": "WebUI Developer(s)",
+      "orginalDevelopers": "Original Module Developer(s)",
+      "moduleLicense": "Module License",
+      "WebUILicense": "WebUI License"
+    },
+    "mini_settings_language": {
+      "title": "语言"
+    },
+    "mini_settings_theme": {
+      "title": "Change WebUI theme",
+      "theme": {
+        "dark": "Dark Theme",
+        "light": "Light Theme",
+        "amoled": "Amoled Theme",
+        "system_based": "System Based Theme"
       }
     }
+  },
+  "globals": {
+    "unknown": "未知"
   }
 }

@@ -1,0 +1,9 @@
+.not_avaliable {
+  position: fixed;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2em;
+  text-align: center;
+  top: 0; left: 30px; right: 30px; bottom: 0;
+}

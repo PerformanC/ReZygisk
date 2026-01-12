@@ -6,6 +6,14 @@ function getUniqueCallbackName(prefix) {
 }
 
 export function exec(command, options) {
+  if (typeof ksu === "undefined") {
+    /* INFO: Assume this is a computer for ReZygisk testing */
+
+    return new Promise((resolve, reject) => {
+      resolve({ errno: 0, stdout: "OK", stderr: "" });
+    });
+  }
+
   if (typeof options === "undefined") {
     options = {};
   }
@@ -71,6 +79,9 @@ function Stdio() {
   };
   
   export function spawn(command, args, options) {
+    /* INFO: Assume this is a computer for ReZygisk testing */
+    if (typeof ksu === "undefined") return new ChildProcess();
+  
     if (typeof args === "undefined") {
       args = [];
     } else if (!(args instanceof Array)) {
@@ -109,9 +120,14 @@ function Stdio() {
   }
 
 export function fullScreen(isFullScreen) {
+  /* INFO: Assume this is a computer for ReZygisk testing */
+  if (typeof ksu === "undefined") return;
+
   ksu.fullScreen(isFullScreen);
 }
 
 export function toast(message) {
-  ksu.toast(message);
+  /* INFO: Assume this is a computer for ReZygisk testing */
+  if (typeof ksu === "undefined") alert(message);
+  else ksu.toast(message);
 }

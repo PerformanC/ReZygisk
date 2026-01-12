@@ -2,13 +2,6 @@ import { setDarkNav } from './darkNavbar.js'
 
 const rootCss = document.querySelector(':root')
 
-/* INFO: Changes the icons to match the theme */
-const close_icons = document.getElementsByClassName('close_icon')
-const expand_icons = document.getElementsByClassName('expander')
-const sp_lang_close = document.getElementById('sp_lang_close')
-const sp_theme_close = document.getElementById('sp_theme_close')
-const sp_errorh_close = document.getElementById('sp_errorh_close')
-
 export function setDark(chooseSet) {
   rootCss.style.setProperty('--background', '#141414')
   rootCss.style.setProperty('--font', '#ffffff')
@@ -17,27 +10,16 @@ export function setDark(chooseSet) {
   rootCss.style.setProperty('--icon', '#494949')
   rootCss.style.setProperty('--icon-bc', '#292929')
   rootCss.style.setProperty('--desktop-navbar', '#252525')
+  rootCss.style.setProperty('--button-enabled', '#535353')
   rootCss.style.setProperty('--desktop-navicon', '#3a3a3a')
   rootCss.style.setProperty('--button', 'var(--background)')
 
   if (chooseSet) setData('dark')
-
-  for (const close_icon of close_icons) {
-    close_icon.innerHTML = '<img src="assets/close.svg">'
-  }
-
-  for (const expand_icon of expand_icons) {
-    expand_icon.innerHTML = '<img class="dimc" src="assets/expand.svg">'
-  }
-
-  sp_lang_close.innerHTML = '<img src="./assets/back.svg"/>'
-  sp_theme_close.innerHTML = '<img src="./assets/back.svg"/>'
-  sp_errorh_close.innerHTML = '<img src="./assets/back.svg"/>'
   setDarkNav()
 }
 
 function setData(mode) {
-  localStorage.setItem('/system/theme', mode)
+  localStorage.setItem('/ReZygisk/theme', mode)
 
   return mode
 }

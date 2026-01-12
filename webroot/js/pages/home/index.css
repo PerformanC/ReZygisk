@@ -1,0 +1,8 @@
+.list {
+  overflow-y: auto;
+  transition: none;
+}
+
+.lock {
+  color: var(--lock);
+}

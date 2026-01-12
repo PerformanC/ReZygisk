@@ -1,30 +1,11 @@
 {
   "langName": "Tiếng Việt",
-  "global": {
-    "unknown": "Không xác định"
-  },
-  "smallPage": {
-    "language": {
-      "header": "Chọn ngôn ngữ mới của bạn"
-    },
-    "theme": {
-      "header": "Chọn giao diện mới của bạn",
-      "dark": "Tối",
-      "light": "Sáng",
-      "system": "Theo hệ thống"
-    },
-    "errorh": {
-      "buttons": {
-        "copy": "SAO CHÉP",
-        "clear": "XOÁ TOÀN BỘ LOGS"
-      },
-      "header": "Lịch Sử Lỗi",
-      "placeholder": "Không có lỗi nào được ghi ở đây!"
-    }
-  },
-  "page": {
+  "pages": {
     "home": {
-      "header": "Trang Chủ",
+      "title": "Trang Chủ",
+      "unknown": "Không xác định",
+			"androidVersion": "Phiên bản Android",
+			"linuxKernelVersion": "Phiên bản hạt nhân Linux",
       "status": {
         "notWorking": "Không hoạt động",
         "ok": "Đang hoạt động",
@@ -40,54 +21,67 @@
         }
       }
     },
-    "modules": {
-      "header": "Mô Đun",
-      "notAvaliable": "Không có mô-đun nào sử dụng Zygisk ở đây!",
-      "arch": "Cấu trúc: "
-    },
     "actions": {
-      "header": "Trình điều khiển",
-      "monitorButton": {
-        "start": "Chạy",
-        "stop": "Dừng",
-        "pause": "Tạm Dừng"
-      },
-      "monitor": "Trình theo dõi",
-      "status": {
-        "tracing": "Đang chạy",
-        "stopping": "Đang Dừng",
-        "stopped": "Đã Dừng",
-        "exiting": "Đã Thoát",
-        "unknown": "Không Xác Định"
+      "title": "Trình điều khiển",
+      "monitor": {
+        "title": "Trình theo dõi",
+        "status": {
+        	"tracing": "Đang chạy",
+        	"stopping": "Đang Dừng",
+        	"stopped": "Đã Dừng",
+        	"exiting": "Đã Thoát",
+        	"unknown": "Không Xác Định"
+        },
+        "button": {
+          "start": "Chạy",
+          "stop": "Dừng",
+          "pause": "Tạm Dừng"
+        }
       }
+    },
+    "modules": {
+      "title": "Mô Đun",
+      "notAvaliable": "Không có mô-đun nào sử dụng Zygisk ở đây!",
+      "arch": "Kiến trúc: "
     },
     "settings": {
-      "header": "Cài đặt",
-      "font": {
-        "header": "Sử dụng phông chữ hệ thống",
-        "description": "Tuỳ chọn này sẽ cho phép người dùng sử dụng phông chữ của hệ thống. LƯU Ý: Có thể sẽ không tương thích với FlipFont"
-      },
-      "theme": {
-        "header": "Giao diện hệ thống",
-        "description": "Chọn giao diện cho WebUI hiện tại của bạn"
-      },
+      "title": "Cài đặt",
       "language": {
-        "header": "Thay đổi ngôn ngữ",
+        "title": "Thay đổi ngôn ngữ",
         "description": "Thay đổi sang ngôn ngữ mới"
       },
-      "logs": {
-        "header": "Lịch sử lỗi",
-        "description": "Xem tất cả các lỗi"
+      "fullscreen": {
+        "title": "Vô hiệu hóa chế độ toàn màn hình trên WebUI",
+        "description": "Tùy chọn này sẽ khiến cho WebUI không còn ở toàn màn hình."
       },
-      "credits": {
-        "module": "Nhà phát triển mô-đun",
-        "original": "Nhà phát triển mô-đun gốc",
-        "web": "Nhà phát triển WebUI"
+      "theme": {
+        "title": "Giao diện WebUI",
+        "description": "Chọn giao diện cho WebUI hiện tại của bạn"
       },
-      "license": {
-        "module": "Giấy phép bản quyền mô-đun",
-        "web": "Giấy phép bản quyền WebUI"
+      "font": {
+        "title": "Sử dụng phông chữ hệ thống",
+        "description": "Tuỳ chọn này sẽ cho phép người dùng sử dụng phông chữ của hệ thống. LƯU Ý: Có thể sẽ không tương thích với FlipFont"
+      },
+      "moduleDevelopers": "Những nhà phát triển mô-đun",
+      "WebUIDevelopers": "Những nhà phát triển WebUI",
+      "orginalDevelopers": "Những nhà phát triển mô-đun gốc",
+      "moduleLicense": "Giấy phép bản quyền mô-đun",
+      "WebUILicense": "Giấy phép bản quyền WebUI"
+    },
+    "mini_settings_language": {
+      "title": "Thay đổi ngôn ngữ"
+    },
+    "mini_settings_theme": {
+      "title": "Thay đổi giao diện WebUI",
+      "theme": {
+        "dark": "Giao diện tối",
+        "light": "Giao diện sáng",
+        "amoled": "Giao diện Amoled",
+        "system_based": "Tự động theo hệ thống"
       }
     }
+  },
+  "globals": {
+    "unknown": "Không xác định"
   }
 }
