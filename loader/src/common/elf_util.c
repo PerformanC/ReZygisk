@@ -70,7 +70,7 @@ int dl_cb(struct dl_phdr_info *info, size_t size, void *data) {
   if (info->dlpi_name == NULL)
     return 0;
 
-  ElfImg *img = (ElfImg *)data;
+  ElfImg *img = data;
 
   if (strstr(info->dlpi_name, img->elf)) {
     img->base = (void *)info->dlpi_addr;
@@ -96,7 +96,7 @@ size_t calculate_valid_symtabs_amount(ElfImg *img) {
     return 0;
   }
 
-  char *symtab_strings = offsetOf_char(img->header, img->symstr_offset_for_symtab);
+  const char *symtab_strings = offsetOf_char(img->header, img->symstr_offset_for_symtab);
 
   for (ElfW(Off) i = 0; i < img->symtab_count; i++) {
     const char *sym_name = symtab_strings + img->symtab_start[i].st_name;
@@ -112,20 +112,83 @@ size_t calculate_valid_symtabs_amount(ElfImg *img) {
   return count;
 }
 
+void _unload_symtabs(ElfImg *img, size_t valid_symtabs_amount) {
+  for (size_t i = 0; i < valid_symtabs_amount; i++) {
+    free(img->symtabs_[i].name);
+  }
+
+  free(img->symtabs_);
+  img->symtabs_ = NULL;
+}
+
+bool _load_symtabs(ElfImg *img) {
+  if (img->symtabs_) return true;
+
+  if (!img->symtab_start || img->symstr_offset_for_symtab == 0 || img->symtab_count == 0) {
+    LOGE("Cannot load symtabs: .symtab section or its string table not found/valid.");
+
+    return false;
+  }
+
+  size_t valid_symtabs_amount = calculate_valid_symtabs_amount(img);
+  if (valid_symtabs_amount == 0) {
+    LOGW("No valid symbols (FUNC/OBJECT with size > 0) found in .symtab for %s", img->elf);
+
+    return false;
+  }
+
+  img->symtabs_ = calloc(valid_symtabs_amount, sizeof(*img->symtabs_));
+  if (!img->symtabs_) {
+    LOGE("Failed to allocate memory for symtabs array");
+
+    return false;
+  }
+
+  const char *symtab_strings = offsetOf_char(img->header, img->symstr_offset_for_symtab);
+  size_t current_valid_index = 0;
+
+  for (ElfW(Off) pos = 0; pos < img->symtab_count; pos++) {
+    ElfW(Sym) *current_sym = &img->symtab_start[pos];
+    unsigned int st_type = ELF_ST_TYPE(current_sym->st_info);
+
+    if ((st_type == STT_FUNC || st_type == STT_OBJECT) && current_sym->st_size > 0 && current_sym->st_name != 0) {
+      const char *st_name = symtab_strings + current_sym->st_name;
+      if (!st_name)
+        continue;
+
+      ElfW(Shdr) *symtab_str_shdr = img->section_header + img->symtab->sh_link;
+      if (current_sym->st_name >= symtab_str_shdr->sh_size) {
+        LOGE("Symbol name offset out of bounds");
+
+        continue;
+      }
+
+      img->symtabs_[current_valid_index].name = strdup(st_name);
+      if (!img->symtabs_[current_valid_index].name) {
+        LOGE("Failed to duplicate symbol name: %s", st_name);
+
+        _unload_symtabs(img, current_valid_index);
+
+        return false;
+      }
+
+      img->symtabs_[current_valid_index].sym = current_sym;
+
+      current_valid_index++;
+      if (current_valid_index == valid_symtabs_amount) break;
+    }
+  }
+
+  return true;
+}
+
 
 void ElfImg_destroy(ElfImg *img) {
   if (!img) return;
 
   if (img->symtabs_) {
     size_t valid_symtabs_amount = calculate_valid_symtabs_amount(img);
-    if (valid_symtabs_amount > 0) {
-      for (size_t i = 0; i < valid_symtabs_amount; i++) {
-        free(img->symtabs_[i].name);
-      }
-    }
-
-    free(img->symtabs_);
-    img->symtabs_ = NULL;
+    _unload_symtabs(img, valid_symtabs_amount);
   }
 
   if (img->elf) {
@@ -143,7 +206,7 @@ void ElfImg_destroy(ElfImg *img) {
 
 
 ElfImg *ElfImg_create(const char *elf, void *base) {
-  ElfImg *img = (ElfImg *)calloc(1, sizeof(ElfImg));
+  ElfImg *img = calloc(1, sizeof(*img));
   if (!img) {
     LOGE("Failed to allocate memory for ElfImg");
 
@@ -208,7 +271,7 @@ ElfImg *ElfImg_create(const char *elf, void *base) {
     return NULL;
   }
 
-  img->header = (ElfW(Ehdr) *)mmap(NULL, img->size, PROT_READ, MAP_PRIVATE, fd, 0);
+  img->header = mmap(NULL, img->size, PROT_READ, MAP_PRIVATE, fd, 0);
 
   close(fd);
 
@@ -242,7 +305,7 @@ ElfImg *ElfImg_create(const char *elf, void *base) {
   ElfW(Shdr) *dynsym_shdr = NULL;
   ElfW(Shdr) *symtab_shdr = NULL;
 
-  char *section_str = NULL;
+  const char *section_str = NULL;
   if (img->section_header && img->header->e_shstrndx != SHN_UNDEF) {
     if (img->header->e_shstrndx < img->header->e_shnum) {
       ElfW(Shdr) *shstrtab_hdr = img->section_header + img->header->e_shstrndx;
@@ -258,7 +321,7 @@ ElfImg *ElfImg_create(const char *elf, void *base) {
     uintptr_t shoff = (uintptr_t)img->section_header;
     for (int i = 0; i < img->header->e_shnum; i++, shoff += img->header->e_shentsize) {
       ElfW(Shdr) *section_h = (ElfW(Shdr *))shoff;
-      char *sname = section_str ? (section_h->sh_name + section_str) : "<?>";
+      const char *sname = section_str ? (section_h->sh_name + section_str) : "<?>";
       size_t entsize = section_h->sh_entsize;
 
       switch (section_h->sh_type) {
@@ -342,6 +405,9 @@ ElfImg *ElfImg_create(const char *elf, void *base) {
 
           break;
         }
+        default: {
+          LOGW("Section header type not supported: %s(%d)", sname, section_h->sh_type);
+        }
       }
     }
   }
@@ -357,7 +423,7 @@ ElfImg *ElfImg_create(const char *elf, void *base) {
       if (linked_strtab->sh_type == SHT_STRTAB) {
         img->strtab = linked_strtab;
         img->symstr_offset = linked_strtab->sh_offset;
-        img->strtab_start = (void *)offsetOf_char(img->header, img->symstr_offset);
+        img->strtab_start = offsetOf_char(img->header, img->symstr_offset);
       } else {
         LOGW("Section %u linked by .dynsym is not SHT_STRTAB (type %u)", dynsym_shdr->sh_link, linked_strtab->sh_type);
       }
@@ -437,73 +503,7 @@ ElfImg *ElfImg_create(const char *elf, void *base) {
   return img;
 }
 
-bool _load_symtabs(ElfImg *img) {
-  if (img->symtabs_) return true;
-
-  if (!img->symtab_start || img->symstr_offset_for_symtab == 0 || img->symtab_count == 0) {
-    LOGE("Cannot load symtabs: .symtab section or its string table not found/valid.");
-
-    return false;
-  }
-
-  size_t valid_symtabs_amount = calculate_valid_symtabs_amount(img);
-  if (valid_symtabs_amount == 0) {
-    LOGW("No valid symbols (FUNC/OBJECT with size > 0) found in .symtab for %s", img->elf);
-
-    return false;
-  }
-
-  img->symtabs_ = (struct symtabs *)calloc(valid_symtabs_amount, sizeof(struct symtabs));
-  if (!img->symtabs_) {
-    LOGE("Failed to allocate memory for symtabs array");
-
-    return false;
-  }
-
-  char *symtab_strings = offsetOf_char(img->header, img->symstr_offset_for_symtab);
-  size_t current_valid_index = 0;
-
-  for (ElfW(Off) pos = 0; pos < img->symtab_count; pos++) {
-    ElfW(Sym) *current_sym = &img->symtab_start[pos];
-    unsigned int st_type = ELF_ST_TYPE(current_sym->st_info);
-
-    if ((st_type == STT_FUNC || st_type == STT_OBJECT) && current_sym->st_size > 0 && current_sym->st_name != 0) {
-      const char *st_name = symtab_strings + current_sym->st_name;
-      if (!st_name)
-        continue;
-
-      ElfW(Shdr) *symtab_str_shdr = img->section_header + img->symtab->sh_link;
-      if (current_sym->st_name >= symtab_str_shdr->sh_size) {
-        LOGE("Symbol name offset out of bounds");
-
-        continue;
-      }
-
-      img->symtabs_[current_valid_index].name = strdup(st_name);
-      if (!img->symtabs_[current_valid_index].name) {
-        LOGE("Failed to duplicate symbol name: %s", st_name);
-
-        for(size_t k = 0; k < current_valid_index; ++k) {
-          free(img->symtabs_[k].name);
-        }
-
-        free(img->symtabs_);
-        img->symtabs_ = NULL;
-
-        return false;
-      }
-
-      img->symtabs_[current_valid_index].sym = current_sym;
-
-      current_valid_index++;
-      if (current_valid_index == valid_symtabs_amount) break;
-    }
-  }
-
-  return true;
-}
-
-ElfW(Addr) GnuLookup(ElfImg *restrict img, const char *name, uint32_t hash, unsigned char *sym_type) {
+ElfW(Addr) GnuLookup(ElfImg *restrict img, const char *name, uint32_t hash, unsigned int *sym_type) {
   if (img->gnu_nbucket_ == 0 || img->gnu_bloom_size_ == 0 || !img->gnu_bloom_filter_ || !img->gnu_bucket_ || !img->gnu_chain_ || !img->dynsym_start || !img->strtab_start)
     return 0;
 
@@ -530,10 +530,10 @@ ElfW(Addr) GnuLookup(ElfImg *restrict img, const char *name, uint32_t hash, unsi
     return 0;
   }
 
-  char *strings = (char *)img->strtab_start;
+  const char *strings = img->strtab_start;
   uint32_t chain_val = img->gnu_chain_[sym_index - img->gnu_symndx_];
 
-  ElfW(Word) dynsym_count = img->dynsym->sh_size / img->dynsym->sh_entsize;
+  ElfW(Xword) dynsym_count = img->dynsym->sh_size / img->dynsym->sh_entsize;
   if (sym_index >= dynsym_count) {
     LOGE("Symbol index %u out of bounds", sym_index);
 
@@ -584,11 +584,11 @@ ElfW(Addr) GnuLookup(ElfImg *restrict img, const char *name, uint32_t hash, unsi
   return 0;
 }
 
-ElfW(Addr) ElfLookup(ElfImg *restrict img, const char *restrict name, uint32_t hash, unsigned char *sym_type) {
+ElfW(Addr) ElfLookup(ElfImg *restrict img, const char *restrict name, uint32_t hash, unsigned int *sym_type) {
   if (img->nbucket_ == 0 || !img->bucket_ || !img->chain_ || !img->dynsym_start || !img->strtab_start)
     return 0;
 
-  char *strings = (char *)img->strtab_start;
+  const char *strings = (char *)img->strtab_start;
 
   for (size_t n = img->bucket_[hash % img->nbucket_]; n != STN_UNDEF; n = img->chain_[n]) {
     ElfW(Sym) *sym = img->dynsym_start + n;
@@ -604,7 +604,7 @@ ElfW(Addr) ElfLookup(ElfImg *restrict img, const char *restrict name, uint32_t h
   return 0;
 }
 
-ElfW(Addr) LinearLookup(ElfImg *img, const char *restrict name, unsigned char *sym_type) {
+ElfW(Addr) LinearLookup(ElfImg *img, const char *restrict name, unsigned int *sym_type) {
   if (!_load_symtabs(img)) {
     LOGE("Failed to load symtabs for linear lookup of %s", name);
 
@@ -634,7 +634,7 @@ ElfW(Addr) LinearLookup(ElfImg *img, const char *restrict name, unsigned char *s
   return 0;
 }
 
-ElfW(Addr) LinearLookupByPrefix(ElfImg *img, const char *prefix, unsigned char *sym_type) {
+ElfW(Addr) LinearLookupByPrefix(ElfImg *img, const char *prefix, unsigned int *sym_type) {
   if (!_load_symtabs(img)) {
     LOGE("Failed to load symtabs for linear lookup by prefix of %s", prefix);
 
@@ -670,7 +670,7 @@ ElfW(Addr) LinearLookupByPrefix(ElfImg *img, const char *prefix, unsigned char *
   return 0;
 }
 
-ElfW(Addr) getSymbOffset(ElfImg *img, const char *name, unsigned char *sym_type) {
+ElfW(Addr) getSymbOffset(ElfImg *img, const char *name, unsigned int *sym_type) {
   ElfW(Addr) offset = 0;
 
   offset = GnuLookup(img, name, GnuHash(name), sym_type);
@@ -756,12 +756,12 @@ ElfW(Addr) getSymbOffset(ElfImg *img, const char *name, unsigned char *sym_type)
          This function is based on AOSP's (Android Open Source Project) code, and resolves the
            indirect symbol, leading to the correct, most appropriate for the hardware, symbol.
 
-    SOURCES: 
+    SOURCES:
      - https://android.googlesource.com/platform/bionic/+/refs/tags/android-16.0.0_r1/linker/linker.cpp#2594
      - https://android.googlesource.com/platform/bionic/+/tags/android-16.0.0_r1/libc/bionic/bionic_call_ifunc_resolver.cpp#41
 */
 static ElfW(Addr) handle_indirect_symbol(ElfImg *img, ElfW(Off) offset) {
-  ElfW(Addr) resolver_addr = (ElfW(Addr))((uintptr_t)img->base + offset - img->bias);
+  ElfW(Addr) resolver_addr = ((uintptr_t)img->base + offset - img->bias);
 
   #ifdef __aarch64__
     typedef ElfW(Addr) (*ifunc_resolver_t)(uint64_t, struct __ifunc_arg_t *);
@@ -789,7 +789,7 @@ static ElfW(Addr) handle_indirect_symbol(ElfImg *img, ElfW(Off) offset) {
 }
 
 ElfW(Addr) getSymbAddress(ElfImg *img, const char *name) {
-  unsigned char sym_type = 0;
+  unsigned int sym_type = 0;
   ElfW(Addr) offset = getSymbOffset(img, name, &sym_type);
 
   if (offset == 0 || !img->base) return 0;
@@ -800,11 +800,11 @@ ElfW(Addr) getSymbAddress(ElfImg *img, const char *name) {
     return handle_indirect_symbol(img, offset);
   }
 
-  return (ElfW(Addr))((uintptr_t)img->base + offset - img->bias);
+  return ((uintptr_t)img->base + offset - img->bias);
 }
 
 ElfW(Addr) getSymbAddressByPrefix(ElfImg *img, const char *prefix) {
-  unsigned char sym_type = 0;
+  unsigned int sym_type = 0;
   ElfW(Addr) offset = LinearLookupByPrefix(img, prefix, &sym_type);
 
   if (offset == 0 || !img->base) return 0;
@@ -815,7 +815,7 @@ ElfW(Addr) getSymbAddressByPrefix(ElfImg *img, const char *prefix) {
     return handle_indirect_symbol(img, offset);
   }
 
-  return (ElfW(Addr))((uintptr_t)img->base + offset - img->bias);
+  return ((uintptr_t)img->base + offset - img->bias);
 }
 
 void *getSymbValueByPrefix(ElfImg *img, const char *prefix) {
