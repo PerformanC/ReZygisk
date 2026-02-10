@@ -16,3 +16,6 @@ allow zygote zygote process execmem
 allow system_server system_server process execmem
 allow zygote tmpfs file *
 allow zygote appdomain_tmpfs file *
+
+# Allow zygote to execute our labeled files so libzygisk.so is runnable
+allow zygote zygisk_file file {read open execute map getattr execmod}

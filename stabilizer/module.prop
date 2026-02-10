@@ -1,0 +1,6 @@
+id=00zygisk_stabilizer
+name=00 Zygisk Stabilizer
+version=1.0.0
+versionCode=100
+author=ReZygisk
+description=Preload core system libs in Zygote to reduce system_server crashes; no hooks.

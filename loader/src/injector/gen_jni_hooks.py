@@ -118,6 +118,35 @@ class SpecApp(ForkAndSpec):
     def base_name(self):
         return 'nativeSpecializeAppProcess'
 
+# Specialization for CaremeOS (xtc) that needs defaulted optional fields
+class SpecAppXtc(SpecApp):
+    def body(self):
+        decl = ''
+        decl += ind(1) + 'jboolean is_child_zygote = JNI_FALSE;'
+        decl += ind(1) + 'jboolean is_top_app = JNI_FALSE;'
+        decl += ind(1) + 'jobjectArray pkg_data_info_list = NULL;'
+        decl += ind(1) + 'jobjectArray whitelisted_data_info_list = NULL;'
+        decl += ind(1) + 'jboolean mount_data_dirs = JNI_FALSE;'
+        decl += ind(1) + 'jboolean mount_storage_dirs = JNI_FALSE;'
+        decl += ind(1) + 'jboolean mount_sysprop_overrides = JNI_FALSE;'
+        decl += ind(1) + self.init_args()
+        decl += ind(1) + 'args.is_child_zygote = &is_child_zygote;'
+        decl += ind(1) + 'args.is_top_app = &is_top_app;'
+        decl += ind(1) + 'args.pkg_data_info_list = &pkg_data_info_list;'
+        decl += ind(1) + 'args.whitelisted_data_info_list = &whitelisted_data_info_list;'
+        decl += ind(1) + 'args.mount_data_dirs = &mount_data_dirs;'
+        decl += ind(1) + 'args.mount_storage_dirs = &mount_storage_dirs;'
+        decl += ind(1) + 'args.mount_sysprop_overrides = &mount_sysprop_overrides;'
+        decl += ind(1) + 'struct zygisk_context ctx;'
+        decl += ind(1) + 'rz_init(&ctx, env, &args);'
+        decl += ind(1) + f'rz_{self.base_name()}_pre(&ctx);'
+        decl += ind(1) + self.orig_method() + '('
+        decl += ind(2) + f'env, clazz, {self.name_list()}'
+        decl += ind(1) + ');'
+        decl += ind(1) + f'rz_{self.base_name()}_post(&ctx);'
+        decl += ind(1) + 'rz_cleanup(&ctx);'
+        return decl
+
 class ForkServer(ForkAndSpec):
     def base_name(self):
         return 'nativeForkSystemServer'
@@ -216,6 +245,10 @@ spec_u = SpecApp('u', [uid, gid, gids, runtime_flags, rlimits, mount_external, s
 spec_samsung_q = SpecApp('samsung_q', [uid, gid, gids, runtime_flags, rlimits, mount_external,
     se_info, Anon(jint), Anon(jint), nice_name, is_child_zygote, instruction_set, app_data_dir])
 
+# CaremeOS XTC specialization
+spec_xtc = SpecAppXtc('xtc', [uid, gid, gids, runtime_flags, rlimits, mount_external,
+    se_info, nice_name, instruction_set, app_data_dir])
+
 server_l = ForkServer('l', [uid, gid, gids, runtime_flags, rlimits,
     permitted_capabilities, effective_capabilities])
 
@@ -247,6 +280,8 @@ def gen_jni_def(clz, methods):
     first_m = methods[0]
     decl += ind(0) + f'typedef {first_m.ret.type.cpp} (*{func_ptr_type})(JNIEnv *, jclass, ...);'
     
+
+    # 用 methods[0] 代替 m，避免未绑定错误
     for m in methods:
         decl += ind(0) + f'__attribute__((no_stack_protector)) static {m.ret.type.cpp} {m.name}(JNIEnv *env, jclass clazz, {m.cpp()}) {{'
         decl += m.body()
@@ -255,7 +290,8 @@ def gen_jni_def(clz, methods):
         decl += ind(0) + '}'
 
     num_methods = len(methods)
-    decl += ind(0) + f'static JNINativeMethod {m.base_name()}_methods[{num_methods}] = {{'
+    base = methods[0].base_name()
+    decl += ind(0) + f'static JNINativeMethod {base}_methods[{num_methods}] = {{'
     for m in methods:
         decl += ind(1) + '{'
         decl += ind(2) + f'"{m.base_name()}",'
@@ -263,11 +299,11 @@ def gen_jni_def(clz, methods):
         decl += ind(2) + f'(void *) &{m.name}'
         decl += ind(1) + '},'
     decl += ind(0) + '};'
-    decl += ind(0) + f'static const int {m.base_name()}_methods_count = {num_methods};'
-    decl = ind(0) + f'static void *{m.base_name()}_orig = NULL;' + decl
+    decl += ind(0) + f'static const int {base}_methods_count = {num_methods};'
+    decl = ind(0) + f'static void *{base}_orig = NULL;' + decl
     decl += ind(0)
 
-    hook_map[clz].append(m.base_name())
+    hook_map[clz].append(base)
 
     return decl
 
@@ -281,7 +317,7 @@ with open('jni_hooks.h', 'w') as f:
     methods = [fas_l, fas_o, fas_p, fas_q_alt, fas_r, fas_u, fas_samsung_m, fas_samsung_n, fas_samsung_o, fas_samsung_p, fas_samsung_b, fas_grapheneos_u]
     f.write(gen_jni_def(zygote, methods))
 
-    methods = [spec_q, spec_q_alt, spec_r, spec_u, spec_samsung_q, spec_grapheneos_u]
+    methods = [spec_q, spec_q_alt, spec_r, spec_u, spec_samsung_q, spec_xtc, spec_grapheneos_u]
     f.write(gen_jni_def(zygote, methods))
 
     methods = [server_l, server_samsung_q, server_grapheneos_u]

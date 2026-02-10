@@ -6,9 +6,14 @@ fun getLatestNDKPath(): String {
   if (android_home == null) {
     throw Exception("ANDROID_HOME not set")
   }
+  // Prefer flat android-ndk-* directory if present (e.g., android-ndk-r29)
+  val flatNdk = Paths.get(android_home, "android-ndk-r29").toFile()
+  if (flatNdk.exists()) {
+    return flatNdk.absolutePath
+  }
 
+  // Otherwise fall back to side-by-side ndk/<version>
   val ndkPath = android_home + "/ndk"
-
   val ndkDir = Paths.get(ndkPath)
   if (!ndkDir.toFile().exists()) {
     throw Exception("NDK not found at $ndkPath")
@@ -35,11 +40,22 @@ val CStandardFlags = arrayOf(
   "-Wconversion", "-Iroot_impl", "-llog", "-DMIN_APATCH_VERSION=$minAPatchVersion",
   "-DMIN_KSU_VERSION=$minKsuVersion",
   "-DMIN_MAGISK_VERSION=$minMagiskVersion",
-  "-DZKSU_VERSION=\"$verName\""
+  "-DZKSU_VERSION=\\\"$verName\\\""
 )
 
 val CFlagsRelease = arrayOf(
   "-Wl,--strip-all", "-flto=thin", "-O3", "-ffast-math"
+)
+
+/* INFO: arm32 on older devices (e.g., Android 8/9 without linker32) can be
+          picky about aggressive flags and high API levels. Avoid LTO for arm32,
+          lower optimization, and use both hash styles for loader compatibility. */
+val CFlagsReleaseArm32 = arrayOf(
+  "-Wl,--strip-all",
+  "-Wl,--hash-style=both",
+  "-fno-stack-protector",
+  "-fno-builtin",
+  "-O0"
 )
 
 val CFlagsDebug = arrayOf(
@@ -64,11 +80,14 @@ task("buildAndStrip") {
   val isDebug = gradle.startParameter.taskNames.any { it.lowercase().contains("debug") }
   doLast {
     val ndkPath = getLatestNDKPath()
+    val hostTag = if (OperatingSystem.current().isWindows) "windows-x86_64" else "linux-x86_64"
+    val compilerExt = if (OperatingSystem.current().isWindows) ".cmd" else ""
 
-    val aarch64Compiler = Paths.get(ndkPath, "toolchains", "llvm", "prebuilt", "linux-x86_64", "bin", "aarch64-linux-android34-clang").toString()
-    val armv7aCompiler = Paths.get(ndkPath, "toolchains", "llvm", "prebuilt", "linux-x86_64", "bin", "armv7a-linux-androideabi34-clang").toString()
-    val x86Compiler = Paths.get(ndkPath, "toolchains", "llvm", "prebuilt", "linux-x86_64", "bin", "i686-linux-android34-clang").toString()
-    val x86_64Compiler = Paths.get(ndkPath, "toolchains", "llvm", "prebuilt", "linux-x86_64", "bin", "x86_64-linux-android34-clang").toString()
+    val aarch64Compiler = Paths.get(ndkPath, "toolchains", "llvm", "prebuilt", hostTag, "bin", "aarch64-linux-android34-clang$compilerExt").toString()
+    /* INFO: Target API 26 for arm32 per request. */
+    val armv7aCompiler = Paths.get(ndkPath, "toolchains", "llvm", "prebuilt", hostTag, "bin", "armv7a-linux-androideabi26-clang$compilerExt").toString()
+    val x86Compiler = Paths.get(ndkPath, "toolchains", "llvm", "prebuilt", hostTag, "bin", "i686-linux-android34-clang$compilerExt").toString()
+    val x86_64Compiler = Paths.get(ndkPath, "toolchains", "llvm", "prebuilt", hostTag, "bin", "x86_64-linux-android34-clang$compilerExt").toString()
 
     if (!Paths.get(aarch64Compiler).toFile().exists()) {
       throw Exception("aarch64 compiler not found at $aarch64Compiler")
@@ -102,12 +121,13 @@ task("buildAndStrip") {
     x86_64OutputDir.mkdirs()
 
     val compileArgs = (if (isDebug) CFlagsDebug else CFlagsRelease) + CStandardFlags
+    val compileArgsArm32 = (if (isDebug) CFlagsDebug else CFlagsReleaseArm32) + CStandardFlags
 
     exec {
       commandLine(aarch64Compiler, "-o", Paths.get(aarch64OutputDir.toString(), "zygiskd").toString(), *compileArgs, *Files)
     }
     exec {
-      commandLine(armv7aCompiler, "-o", Paths.get(armv7aOutputDir.toString(), "zygiskd").toString(), *compileArgs, *Files)
+      commandLine(armv7aCompiler, "-o", Paths.get(armv7aOutputDir.toString(), "zygiskd").toString(), *compileArgsArm32, *Files)
     }
     exec {
       commandLine(x86Compiler, "-o", Paths.get(x86OutputDir.toString(), "zygiskd").toString(), *compileArgs, *Files)

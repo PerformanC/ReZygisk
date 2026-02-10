@@ -458,8 +458,8 @@ static void initialize_jni_hook(void) {
       struct lsplt_map_entry *map = &map_infos->maps[i];
       if (!strstr(map->path, "/libnativehelper.so")) continue;
 
-      /* TODO: Add RTLD_NOLOAD? */
-      void *handle = dlopen(map->path, RTLD_LAZY);
+      /* Pre-O linker lacks namespaces; load libnativehelper globally to export JNI_GetCreatedJavaVMs. */
+      void *handle = dlopen(map->path, RTLD_NOW | RTLD_GLOBAL);
       if (!handle) {
         LOGE("Failed to dlopen %s: %s", map->path, dlerror());
 
@@ -1059,14 +1059,14 @@ static void rz_nativeSpecializeAppProcess_post(struct zygisk_context *ctx) {
 static void rz_nativeForkSystemServer_pre(struct zygisk_context *ctx) {
   LOGV("pre forkSystemServer");
   FLAG_SET(ctx, SERVER_FORK_AND_SPECIALIZE);
+  /* Avoid fd sanitization for system_server to keep critical descriptors intact. */
+  FLAG_SET(ctx, SKIP_FD_SANITIZATION);
 
   rz_fork_pre(ctx);
   if (!is_zygote_child(ctx)) return;
 
   rz_run_modules_pre(ctx);
   rezygiskd_system_server_started();
-
-  rz_sanitize_fds(ctx);
 }
 
 static void rz_nativeForkSystemServer_post(struct zygisk_context *ctx) {

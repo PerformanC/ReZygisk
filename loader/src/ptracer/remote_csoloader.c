@@ -466,6 +466,19 @@ static bool resolve_symbol_addr(int fd, const struct elf_dyn_info *info,
     }
   }
 
+  /* Fallback: some vendor images strip .symtab/.hash from secondary libs.
+     Many libc symbols (malloc/free/strcmp/….) are still exported from libc.so,
+     so try libc explicitly to avoid repeated failures. */
+  const char *libc_path = find_remote_module_path(remote_map, "libc.so");
+  if (libc_path) {
+    void *addr = find_func_addr(local_map, remote_map, libc_path, name);
+    if (addr) {
+      *out_addr = (uintptr_t)addr;
+
+      return true;
+    }
+  }
+
   LOGE("Failed to resolve external symbol %s", name);
 
   return false;

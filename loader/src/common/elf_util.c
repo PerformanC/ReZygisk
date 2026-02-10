@@ -6,7 +6,6 @@
 #include <sys/mman.h>
 #include <sys/stat.h>
 #include <sys/auxv.h>
-
 #include <unistd.h>
 
 #ifdef __LP64__
@@ -16,7 +15,6 @@
 #endif
 
 #include "logging.h"
-
 #include "elf_util.h"
 
 #define SHT_GNU_HASH 0x6ffffff6
@@ -91,8 +89,7 @@ size_t calculate_valid_symtabs_amount(ElfImg *img) {
   size_t count = 0;
 
   if (img->symtab_start == NULL || img->symstr_offset_for_symtab == 0) {
-    LOGE("Invalid symtab_start or symstr_offset_for_symtab, cannot count valid symbols");
-
+    LOGW("No .symtab or string table available for %s", img->elf);
     return 0;
   }
 
@@ -111,7 +108,6 @@ size_t calculate_valid_symtabs_amount(ElfImg *img) {
 
   return count;
 }
-
 
 void ElfImg_destroy(ElfImg *img) {
   if (!img) return;
@@ -140,7 +136,6 @@ void ElfImg_destroy(ElfImg *img) {
 
   free(img);
 }
-
 
 ElfImg *ElfImg_create(const char *elf, void *base) {
   ElfImg *img = (ElfImg *)calloc(1, sizeof(ElfImg));
@@ -441,8 +436,7 @@ bool _load_symtabs(ElfImg *img) {
   if (img->symtabs_) return true;
 
   if (!img->symtab_start || img->symstr_offset_for_symtab == 0 || img->symtab_count == 0) {
-    LOGE("Cannot load symtabs: .symtab section or its string table not found/valid.");
-
+    LOGW("No .symtab section, fallback to dynsym-only lookup for %s", img->elf);
     return false;
   }
 
@@ -515,18 +509,11 @@ ElfW(Addr) GnuLookup(ElfImg *restrict img, const char *name, uint32_t hash, unsi
                    ((uintptr_t)1 << ((hash >> img->gnu_shift2_) % bloom_mask_bits));
 
   if ((mask & bloom_word) != mask) {
-    /* INFO: Very loggy -- generates too much noise. GNU is rarely used for Zygisk context. */
-    /* LOGW("Symbol '%s' (hash %u) filtered out by GNU Bloom Filter (idx %zu, mask 0x%lx, word 0x%lx)",
-           name, hash, bloom_idx, (unsigned long)mask, (unsigned long)bloom_word);
-    */
-
     return 0;
   }
 
   uint32_t sym_index = img->gnu_bucket_[hash % img->gnu_nbucket_];
   if (sym_index < img->gnu_symndx_) {
-    LOGW("Symbol %s hash %u maps to bucket %u index %u (below gnu_symndx %u), not exported?", name, hash, hash % img->gnu_nbucket_, sym_index, img->gnu_symndx_);
-
     return 0;
   }
 
@@ -606,15 +593,11 @@ ElfW(Addr) ElfLookup(ElfImg *restrict img, const char *restrict name, uint32_t h
 
 ElfW(Addr) LinearLookup(ElfImg *img, const char *restrict name, unsigned char *sym_type) {
   if (!_load_symtabs(img)) {
-    LOGE("Failed to load symtabs for linear lookup of %s", name);
-
     return 0;
   }
 
   size_t valid_symtabs_amount = calculate_valid_symtabs_amount(img);
   if (valid_symtabs_amount == 0) {
-    LOGW("No valid symbols (FUNC/OBJECT with size > 0) found in .symtab for %s", img->elf);
-
     return 0;
   }
 
@@ -636,15 +619,11 @@ ElfW(Addr) LinearLookup(ElfImg *img, const char *restrict name, unsigned char *s
 
 ElfW(Addr) LinearLookupByPrefix(ElfImg *img, const char *prefix, unsigned char *sym_type) {
   if (!_load_symtabs(img)) {
-    LOGE("Failed to load symtabs for linear lookup by prefix of %s", prefix);
-
     return 0;
   }
 
   size_t valid_symtabs_amount = calculate_valid_symtabs_amount(img);
   if (valid_symtabs_amount == 0) {
-    LOGW("No valid symbols (FUNC/OBJECT with size > 0) found in .symtab for %s", img->elf);
-
     return 0;
   }
 
@@ -756,7 +735,7 @@ ElfW(Addr) getSymbOffset(ElfImg *img, const char *name, unsigned char *sym_type)
          This function is based on AOSP's (Android Open Source Project) code, and resolves the
            indirect symbol, leading to the correct, most appropriate for the hardware, symbol.
 
-    SOURCES: 
+    SOURCES:
      - https://android.googlesource.com/platform/bionic/+/refs/tags/android-16.0.0_r1/linker/linker.cpp#2594
      - https://android.googlesource.com/platform/bionic/+/tags/android-16.0.0_r1/libc/bionic/bionic_call_ifunc_resolver.cpp#41
 */
