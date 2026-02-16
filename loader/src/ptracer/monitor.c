@@ -407,24 +407,33 @@ void rezygiskd_listener_stop() {
 
 #define MAX_RETRY_COUNT 5
 
-#define CREATE_ZYGOTE_START_COUNTER(abi)             \
-  struct timespec last_zygote##abi = {               \
-    .tv_sec = 0,                                     \
-    .tv_nsec = 0                                     \
-  };                                                 \
-                                                     \
-  int count_zygote ## abi = 0;                       \
-  bool should_stop_inject ## abi() {                 \
-    struct timespec now = {};                        \
-    clock_gettime(CLOCK_MONOTONIC, &now);            \
-    if (now.tv_sec - last_zygote ## abi.tv_sec < 30) \
-      count_zygote ## abi++;                         \
-    else                                             \
-      count_zygote ## abi = 0;                       \
-                                                     \
-    last_zygote##abi = now;                          \
-                                                     \
-    return count_zygote##abi >= MAX_RETRY_COUNT;     \
+#define CREATE_ZYGOTE_START_COUNTER(abi)                                     \
+  struct timespec last_zygote##abi = {                                       \
+    .tv_sec = 0,                                                             \
+    .tv_nsec = 0                                                             \
+  };                                                                         \
+                                                                             \
+  int count_zygote ## abi = 0;                                               \
+  bool should_stop_inject ## abi() {                                         \
+    static bool warned = false;                                              \
+    struct timespec now = {};                                                \
+    clock_gettime(CLOCK_MONOTONIC, &now);                                    \
+    if (now.tv_sec - last_zygote ## abi.tv_sec < 30)                         \
+      count_zygote ## abi++;                                                 \
+    else {                                                                   \
+      count_zygote ## abi = 0;                                               \
+      warned = false;                                                        \
+    }                                                                        \
+                                                                             \
+    last_zygote##abi = now;                                                  \
+                                                                             \
+    if (!warned && count_zygote##abi >= MAX_RETRY_COUNT) {                   \
+      LOGW("Zygote" #abi " restarted %d times in 30s; continuing injection", \
+           count_zygote##abi);                                               \
+      warned = true;                                                         \
+    }                                                                        \
+                                                                             \
+    return false;                                                            \
   }
 
 CREATE_ZYGOTE_START_COUNTER(64)

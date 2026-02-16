@@ -1,5 +1,6 @@
 #include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
 
 #include <android/log.h>
 
@@ -12,6 +13,13 @@
 int __android_log_print(int prio, const char *tag, const char *fmt, ...);
 
 int main(int argc, char *argv[]) {
+  /* INFO: Handle simple commands without logging to isolate potential linker/log init crashes. */
+  if (argc > 1 && strcmp(argv[1], "version") == 0) {
+    dprintf(STDOUT_FILENO, "ReZygisk Daemon %s\n", ZKSU_VERSION);
+
+    return 0;
+  }
+
   #ifdef __LP64__
     LOGI("Welcome to ReZygisk %s Zygiskd64!\n", ZKSU_VERSION);
   #else
@@ -28,12 +36,6 @@ int main(int argc, char *argv[]) {
 
       int fd = atoi(argv[2]);
       companion_entry(fd);
-
-      return 0;
-    }
-
-    else if (strcmp(argv[1], "version") == 0) {
-      LOGI("ReZygisk Daemon %s\n", ZKSU_VERSION);
 
       return 0;
     }

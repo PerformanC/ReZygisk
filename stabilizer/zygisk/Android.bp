@@ -1,0 +1,2 @@
+// Minimal ndk-build via ndk-build not used; we keep placeholder for Soong compatibility if needed.
+// This project is built via the main Gradle/CMake; file present to avoid tooling complaints.

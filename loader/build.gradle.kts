@@ -55,9 +55,9 @@ android {
     defaultConfig {
         externalNativeBuild.cmake {
             cFlags("-std=c18", *defaultCFlags)
-            ccachePath?.let {
-                arguments += "-DNDK_CCACHE=$it"
-            }
+            // ccachePath?.let {
+            //     arguments += "-DNDK_CCACHE=$it"
+            // }
         }
     }
 

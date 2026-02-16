@@ -327,6 +327,31 @@ __attribute__((no_stack_protector)) static void nativeSpecializeAppProcess_samsu
   rz_nativeSpecializeAppProcess_post(&ctx);
   rz_cleanup(&ctx);
 }
+__attribute__((no_stack_protector)) static void nativeSpecializeAppProcess_xtc(JNIEnv *env, jclass clazz, jint uid, jint gid, jintArray gids, jint runtime_flags, jobjectArray rlimits, jint mount_external, jstring se_info, jstring nice_name, jstring instruction_set, jstring app_data_dir) {
+  jboolean is_child_zygote = JNI_FALSE;
+  jboolean is_top_app = JNI_FALSE;
+  jobjectArray pkg_data_info_list = NULL;
+  jobjectArray whitelisted_data_info_list = NULL;
+  jboolean mount_data_dirs = JNI_FALSE;
+  jboolean mount_storage_dirs = JNI_FALSE;
+  jboolean mount_sysprop_overrides = JNI_FALSE;
+  struct app_specialize_args_v5 args = { .uid = &uid, .gid = &gid, .gids = &gids, .runtime_flags = &runtime_flags, .rlimits = &rlimits, .mount_external = &mount_external, .se_info = &se_info, .nice_name = &nice_name, .instruction_set = &instruction_set, .app_data_dir = &app_data_dir };
+  args.is_child_zygote = &is_child_zygote;
+  args.is_top_app = &is_top_app;
+  args.pkg_data_info_list = &pkg_data_info_list;
+  args.whitelisted_data_info_list = &whitelisted_data_info_list;
+  args.mount_data_dirs = &mount_data_dirs;
+  args.mount_storage_dirs = &mount_storage_dirs;
+  args.mount_sysprop_overrides = &mount_sysprop_overrides;
+  struct zygisk_context ctx;
+  rz_init(&ctx, env, &args);
+  rz_nativeSpecializeAppProcess_pre(&ctx);
+  ((nativeSpecializeAppProcess_fn)nativeSpecializeAppProcess_orig)(
+    env, clazz, uid, gid, gids, runtime_flags, rlimits, mount_external, se_info, nice_name, instruction_set, app_data_dir
+  );
+  rz_nativeSpecializeAppProcess_post(&ctx);
+  rz_cleanup(&ctx);
+}
 __attribute__((no_stack_protector)) static void nativeSpecializeAppProcess_grapheneos_u(JNIEnv *env, jclass clazz, jint uid, jint gid, jintArray gids, jint runtime_flags, jobjectArray rlimits, jint mount_external, jstring se_info, jstring nice_name, jboolean is_child_zygote, jstring instruction_set, jstring app_data_dir, jboolean is_top_app, jobjectArray pkg_data_info_list, jobjectArray whitelisted_data_info_list, jboolean mount_data_dirs, jboolean mount_storage_dirs, jboolean mount_sysprop_overrides, jlongArray _15) {
   struct app_specialize_args_v5 args = { .uid = &uid, .gid = &gid, .gids = &gids, .runtime_flags = &runtime_flags, .rlimits = &rlimits, .mount_external = &mount_external, .se_info = &se_info, .nice_name = &nice_name, .instruction_set = &instruction_set, .app_data_dir = &app_data_dir };
   args.is_child_zygote = &is_child_zygote;
@@ -345,7 +370,7 @@ __attribute__((no_stack_protector)) static void nativeSpecializeAppProcess_graph
   rz_nativeSpecializeAppProcess_post(&ctx);
   rz_cleanup(&ctx);
 }
-static JNINativeMethod nativeSpecializeAppProcess_methods[6] = {
+static JNINativeMethod nativeSpecializeAppProcess_methods[7] = {
   {
     "nativeSpecializeAppProcess",
     "(II[II[[IILjava/lang/String;Ljava/lang/String;ZLjava/lang/String;Ljava/lang/String;)V",
@@ -373,11 +398,16 @@ static JNINativeMethod nativeSpecializeAppProcess_methods[6] = {
   },
   {
     "nativeSpecializeAppProcess",
+    "(II[II[[IILjava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V",
+    (void *) &nativeSpecializeAppProcess_xtc
+  },
+  {
+    "nativeSpecializeAppProcess",
     "(II[II[[IILjava/lang/String;Ljava/lang/String;ZLjava/lang/String;Ljava/lang/String;Z[Ljava/lang/String;[Ljava/lang/String;ZZZ[J)V",
     (void *) &nativeSpecializeAppProcess_grapheneos_u
   },
 };
-static const int nativeSpecializeAppProcess_methods_count = 6;
+static const int nativeSpecializeAppProcess_methods_count = 7;
 
 static void *nativeForkSystemServer_orig = NULL;
 typedef jint (*nativeForkSystemServer_fn)(JNIEnv *, jclass, ...);

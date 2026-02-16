@@ -339,40 +339,74 @@ void *find_module_base(struct maps *map, const char *file) {
   return NULL;
 }
 
-void *find_func_addr(struct maps *local_info, struct maps *remote_info, const char *module, const char *func) {
-  uint8_t *local_base = (uint8_t *)find_module_base(local_info, module);
-  if (local_base == NULL) {
-    LOGE("failed to find local base for module %s", module);
+static const char *find_libc_path(struct maps *map) {
+  for (size_t i = 0; i < map->size; i++) {
+    if (map->maps[i].path == NULL) continue;
+    if (map->maps[i].offset != 0) continue;
 
+    const char *file_name = position_after(map->maps[i].path, '/');
+    if (!file_name) file_name = map->maps[i].path;
+
+    size_t len = strlen(file_name);
+    if (len >= 7 && strcmp(file_name + len - 7, "libc.so") == 0) {
+      return map->maps[i].path;
+    }
+  }
+
+  return NULL;
+}
+
+void *find_func_addr(struct maps *local_info, struct maps *remote_info, const char *module, const char *func) {
+  const char *target = module;
+
+  uint8_t *local_base = (uint8_t *)find_module_base(local_info, target);
+  if (local_base == NULL) {
+    LOGE("failed to find local base for module %s", target);
     return NULL;
   }
 
-  uint8_t *remote_base = (uint8_t *)find_module_base(remote_info, module);
+  uint8_t *remote_base = (uint8_t *)find_module_base(remote_info, target);
   if (remote_base == NULL) {
-    LOGE("failed to find remote base for module %s", module);
-
+    LOGE("failed to find remote base for module %s", target);
     return NULL;
   }
 
   LOGD("found local base %p remote base %p", local_base, remote_base);
 
-  ElfImg *mod = ElfImg_create(module, local_base);
+  ElfImg *mod = ElfImg_create(target, local_base);
   if (mod == NULL) {
-    LOGE("failed to create elf img %s", module);
-
+    LOGE("failed to create elf img %s", target);
     return NULL;
   }
 
   uint8_t *sym = (uint8_t *)getSymbAddress(mod, func);
+  if (sym == NULL && strstr(target, "libc.so") == NULL) {
+    /* fallback: many bionic symbols only exported from libc; try libc directly */
+    const char *libc_path = find_libc_path(local_info);
+    if (libc_path) {
+      LOGW("symbol %s missing in %s, retry in %s", func, target, libc_path);
+      ElfImg_destroy(mod);
+
+      local_base = (uint8_t *)find_module_base(local_info, libc_path);
+      remote_base = (uint8_t *)find_module_base(remote_info, libc_path);
+
+      if (local_base && remote_base) {
+        mod = ElfImg_create(libc_path, local_base);
+        if (mod) {
+          sym = (uint8_t *)getSymbAddress(mod, func);
+          target = libc_path;
+        }
+      }
+    }
+  }
+
   if (sym == NULL) {
-    LOGE("failed to find symbol %s in %s", func, module);
-
+    LOGE("failed to find symbol %s in %s", func, target);
     ElfImg_destroy(mod);
-
     return NULL;
   }
 
-  LOGD("found symbol %s in %s: %p", func, module, sym);
+  LOGD("found symbol %s in %s: %p", func, target, sym);
 
   uintptr_t addr = (uintptr_t)(sym - local_base) + (uintptr_t)remote_base;
   LOGD("addr %p", (void *)addr);

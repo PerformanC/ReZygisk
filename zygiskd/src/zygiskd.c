@@ -7,6 +7,7 @@
 #include <sys/stat.h>
 #include <sys/wait.h>
 #include <sys/sendfile.h>
+#include <sys/mount.h>
 #include <fcntl.h>
 #include <errno.h>
 #include <stdio.h>
@@ -46,6 +47,7 @@ enum Architecture {
 #define PATH_CP_NAME TMP_PATH "/" lp_select("cp32.sock", "cp64.sock")
 #define ZYGISKD_FILE PATH_MODULES_DIR "/rezygisk/bin/zygiskd" lp_select("32", "64")
 #define ZYGISKD_PATH "/data/adb/modules/rezygisk/bin/zygiskd" lp_select("32", "64")
+#define TMP_MODULE_DIR TMP_PATH "/modules"
 
 #ifdef __aarch64__
   #define ARCH_STR "arm64-v8a"
@@ -463,15 +465,33 @@ void zygiskd_start(char *restrict argv[]) {
         break;
       }
       case ReadModules: {
+        mkdir(TMP_MODULE_DIR, 0755);
+
         size_t clen = context.len;
         ssize_t ret = write_size_t(client_fd, clen);
         ASSURE_SIZE_WRITE_BREAK("ReadModules", "len", ret, sizeof(clen));
 
         for (size_t i = 0; i < clen; i++) {
-          char lib_path[PATH_MAX];
-          snprintf(lib_path, PATH_MAX, "/data/adb/modules/%s/zygisk/" ARCH_STR ".so", context.modules[i].name);
+          char src_path[PATH_MAX];
+          snprintf(src_path, PATH_MAX, "/data/adb/modules/%s/zygisk/" ARCH_STR ".so", context.modules[i].name);
 
-          if (write_string(client_fd, lib_path) == -1) {
+          char dst_path[PATH_MAX];
+          snprintf(dst_path, PATH_MAX, TMP_MODULE_DIR "/%s_" ARCH_STR ".so", context.modules[i].name);
+
+          umount2(dst_path, MNT_DETACH);
+          if (mount(src_path, dst_path, NULL, MS_BIND, NULL) == -1) {
+            LOGE("Failed bind mounting module %s -> %s: %s\n", src_path, dst_path, strerror(errno));
+
+            if (write_string(client_fd, src_path) == -1) {
+              LOGE("Failed writing module path.\n");
+
+              break;
+            }
+
+            continue;
+          }
+
+          if (write_string(client_fd, dst_path) == -1) {
             LOGE("Failed writing module path.\n");
 
             break;
