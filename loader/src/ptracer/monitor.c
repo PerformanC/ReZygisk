@@ -519,8 +519,7 @@ static bool ensure_daemon_created(bool is_64bit) {
   }
 
 #define PRE_INJECT_TANGO                                           \
-  if ((strcmp(program, "/system_ext/bin/tango_translator") == 0 || \
-       strcmp(program, "/system/bin/tango_translator") == 0)) {    \
+  if (strcmp(program, "/system_ext/bin/tango_translator") == 0) {  \
     tracer = "./bin/zygisk-ptrace64";                              \
     is_tango = true;                                               \
                                                                    \
