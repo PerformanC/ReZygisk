@@ -387,7 +387,7 @@ void rezygiskd_listener_callback() {
         LOGD("system server started, mounting prop");
 
         if (mount(PROP_PATH, "/data/adb/modules/rezygisk/module.prop", NULL, MS_BIND, NULL) == -1) {
-          PLOGE("failed to mount prop");
+          PLOGE("Failed to mount module prop");
         }
 
         break;
@@ -430,22 +430,15 @@ CREATE_ZYGOTE_START_COUNTER(32)
 
 static bool ensure_daemon_created(bool is_64bit) {
   struct rezygiskd_status *status = is_64bit ? &status64 : &status32;
-
-  if (is_64bit || (!is_64bit && !status64.supported)) {
-    LOGD("new zygote started.");
-
-    umount2("/data/adb/modules/rezygisk/module.prop", MNT_DETACH);
-  }
-
   if (status->daemon_pid != -1) {
-    LOGI("daemon%s already running", is_64bit ? "64" : "32");
+    LOGI("ReZygiskd%s already running", is_64bit ? "64" : "32");
 
     return status->daemon_running;
   }
 
   pid_t pid = fork();
   if (pid < 0) {
-    PLOGE("create daemon%s", is_64bit ? "64" : "32");
+    PLOGE("create ReZygiskd%s", is_64bit ? "64" : "32");
 
     return false;
   }
@@ -456,7 +449,7 @@ static bool ensure_daemon_created(bool is_64bit) {
 
     execl(daemon_name, daemon_name, NULL);
 
-    PLOGE("exec daemon %s failed", daemon_name);
+    PLOGE("exec ReZygiskd%s failed", is_64bit ? "64" : "32");
 
     exit(1);
   }
