@@ -981,18 +981,6 @@ static bool prepare_environment() {
 
   fclose(orig_prop);
 
-  /* INFO: This environment variable is related to Magisk Zygisk/Manager. It
-             it used by Magisk's Zygisk to communicate to Magisk Manager whether
-             Zygisk is working or not.
-
-           Because of that behavior, we can knowledge built-in Zygisk is being
-             used and stop the continuation of initialization of ReZygisk.*/
-  if (getenv("ZYGISK_ENABLED")) {
-    update_status("❌ Disable Magisk's built-in Zygisk");
-
-    return false;
-  }
-
   return true;
 }
 
