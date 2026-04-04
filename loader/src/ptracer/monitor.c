@@ -29,7 +29,7 @@
 
 static bool update_status(const char *message);
 
-char monitor_stop_reason[32];
+const char* monitor_stop_reason = "MONITOR_STOP_REASON"; /* Initialize with placeholder */
 
 struct environment_information {
   char *root_impl;
@@ -131,7 +131,7 @@ void monitor_events_loop() {
       break;
     }
 
-    for (int i = 0; i < nfds; i++) { 
+    for (int i = 0; i < nfds; i++) {
       ((monitor_event_callback_t)events[i].data.ptr)();
 
       if (!monitor_events_running) break;
@@ -202,7 +202,7 @@ void rezygiskd_listener_callback() {
           LOGI("Stop tracing requested");
 
           tracing_state = STOPPING;
-          strcpy(monitor_stop_reason, "user requested");
+          monitor_stop_reason = "user requested";
 
           ptrace(PTRACE_INTERRUPT, 1, 0, 0);
           update_status(NULL);
@@ -214,14 +214,14 @@ void rezygiskd_listener_callback() {
         LOGI("Prepare for exit ...");
 
         tracing_state = EXITING;
-        strcpy(monitor_stop_reason, "user requested");
+        monitor_stop_reason = "user requested";
 
         update_status(NULL);
         monitor_events_stop();
 
         break;
       }
-      case ZYGOTE64_INJECTED: 
+      case ZYGOTE64_INJECTED:
       case ZYGOTE32_INJECTED: {
         LOGI("Received Zygote%s injected command", cmd == ZYGOTE64_INJECTED ? "64" : "32");
 
@@ -305,20 +305,20 @@ void rezygiskd_listener_callback() {
           if (read_uint32_t(monitor_sock_fd, &module_name_len) != sizeof(module_name_len)) {
             LOGE("read ReZygiskd%s module name len", cmd == DAEMON64_SET_INFO ? "64" : "32");
 
-            goto rezygiskd64_set_info_modules_cleanup;
+            goto set_info_modules_cleanup;
           }
 
           environment_information->modules[i] = malloc(module_name_len + 1);
           if (environment_information->modules[i] == NULL) {
             PLOGE("malloc ReZygiskd%s module name", cmd == DAEMON64_SET_INFO ? "64" : "32");
 
-            goto rezygiskd64_set_info_modules_cleanup;
+            goto set_info_modules_cleanup;
           }
 
           if (read_loop(monitor_sock_fd, (void *)environment_information->modules[i], module_name_len) != (ssize_t)module_name_len) {
             LOGE("read ReZygiskd%s module name", cmd == DAEMON64_SET_INFO ? "64" : "32");
 
-            goto rezygiskd64_set_info_modules_cleanup;
+            goto set_info_modules_cleanup;
           }
 
           environment_information->modules[i][module_name_len] = '\0';
@@ -326,7 +326,7 @@ void rezygiskd_listener_callback() {
 
           continue;
 
-          rezygiskd64_set_info_modules_cleanup:
+          set_info_modules_cleanup:
             free((void *)environment_information->root_impl);
             environment_information->root_impl = NULL;
 
@@ -497,7 +497,7 @@ static bool ensure_daemon_created(bool is_64bit) {
       LOGW("Zygote" # abi " restart too much times, stop injecting"); \
                                                                       \
       tracing_state = STOPPING;                                       \
-      strcpy(monitor_stop_reason, "Zygote crashed");                  \
+      monitor_stop_reason = "Zygote crashed";                         \
       ptrace(PTRACE_INTERRUPT, 1, 0, 0);                              \
                                                                       \
       break;                                                          \
@@ -507,7 +507,7 @@ static bool ensure_daemon_created(bool is_64bit) {
       LOGW("ReZygiskd " #abi "-bit not running, stop injecting");     \
                                                                       \
       tracing_state = STOPPING;                                       \
-      strcpy(monitor_stop_reason, "ReZygiskd not running");           \
+      monitor_stop_reason = "ReZygiskd not running";                  \
       ptrace(PTRACE_INTERRUPT, 1, 0, 0);                              \
                                                                       \
       break;                                                          \
@@ -523,7 +523,7 @@ static bool ensure_daemon_created(bool is_64bit) {
       LOGW("Tango restart too many times, stop injecting");        \
                                                                    \
       tracing_state = STOPPING;                                    \
-      strcpy(monitor_stop_reason, "Zygote crashed");               \
+      monitor_stop_reason = "Zygote crashed";                      \
       ptrace(PTRACE_INTERRUPT, 1, 0, 0);                           \
                                                                    \
       break;                                                       \
@@ -533,7 +533,7 @@ static bool ensure_daemon_created(bool is_64bit) {
       LOGW("ReZygiskd 32-bit not running, stop injecting");        \
                                                                    \
       tracing_state = STOPPING;                                    \
-      strcpy(monitor_stop_reason, "ReZygiskd not running");        \
+      monitor_stop_reason = "ReZygiskd not running";               \
       ptrace(PTRACE_INTERRUPT, 1, 0, 0);                           \
                                                                    \
       break;                                                       \

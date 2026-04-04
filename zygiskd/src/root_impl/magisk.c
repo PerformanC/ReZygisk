@@ -55,7 +55,7 @@ void magisk_get_existence(struct root_impl_state *state) {
     return;
   }
 
-  char *argv[4] = { "magisk", "-v", NULL, NULL };
+  const char *argv[4] = { "magisk", "-v", NULL, NULL };
 
   char magisk_info[128];
   if (!exec_command(magisk_info, sizeof(magisk_info), (const char *)path_to_magisk, argv)) {
@@ -116,7 +116,7 @@ bool magisk_uid_granted_root(uid_t uid) {
   char sqlite_cmd[256];
   snprintf(sqlite_cmd, sizeof(sqlite_cmd), "select 1 from policies where uid=%d and policy=2 limit 1", uid);
 
-  char *const argv[] = { "magisk", "--sqlite", sqlite_cmd, NULL };
+  const char *const argv[] = { "magisk", "--sqlite", sqlite_cmd, NULL };
 
   char result[32];
   if (!exec_command(result, sizeof(result), (const char *)path_to_magisk, argv)) {
@@ -136,7 +136,7 @@ bool magisk_uid_should_umount(const char *const process) {
   else /* INFO: Find if process string starts with any data in "process" column */
     snprintf(sqlite_cmd, sizeof(sqlite_cmd), "SELECT 1 FROM denylist WHERE \"%s\" LIKE process || '%%' LIMIT 1", process);
 
-  char *const argv[] = { "magisk", "--sqlite", sqlite_cmd, NULL };
+  const char *const argv[] = { "magisk", "--sqlite", sqlite_cmd, NULL };
 
   char result[sizeof("1=1")];
   if (!exec_command(result, sizeof(result), (const char *)path_to_magisk, argv)) {
@@ -149,7 +149,7 @@ bool magisk_uid_should_umount(const char *const process) {
 }
 
 bool magisk_uid_is_manager(uid_t uid) {
-  char *const argv[] = { "magisk", "--sqlite", "select value from strings where key=\"requester\" limit 1", NULL };
+  const char *const argv[] = { "magisk", "--sqlite", "select value from strings where key=\"requester\" limit 1", NULL };
 
   char output[128];
   if (!exec_command(output, sizeof(output), (const char *)path_to_magisk, argv)) {

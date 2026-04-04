@@ -148,7 +148,7 @@ static int spawn_companion(char *restrict argv[], char *restrict name, int lib_f
 
     exit(1);
   }
-  
+
   if (pid > 0) {
     close(companion_fd);
 
@@ -227,7 +227,7 @@ static int spawn_companion(char *restrict argv[], char *restrict name, int lib_f
   char companion_fd_str[32];
   snprintf(companion_fd_str, sizeof(companion_fd_str), "%d", companion_fd);
 
-  char *eargv[] = { process_name, "companion", companion_fd_str, NULL };
+  const char *eargv[] = { process_name, "companion", companion_fd_str, NULL };
   if (non_blocking_execv(ZYGISKD_PATH, eargv) == -1) {
     LOGE("Failed executing companion: %s", strerror(errno));
 
