@@ -2,8 +2,7 @@
 #define CONSTANTS_H
 
 #include <stdbool.h>
-
-#include <android/log.h>
+#include <stdint.h>
 
 #define PROCESS_NAME_MAX_LEN 256 + 1
 

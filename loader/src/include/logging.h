@@ -1,10 +1,10 @@
 #ifndef LOGGING_H
 #define LOGGING_H
 
-#include <android/log.h>
-
 #include <errno.h>
-#include <string.h>
+#include <string.h> /* IWYU pragma: keep */
+
+#include <android/log.h>
 
 #include "misc.h"
 

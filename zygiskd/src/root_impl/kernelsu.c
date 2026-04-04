@@ -1,19 +1,18 @@
-#include <stdlib.h>
-#include <string.h>
+#include "kernelsu.h"
+
 #include <errno.h>
-#include <sys/stat.h>
-#include <sys/prctl.h>
+#include <string.h>
+#include <unistd.h>
 #include <sys/ioctl.h>
+#include <sys/prctl.h>
+#include <sys/stat.h>
+#include <sys/syscall.h>
 #include <sys/system_properties.h>
 
-#include <unistd.h>
-#include <sys/syscall.h>
 
 #include "../constants.h"
 #include "../utils.h"
 #include "common.h"
-
-#include "kernelsu.h"
 
 const char *ksu_manager_paths[] = {
   "/data/user_de/0/me.weishu.kernelsu",
@@ -76,7 +75,7 @@ void ksu_get_existence(struct root_impl_state *state) {
   get_property("ro.board.platform", platform);
 
   /* INFO: On Waydroid, the SYS_reboot call will trigger a SIGSYS signal, resulting
-             in the crash of ReZygiskd. To avoid that, read the platform property 
+             in the crash of ReZygiskd. To avoid that, read the platform property
              and not try to call KernelSU v3 interface, jumping to KernelSU v1
              interface which doesn't require the SYS_reboot call. */
   if (strcmp(platform, "waydroid") == 0)

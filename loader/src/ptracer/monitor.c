@@ -1,26 +1,23 @@
+#include "monitor.h"
+
 #include <stdlib.h>
-
-#include <time.h>
-
-#include <sys/system_properties.h>
-#include <sys/signalfd.h>
-#include <err.h>
-#include <sys/socket.h>
-#include <sys/un.h>
-#include <sys/epoll.h>
-#include <sys/wait.h>
-#include <sys/mount.h>
-#include <fcntl.h>
 #include <string.h>
-
+#include <time.h>
 #include <unistd.h>
 
-#include "utils.h"
-#include "daemon.h"
-#include "misc.h"
-#include "socket_utils.h"
+#include <err.h>
+#include <fcntl.h>
+#include <sys/epoll.h>
+#include <sys/mount.h>
+#include <sys/signalfd.h>
+#include <sys/socket.h>
+#include <sys/system_properties.h>
+#include <sys/un.h>
+#include <sys/wait.h>
 
-#include "monitor.h"
+#include "daemon.h"
+#include "socket_utils.h"
+#include "utils.h"
 
 #define PROP_PATH TMP_PATH "/module.prop"
 #define SOCKET_NAME "init_monitor"
@@ -117,7 +114,7 @@ bool monitor_events_unregister_event(int fd) {
 
 void monitor_events_stop() {
   monitor_events_running = false;
-};
+}
 
 void monitor_events_loop() {
   struct epoll_event events[2];

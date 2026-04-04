@@ -1,8 +1,8 @@
 #ifndef CPP_STRINGS_H
 #define CPP_STRINGS_H
 
-#include <stddef.h>
 #include <stdbool.h>
+#include <stddef.h>
 
 /* INFO: Read a C string pointer from a std::string object.
            The returned pointer is valid only as long as the std::string exists. */

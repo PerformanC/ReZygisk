@@ -3,7 +3,6 @@
 
 #include "remote_csoloader.h"
 
-#include <errno.h>
 #include <fcntl.h>
 #include <inttypes.h>
 #include <limits.h>
@@ -14,13 +13,11 @@
 
 #include <elf.h>
 #include <link.h>
-
 #include <sys/syscall.h>
 
 #undef SYS_mmap
 #define SYS_mmap LP_SELECT(__NR_mmap2, __NR_mmap)
 
-#include "logging.h"
 #include "socket_utils.h"
 
 #ifndef ALIGN_DOWN
@@ -793,7 +790,7 @@ bool remote_csoloader_load_and_resolve_entry(int pid, struct user_regs_struct *r
     call_regs = regs_saved;
 
     args[0] = remote_fd;
-  
+
     remote_syscall(pid, &call_regs, syscall_gadget, SYS_close, args, 1);
 
     free(phdr);
@@ -849,7 +846,7 @@ bool remote_csoloader_load_and_resolve_entry(int pid, struct user_regs_struct *r
           call_regs = regs_saved;
 
           args[0] = remote_fd;
-  
+
           remote_syscall(pid, &call_regs, syscall_gadget, SYS_close, args, 1);
           free(phdr);
           close(fd);

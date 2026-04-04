@@ -1,9 +1,9 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
-#include "utils.h"
-#include "monitor.h"
 #include "daemon.h"
+#include "monitor.h"
 
 int main(int argc, char **argv) {
   printf("The ReZygisk Tracer %s\n\n", ZKSU_VERSION);

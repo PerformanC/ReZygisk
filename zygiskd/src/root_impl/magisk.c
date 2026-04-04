@@ -1,18 +1,18 @@
+#include "magisk.h"
+
+#include <dirent.h>
+#include <errno.h>
+#include <fcntl.h>
 #include <stdlib.h>
 #include <string.h>
-#include <fcntl.h>
-#include <dirent.h>
-#include <sys/stat.h>
-#include <sys/prctl.h>
-#include <errno.h>
-
 #include <unistd.h>
+#include <sys/prctl.h>
+#include <sys/stat.h>
+
 
 #include "../constants.h"
 #include "../utils.h"
 #include "common.h"
-
-#include "magisk.h"
 
 const char *supported_variants[] = {
   "kitsune"

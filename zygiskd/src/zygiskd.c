@@ -1,25 +1,27 @@
+#include "zygiskd.h"
+
+#include <dirent.h>
+#include <errno.h>
+#include <fcntl.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <dirent.h>
 #include <sys/mman.h>
-#include <sys/socket.h>
-#include <sys/un.h>
-#include <sys/stat.h>
-#include <sys/wait.h>
 #include <sys/sendfile.h>
-#include <fcntl.h>
-#include <errno.h>
-#include <stdio.h>
+#include <sys/socket.h>
+#include <sys/stat.h>
+#include <sys/un.h>
+#include <sys/wait.h>
 
-#include <unistd.h>
 #include <linux/limits.h>
-#include <sys/syscall.h>
 #include <linux/memfd.h>
+#include <sys/syscall.h>
+#include <unistd.h>
 
 #include <pthread.h>
 
-#include "root_impl/common.h"
 #include "constants.h"
+#include "root_impl/common.h"
 #include "utils.h"
 
 struct Module {

@@ -1,33 +1,35 @@
-#include <sys/mount.h>
+#include "hook.h"
+
 #include <dlfcn.h>
 #include <link.h>
 #include <regex.h>
-#include <stdint.h>
 #include <stdbool.h>
+#include <stdint.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <stdio.h>
+#include <sys/mount.h>
 
-#include <lsplt.h>
 #include <csoloader.h>
+#include <lsplt.h>
 
-#include <fcntl.h>
 #include <dirent.h>
-#include <sys/types.h>
-#include <sys/prctl.h>
-#include <sys/stat.h>
-#include <sys/socket.h>
-#include <sys/un.h>
-#include <sys/mman.h>
-#include <signal.h>
+#include <fcntl.h>
 #include <limits.h>
+#include <signal.h>
+#include <sys/mman.h>
+#include <sys/prctl.h>
+#include <sys/socket.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <sys/un.h>
 
-#include <unistd.h>
 #include <pthread.h>
+#include <unistd.h>
 
 #include "daemon.h"
-#include "module.h"
 #include "misc.h"
+#include "module.h"
 
 #include "art_method.h"
 #include "cpp_strings.h"
@@ -478,7 +480,7 @@ static void initialize_jni_hook(void) {
 
         break;
       }
- 
+
       get_created_java_vms = (jint (*)(JavaVM **, jsize, jsize *))dlsym(handle, "JNI_GetCreatedJavaVMs");
       dlclose(handle);
 
@@ -585,7 +587,7 @@ static bool api_plt_hook_commit(void) {
       bool ignored = false;
       for (size_t ig = 0; ig < g_ctx->ignore_info_count; ig++) {
         struct ignore_info *ign = &g_ctx->ignore_info[ig];
-        if (regexec(&ign->regex, map->path, 0, NULL, 0) != 0) continue;  
+        if (regexec(&ign->regex, map->path, 0, NULL, 0) != 0) continue;
         if (ign->symbol && strcmp(ign->symbol, reg->symbol) != 0) continue;
 
         ignored = true;

@@ -1,11 +1,12 @@
 /* INFO: C implementation for reading C++ std::string from memory.
            Handles libc++ std::string layout with SSO (Small String Optimization).
-   
+
          libc++ layout:
           - Short mode (LSB of first byte = 0): size = first_byte >> 1, data at byte 1
           - Long mode: capacity/size/pointer at platform-specific offsets */
 
 #include "cpp_strings.h"
+
 #include <stdint.h>
 
 #ifdef __LP64__
