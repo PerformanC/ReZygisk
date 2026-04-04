@@ -1,14 +1,14 @@
-#include "magisk.h"
+#include <stdlib.h>
+#include <string.h>
 
 #include <dirent.h>
 #include <errno.h>
 #include <fcntl.h>
-#include <stdlib.h>
-#include <string.h>
 #include <unistd.h>
 #include <sys/prctl.h>
 #include <sys/stat.h>
 
+#include "magisk.h"
 
 #include "../constants.h"
 #include "../utils.h"

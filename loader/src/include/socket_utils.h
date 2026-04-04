@@ -2,6 +2,7 @@
 #define SOCKET_UTILS_H
 
 #include <stdint.h>
+
 #include <sys/types.h>
 
 ssize_t write_loop(int fd, const void *buf, size_t count);

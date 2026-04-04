@@ -1,9 +1,8 @@
-#include "ptrace_clear.h"
+#include <stdio.h>
+#include <stdbool.h>
+#include <string.h>
 
 #include <fcntl.h>
-#include <stdbool.h>
-#include <stdio.h>
-#include <string.h>
 #include <sys/syscall.h>
 
 #include <linux/audit.h>
@@ -11,6 +10,8 @@
 #include <linux/seccomp.h>
 #include <sys/prctl.h>
 #include <unistd.h>
+
+#include "ptrace_clear.h"
 
 #include "logging.h"
 

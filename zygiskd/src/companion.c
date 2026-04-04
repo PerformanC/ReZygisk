@@ -1,12 +1,11 @@
-#include "companion.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
 #include <dlfcn.h>
 #include <errno.h>
 #include <fcntl.h>
 #include <signal.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
 #include <sys/socket.h>
 #include <sys/stat.h>
 #include <sys/types.h>
@@ -14,6 +13,8 @@
 #include <linux/limits.h>
 #include <pthread.h>
 #include <unistd.h>
+
+#include "companion.h"
 
 #define LOG_TAG "zygiskd-companion" LP_SELECT("32", "64")
 

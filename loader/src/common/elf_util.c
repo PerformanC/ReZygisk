@@ -1,15 +1,16 @@
-#include "elf_util.h"
-
-#include <fcntl.h>
+#include <stdlib.h>
 #include <stdbool.h>
 #include <stdint.h>
-#include <stdlib.h>
 #include <string.h>
+
+#include <fcntl.h>
 #include <sys/auxv.h>
 #include <sys/mman.h>
 #include <sys/stat.h>
 
 #include <unistd.h>
+
+#include "elf_util.h"
 
 #define LOG_TAG "zygisk-elfutil" LP_SELECT("32", "64")
 

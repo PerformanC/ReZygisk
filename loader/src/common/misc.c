@@ -1,7 +1,8 @@
-#include "misc.h"
-
 #include <stdio.h>
+
 #include <sys/utsname.h>
+
+#include "misc.h"
 
 #include "logging.h"
 
