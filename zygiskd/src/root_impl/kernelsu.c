@@ -1,7 +1,6 @@
-#include "kernelsu.h"
+#include <string.h>
 
 #include <errno.h>
-#include <string.h>
 #include <unistd.h>
 #include <sys/ioctl.h>
 #include <sys/prctl.h>
@@ -9,6 +8,7 @@
 #include <sys/syscall.h>
 #include <sys/system_properties.h>
 
+#include "kernelsu.h"
 
 #include "../constants.h"
 #include "../utils.h"

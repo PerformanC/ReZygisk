@@ -1,7 +1,7 @@
-#include "common.h"
-
 #include <sys/stat.h>
 #include <sys/types.h>
+
+#include "common.h"
 
 #include "../utils.h"
 #include "apatch.h"

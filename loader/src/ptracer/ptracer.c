@@ -1,10 +1,11 @@
-#include <fcntl.h>
-#include <inttypes.h>
-#include <link.h>
-#include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <inttypes.h>
 #include <string.h>
+
+#include <fcntl.h>
+#include <link.h>
+#include <signal.h>
 #include <sys/auxv.h>
 #include <sys/mman.h>
 #include <sys/ptrace.h>

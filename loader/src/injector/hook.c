@@ -1,17 +1,13 @@
-#include "hook.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <stdbool.h>
+#include <stdint.h>
+#include <string.h>
 
 #include <dlfcn.h>
 #include <link.h>
 #include <regex.h>
-#include <stdbool.h>
-#include <stdint.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
 #include <sys/mount.h>
-
-#include <csoloader.h>
-#include <lsplt.h>
 
 #include <dirent.h>
 #include <fcntl.h>
@@ -26,6 +22,11 @@
 
 #include <pthread.h>
 #include <unistd.h>
+
+#include <csoloader.h>
+#include <lsplt.h>
+
+#include "hook.h"
 
 #include "daemon.h"
 #include "misc.h"

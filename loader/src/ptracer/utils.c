@@ -1,20 +1,19 @@
-#include "utils.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <stddef.h>
+#include <string.h>
 
 #include <ctype.h>
 #include <errno.h>
 #include <inttypes.h>
 #include <linux/limits.h>
-#include <stddef.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <unistd.h>
 
 #include <dlfcn.h>
 #include <fcntl.h>
 #include <link.h>
 #include <sched.h>
 #include <signal.h>
+#include <unistd.h>
 #include <sys/auxv.h>
 #include <sys/mman.h>
 #include <sys/ptrace.h>
@@ -23,6 +22,8 @@
 #include <sys/time.h>
 #include <sys/uio.h>
 #include <sys/wait.h>
+
+#include "utils.h"
 
 #include "elf_util.h"
 #include "elf_util_32.h"

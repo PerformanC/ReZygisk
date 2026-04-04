@@ -2,6 +2,7 @@
 #define UTILS_H
 
 #include <stdbool.h>
+
 #include <unistd.h>
 #include <sys/ptrace.h>
 

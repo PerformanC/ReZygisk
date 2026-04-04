@@ -3,11 +3,12 @@
 
          libc++ layout:
           - Short mode (LSB of first byte = 0): size = first_byte >> 1, data at byte 1
-          - Long mode: capacity/size/pointer at platform-specific offsets */
-
-#include "cpp_strings.h"
+          - Long mode: capacity/size/pointer at platform-specific offsets
+*/
 
 #include <stdint.h>
+
+#include "cpp_strings.h"
 
 #ifdef __LP64__
   #define LONG_SIZE_OFFSET 8

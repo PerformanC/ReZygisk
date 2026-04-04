@@ -1,11 +1,11 @@
-#include "daemon.h"
-
-#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <sys/socket.h>
+#include <stdbool.h>
 
 #include <linux/un.h>
+#include <sys/socket.h>
+
+#include "daemon.h"
 
 #include "logging.h"
 #include "misc.h"

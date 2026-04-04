@@ -1,9 +1,10 @@
-#include "socket_utils.h"
+#include <stdlib.h>
 
 #include <errno.h>
-#include <stdlib.h>
-#include <sys/socket.h>
 #include <unistd.h>
+#include <sys/socket.h>
+
+#include "socket_utils.h"
 
 #include "logging.h"
 

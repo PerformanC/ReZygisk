@@ -1,13 +1,15 @@
 /* INFO: Remote CSOLoader, part of CSOLoader. Follows the same licensing
-           as the original one (CSOLoader project). */
+           as the original one (CSOLoader project).
+*/
 
 #include "remote_csoloader.h"
 
-#include <fcntl.h>
+#include <stdlib.h>
 #include <inttypes.h>
 #include <limits.h>
-#include <stdlib.h>
 #include <string.h>
+
+#include <fcntl.h>
 #include <sys/mman.h>
 #include <unistd.h>
 
