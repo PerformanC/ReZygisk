@@ -2,9 +2,9 @@
 #define ELF_UTIL_32_H
 
 #include <stdbool.h>
+#include <stdint.h>
 #include <string.h>
 #include <sys/types.h>
-#include <stdint.h>
 
 #ifdef __aarch64__
 

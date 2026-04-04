@@ -1,19 +1,19 @@
-#include <stdlib.h>
-#include <stdint.h>
-#include <stdbool.h>
-#include <string.h>
+#include "elf_util.h"
+
 #include <fcntl.h>
+#include <stdbool.h>
+#include <stdint.h>
+#include <stdlib.h>
+#include <string.h>
+#include <sys/auxv.h>
 #include <sys/mman.h>
 #include <sys/stat.h>
-#include <sys/auxv.h>
 
 #include <unistd.h>
 
 #define LOG_TAG "zygisk-elfutil" LP_SELECT("32", "64")
 
 #include "logging.h"
-
-#include "elf_util.h"
 
 #define SHT_GNU_HASH 0x6ffffff6
 
@@ -736,7 +736,7 @@ ElfW(Addr) getSymbOffset(ElfImg *img, const char *name, unsigned char *sym_type)
          This function is based on AOSP's (Android Open Source Project) code, and resolves the
            indirect symbol, leading to the correct, most appropriate for the hardware, symbol.
 
-    SOURCES: 
+    SOURCES:
      - https://android.googlesource.com/platform/bionic/+/refs/tags/android-16.0.0_r1/linker/linker.cpp#2594
      - https://android.googlesource.com/platform/bionic/+/tags/android-16.0.0_r1/libc/bionic/bionic_call_ifunc_resolver.cpp#41
 */

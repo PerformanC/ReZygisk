@@ -2,8 +2,8 @@
 #define ART_METHOD_H
 
 #include <stdbool.h>
-#include <stdint.h>
 #include <stddef.h>
+#include <stdint.h>
 
 #include <jni.h>
 

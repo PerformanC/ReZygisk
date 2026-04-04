@@ -1,14 +1,15 @@
+#include "daemon.h"
+
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <stdbool.h>
 #include <sys/socket.h>
 
 #include <linux/un.h>
 
 #include "logging.h"
+#include "misc.h"
 #include "socket_utils.h"
-
-#include "daemon.h"
 
 #define SOCKET_FILE_NAME LP_SELECT("cp32", "cp64") ".sock"
 
@@ -20,7 +21,7 @@ int rezygiskd_connect(uint8_t retry) {
     .sun_path = { 0 }
   };
 
-  /* 
+  /*
     INFO: Application must assume that sun_path can hold _POSIX_PATH_MAX characters.
 
     Sources:

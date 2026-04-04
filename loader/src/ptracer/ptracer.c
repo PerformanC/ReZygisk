@@ -1,24 +1,24 @@
+#include <fcntl.h>
+#include <inttypes.h>
+#include <link.h>
+#include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <inttypes.h>
 #include <string.h>
-#include <fcntl.h>
-#include <sys/ptrace.h>
 #include <sys/auxv.h>
 #include <sys/mman.h>
+#include <sys/ptrace.h>
 #include <sys/socket.h>
-#include <link.h>
 #include <sys/wait.h>
-#include <signal.h>
 
 #include <elf.h>
-#include <unistd.h>
 #include <linux/un.h>
+#include <unistd.h>
 
 #define LOG_TAG "zygisk-injector" LP_SELECT("32", "64")
 
-#include "utils.h"
 #include "misc.h"
+#include "utils.h"
 
 #include "remote_csoloader.h"
 #include "remote_csoloader_arm32.h"

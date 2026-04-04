@@ -3,9 +3,9 @@
 #include <pthread.h>
 #include <unistd.h>
 
-#include "misc.h"
 #include "daemon.h"
 #include "logging.h"
+#include "misc.h"
 
 #include "hook.h"
 #include "ptrace_clear.h"

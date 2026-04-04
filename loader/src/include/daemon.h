@@ -2,10 +2,7 @@
 #define DAEMON_H
 
 #include <stdbool.h>
-
 #include <unistd.h>
-
-#include "misc.h"
 
 enum rezygiskd_actions {
   ZygoteInjected,

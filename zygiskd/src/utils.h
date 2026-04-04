@@ -5,6 +5,8 @@
 #include <unistd.h>
 #include <sys/types.h>
 
+#include <android/log.h>
+
 #include "constants.h"
 #include "root_impl/common.h"
 

@@ -1,16 +1,18 @@
 #ifndef UTILS_H
 #define UTILS_H
 
+#include <stdbool.h>
+#include <unistd.h>
 #include <sys/ptrace.h>
 
-#include "daemon.h"
 #include "misc.h"
 
+/* Redefining logging macros with different tag */
 #ifndef LOG_TAG
   #define LOG_TAG "zygisk-ptrace" LP_SELECT("32", "64")
 #endif
 
-#include "logging.h"
+#include "logging.h" /* IWYU pragma: keep */
 
 struct map {
   uintptr_t start;

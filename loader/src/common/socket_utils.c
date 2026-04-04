@@ -1,12 +1,11 @@
-#include <stdlib.h>
-#include <errno.h>
-#include <sys/socket.h>
+#include "socket_utils.h"
 
+#include <errno.h>
+#include <stdlib.h>
+#include <sys/socket.h>
 #include <unistd.h>
 
 #include "logging.h"
-
-#include "socket_utils.h"
 
 ssize_t write_loop(int fd, const void *buf, size_t count) {
   ssize_t written = 0;
