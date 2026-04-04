@@ -30,7 +30,7 @@ val commitHash: String by rootProject.extra
            doesn't exist, we must utilize "-Wno-unknown-warning-option". */
 val CStandardFlags = arrayOf(
   "-D_GNU_SOURCE", "-std=c99", "-Wpedantic", "-Wall", "-Wextra", "-Werror",
-  "-Wformat", "-Wuninitialized", "-Wshadow", "-Wno-zero-length-array", 
+  "-Wformat", "-Wuninitialized", "-Wshadow", "-Wno-zero-length-array", "-Wwrite-strings",
   "-Wno-fixed-enum-extension", "-Wno-unknown-warning-option", "-Wno-c23-extensions",
   "-Wconversion", "-Iroot_impl", "-llog", "-DMIN_APATCH_VERSION=$minAPatchVersion",
   "-DMIN_KSU_VERSION=$minKsuVersion",
@@ -117,4 +117,3 @@ task("buildAndStrip") {
     }
   }
 }
-

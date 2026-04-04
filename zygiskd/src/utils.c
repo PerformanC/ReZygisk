@@ -328,7 +328,7 @@ ssize_t read_string(int fd, char *restrict buf, size_t buf_size) {
 }
 
 /* INFO: Cannot use restrict here as execv does not have restrict */
-bool exec_command(char *restrict buf, size_t len, const char *restrict file, char *const argv[]) {
+bool exec_command(char *restrict buf, size_t len, const char *restrict file, const char *const argv[]) {
   int link[2];
   pid_t pid;
 
@@ -352,7 +352,7 @@ bool exec_command(char *restrict buf, size_t len, const char *restrict file, cha
     close(link[0]);
     close(link[1]);
 
-    execv(file, argv);
+    execv_const(file, argv);
 
     LOGE("execv failed: %s", strerror(errno));
     _exit(1);
@@ -386,7 +386,7 @@ bool check_unix_socket(int fd, bool block) {
 }
 
 /* INFO: Cannot use restrict here as execv does not have restrict */
-int non_blocking_execv(const char *restrict file, char *const argv[]) {
+int non_blocking_execv(const char *restrict file, const char *const argv[]) {
   int link[2];
   pid_t pid;
 
@@ -407,7 +407,7 @@ int non_blocking_execv(const char *restrict file, char *const argv[]) {
     close(link[0]);
     close(link[1]);
 
-    execv(file, argv);
+    execv_const(file, argv);
   } else {
     close(link[1]);
 
@@ -641,7 +641,7 @@ bool umount_root(struct root_impl impl) {
     return false;
   }
 
-  char *source_name = "magisk";
+  const char *source_name = "magisk";
   if (impl.impl == KernelSU) source_name = "KSU";
   else if (impl.impl == APatch) source_name = "APatch";
 

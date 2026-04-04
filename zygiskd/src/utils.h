@@ -2,6 +2,7 @@
 #define UTILS_H
 
 #include <stdio.h>
+#include <unistd.h>
 #include <sys/types.h>
 
 #include "constants.h"
@@ -83,11 +84,18 @@ ssize_t write_string(int fd, const char *restrict str);
 
 ssize_t read_string(int fd, char *restrict buf, size_t buf_size);
 
-bool exec_command(char *restrict buf, size_t len, const char *restrict file, char *const argv[]);
+/* execv's argv parameter is missing a const qualifier due to a historical
+** POSIX oversight. The cast is safe since execv does not modify the strings.
+*/
+static inline int execv_const(const char *path, const char *const argv[]) {
+  return execv(path, (char *const *)argv); /* NOSONAR: this cast is deliberate (c:S859) */
+}
+
+bool exec_command(char *restrict buf, size_t len, const char *restrict file, const char *const argv[]);
 
 bool check_unix_socket(int fd, bool block);
 
-int non_blocking_execv(const char *restrict file, char *const argv[]);
+int non_blocking_execv(const char *restrict file, const char *const argv[]);
 
 void stringify_root_impl_name(struct root_impl impl, char *restrict output);
 
