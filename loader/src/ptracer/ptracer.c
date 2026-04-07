@@ -118,7 +118,7 @@ static bool inject_tango(int pid, const char *lib_path, uint32_t libc_init_targe
 
   uint32_t tramp_thumb = tramp | 1;
   if (write_proc(pid, (uintptr_t)libc_init_got_slot, &tramp_thumb, 4) != 4 && !ptrace_poke_u32(pid, (uintptr_t)libc_init_got_slot, tramp_thumb)) {
-    LOGE("Failed to patch GOT entry at 0x%x with %d: %s", libc_init_got_slot, errno, strerror(errno));
+    PLOGE("Patch GOT entry at 0x%x", libc_init_got_slot);
 
     goto tango_done;
   }
