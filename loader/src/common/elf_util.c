@@ -10,11 +10,11 @@
 
 #include <unistd.h>
 
-#include "elf_util.h"
-
 #define LOG_TAG "zygisk-elfutil" LP_SELECT("32", "64")
 
 #include "logging.h"
+
+#include "elf_util.h"
 
 #define SHT_GNU_HASH 0x6ffffff6
 

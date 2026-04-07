@@ -353,7 +353,7 @@ bool exec_command(char *restrict buf, size_t len, const char *restrict file, con
     close(link[0]);
     close(link[1]);
 
-    execv_const(file, argv);
+    execv(file, (char *const *)argv); /* NOSONAR: this cast is deliberate (c:S859) */
 
     LOGE("execv failed: %s", strerror(errno));
     _exit(1);
@@ -408,7 +408,7 @@ int non_blocking_execv(const char *restrict file, const char *const argv[]) {
     close(link[0]);
     close(link[1]);
 
-    execv_const(file, argv);
+    execv(file, (char *const *)argv); /* NOSONAR: this cast is deliberate (c:S859) */
   } else {
     close(link[1]);
 

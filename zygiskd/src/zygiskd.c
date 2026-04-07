@@ -19,11 +19,11 @@
 
 #include <pthread.h>
 
-#include "zygiskd.h"
-
 #include "constants.h"
 #include "root_impl/common.h"
 #include "utils.h"
+
+#include "zygiskd.h"
 
 struct Module {
   char *name;

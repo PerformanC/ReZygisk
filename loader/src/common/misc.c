@@ -2,9 +2,9 @@
 
 #include <sys/utsname.h>
 
-#include "misc.h"
-
 #include "logging.h"
+
+#include "misc.h"
 
 int parse_int(const char *str) {
   int val = 0;

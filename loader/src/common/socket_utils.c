@@ -4,9 +4,9 @@
 #include <unistd.h>
 #include <sys/socket.h>
 
-#include "socket_utils.h"
-
 #include "logging.h"
+
+#include "socket_utils.h"
 
 ssize_t write_loop(int fd, const void *buf, size_t count) {
   ssize_t written = 0;

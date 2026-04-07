@@ -2,9 +2,9 @@
 #include <stdlib.h>
 #include <stddef.h>
 #include <string.h>
+#include <errno.h>
 
 #include <ctype.h>
-#include <errno.h>
 #include <inttypes.h>
 #include <linux/limits.h>
 
@@ -23,10 +23,10 @@
 #include <sys/uio.h>
 #include <sys/wait.h>
 
-#include "utils.h"
-
 #include "elf_util.h"
 #include "elf_util_32.h"
+
+#include "utils.h"
 
 struct maps *parse_maps(const char *filename) {
   FILE *fp = fopen(filename, "r");

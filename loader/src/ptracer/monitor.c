@@ -1,5 +1,3 @@
-#include "monitor.h"
-
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
@@ -19,6 +17,8 @@
 #include "socket_utils.h"
 #include "utils.h"
 
+#include "monitor.h"
+
 #define PROP_PATH TMP_PATH "/module.prop"
 #define SOCKET_NAME "init_monitor"
 
@@ -26,7 +26,7 @@
 
 static bool update_status(const char *message);
 
-const char* monitor_stop_reason = "MONITOR_STOP_REASON"; /* Initialize with placeholder */
+const char* monitor_stop_reason = NULL;
 
 struct environment_information {
   char *root_impl;

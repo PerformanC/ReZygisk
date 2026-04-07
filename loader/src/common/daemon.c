@@ -5,11 +5,11 @@
 #include <linux/un.h>
 #include <sys/socket.h>
 
-#include "daemon.h"
-
 #include "logging.h"
 #include "misc.h"
 #include "socket_utils.h"
+
+#include "daemon.h"
 
 #define SOCKET_FILE_NAME LP_SELECT("cp32", "cp64") ".sock"
 

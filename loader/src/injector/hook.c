@@ -26,14 +26,14 @@
 #include <csoloader.h>
 #include <lsplt.h>
 
-#include "hook.h"
-
 #include "daemon.h"
 #include "misc.h"
 #include "module.h"
 
 #include "art_method.h"
 #include "cpp_strings.h"
+
+#include "hook.h"
 
 void *start_addr = NULL;
 size_t block_size = 0;

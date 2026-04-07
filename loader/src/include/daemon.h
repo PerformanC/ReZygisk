@@ -2,6 +2,7 @@
 #define DAEMON_H
 
 #include <stdbool.h>
+
 #include <unistd.h>
 
 enum rezygiskd_actions {

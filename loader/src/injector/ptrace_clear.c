@@ -11,9 +11,9 @@
 #include <sys/prctl.h>
 #include <unistd.h>
 
-#include "ptrace_clear.h"
-
 #include "logging.h"
+
+#include "ptrace_clear.h"
 
 static bool seccomp_filters_visible() {
   FILE *status_file = fopen("/proc/self/status", "r");

@@ -1,6 +1,6 @@
 #include <string.h>
-
 #include <errno.h>
+
 #include <unistd.h>
 #include <sys/ioctl.h>
 #include <sys/prctl.h>
@@ -8,11 +8,11 @@
 #include <sys/syscall.h>
 #include <sys/system_properties.h>
 
-#include "kernelsu.h"
-
 #include "../constants.h"
 #include "../utils.h"
 #include "common.h"
+
+#include "kernelsu.h"
 
 const char *ksu_manager_paths[] = {
   "/data/user_de/0/me.weishu.kernelsu",
