@@ -1,29 +1,30 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <errno.h>
 
 #include <fcntl.h>
 #include <poll.h>
-#include <errno.h>
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <sys/wait.h>
-#include <sys/un.h>
-#include <sys/sysmacros.h>
 #include <sys/mount.h>
+#include <sys/socket.h>
+#include <sys/sysmacros.h>
+#include <sys/types.h>
+#include <sys/un.h>
+#include <sys/wait.h>
 #include <sys/xattr.h>
 
-#include <unistd.h>
 #include <linux/limits.h>
-#include <sched.h>
 #include <pthread.h>
+#include <sched.h>
+#include <unistd.h>
 
 #include <android/log.h>
 
-#include "utils.h"
 #include "root_impl/common.h"
 #include "root_impl/kernelsu.h"
 #include "root_impl/magisk.h"
+
+#include "utils.h"
 
 bool switch_mount_namespace(pid_t pid) {
   char path[PATH_MAX];
@@ -353,7 +354,10 @@ bool exec_command(char *restrict buf, size_t len, const char *restrict file, con
     close(link[0]);
     close(link[1]);
 
-    execv(file, (char *const *)argv); /* NOSONAR: this cast is deliberate (c:S859) */
+    /* NOTE: Sonarlint complains about a const qualifier drop here (c:S859),
+     * but this cast is deliberate and unavoidable.
+    */
+    execv(file, (char *const *)argv);
 
     LOGE("execv failed: %s", strerror(errno));
     _exit(1);
@@ -387,7 +391,7 @@ bool check_unix_socket(int fd, bool block) {
 }
 
 /* INFO: Cannot use restrict here as execv does not have restrict */
-int non_blocking_execv(const char *restrict file, const char *const argv[]) {
+int non_blocking_execv(const char *restrict file, char *const argv[]) {
   int link[2];
   pid_t pid;
 
@@ -408,7 +412,7 @@ int non_blocking_execv(const char *restrict file, const char *const argv[]) {
     close(link[0]);
     close(link[1]);
 
-    execv(file, (char *const *)argv); /* NOSONAR: this cast is deliberate (c:S859) */
+    execv(file, argv);
   } else {
     close(link[1]);
 

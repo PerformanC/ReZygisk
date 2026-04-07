@@ -13,7 +13,7 @@
   #define LOG_TAG "zygisk-ptrace" LP_SELECT("32", "64")
 #endif
 
-#include "logging.h" /* IWYU pragma: keep */
+#include "logging.h"
 
 struct map {
   uintptr_t start;

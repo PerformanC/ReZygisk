@@ -2,7 +2,7 @@
 #define LOGGING_H
 
 #include <errno.h>
-#include <string.h> /* IWYU pragma: keep */
+#include <string.h>
 
 #include <android/log.h>
 

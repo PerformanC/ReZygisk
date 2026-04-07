@@ -90,7 +90,7 @@ bool exec_command(char *restrict buf, size_t len, const char *restrict file, con
 
 bool check_unix_socket(int fd, bool block);
 
-int non_blocking_execv(const char *restrict file, const char *const argv[]);
+int non_blocking_execv(const char *restrict file, char *const argv[]);
 
 void stringify_root_impl_name(struct root_impl impl, char *restrict output);
 

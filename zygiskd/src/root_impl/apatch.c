@@ -5,11 +5,11 @@
 #include <sys/stat.h>
 #include <unistd.h>
 
-#include "apatch.h"
-
 #include "../constants.h"
 #include "../utils.h"
 #include "common.h"
+
+#include "apatch.h"
 
 void apatch_get_existence(struct root_impl_state *state) {
   if (access("/data/adb/apd", F_OK) != 0) {
