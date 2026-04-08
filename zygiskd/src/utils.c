@@ -14,7 +14,6 @@
 #include <sys/xattr.h>
 
 #include <linux/limits.h>
-#include <pthread.h>
 #include <sched.h>
 #include <unistd.h>
 

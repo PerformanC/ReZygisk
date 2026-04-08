@@ -17,8 +17,6 @@
 #include <sys/syscall.h>
 #include <unistd.h>
 
-#include <pthread.h>
-
 #include "constants.h"
 #include "root_impl/common.h"
 #include "utils.h"
