@@ -8,18 +8,12 @@
 #include <inttypes.h>
 #include <linux/limits.h>
 
-#include <dlfcn.h>
-#include <fcntl.h>
 #include <link.h>
-#include <sched.h>
 #include <signal.h>
 #include <unistd.h>
-#include <sys/auxv.h>
 #include <sys/mman.h>
 #include <sys/ptrace.h>
-#include <sys/stat.h>
 #include <sys/sysmacros.h>
-#include <sys/time.h>
 #include <sys/uio.h>
 #include <sys/wait.h>
 

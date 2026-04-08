@@ -1,8 +1,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include <android/log.h>
-
 #include "root_impl/common.h"
 #include "companion.h"
 #include "zygiskd.h"

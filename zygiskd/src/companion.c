@@ -4,9 +4,7 @@
 #include <errno.h>
 
 #include <dlfcn.h>
-#include <fcntl.h>
 #include <signal.h>
-#include <sys/socket.h>
 #include <sys/stat.h>
 #include <sys/types.h>
 

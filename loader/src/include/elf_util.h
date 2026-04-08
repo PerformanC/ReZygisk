@@ -5,7 +5,6 @@
 #include <string.h>
 
 #include <link.h>
-#include <pthread.h>
 #include <sys/types.h>
 
 #define SHT_GNU_HASH 0x6ffffff6

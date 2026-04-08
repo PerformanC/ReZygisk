@@ -5,23 +5,15 @@
 #include <dirent.h>
 #include <errno.h>
 #include <fcntl.h>
-#include <sys/mman.h>
-#include <sys/sendfile.h>
 #include <sys/socket.h>
-#include <sys/stat.h>
-#include <sys/un.h>
 #include <sys/wait.h>
 
 #include <linux/limits.h>
-#include <linux/memfd.h>
-#include <sys/syscall.h>
 #include <unistd.h>
 
 #include "constants.h"
 #include "root_impl/common.h"
 #include "utils.h"
-
-#include "zygiskd.h"
 
 struct Module {
   char *name;

@@ -1,19 +1,14 @@
 #include <stdio.h>
-#include <stdlib.h>
 #include <inttypes.h>
 #include <string.h>
 
-#include <fcntl.h>
 #include <link.h>
 #include <signal.h>
-#include <sys/auxv.h>
 #include <sys/mman.h>
 #include <sys/ptrace.h>
-#include <sys/socket.h>
 #include <sys/wait.h>
 
 #include <elf.h>
-#include <linux/un.h>
 #include <unistd.h>
 
 #define LOG_TAG "zygisk-injector" LP_SELECT("32", "64")

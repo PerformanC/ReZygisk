@@ -1,26 +1,19 @@
-#include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
 #include <stdint.h>
 #include <string.h>
 
 #include <dlfcn.h>
-#include <link.h>
 #include <regex.h>
-#include <sys/mount.h>
 
 #include <dirent.h>
 #include <fcntl.h>
 #include <limits.h>
 #include <signal.h>
 #include <sys/mman.h>
-#include <sys/prctl.h>
-#include <sys/socket.h>
 #include <sys/stat.h>
 #include <sys/types.h>
-#include <sys/un.h>
 
-#include <pthread.h>
 #include <unistd.h>
 
 #include <csoloader.h>
@@ -32,8 +25,6 @@
 
 #include "art_method.h"
 #include "cpp_strings.h"
-
-#include "hook.h"
 
 void *start_addr = NULL;
 size_t block_size = 0;

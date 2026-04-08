@@ -3,14 +3,12 @@
 #include <time.h>
 #include <errno.h>
 
-#include <err.h>
 #include <fcntl.h>
 #include <unistd.h>
 #include <sys/epoll.h>
 #include <sys/mount.h>
 #include <sys/signalfd.h>
 #include <sys/socket.h>
-#include <sys/system_properties.h>
 #include <sys/un.h>
 #include <sys/wait.h>
 

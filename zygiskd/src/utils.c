@@ -17,8 +17,6 @@
 #include <sched.h>
 #include <unistd.h>
 
-#include <android/log.h>
-
 #include "root_impl/common.h"
 #include "root_impl/kernelsu.h"
 #include "root_impl/magisk.h"
