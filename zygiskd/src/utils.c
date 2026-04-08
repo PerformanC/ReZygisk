@@ -352,7 +352,7 @@ bool exec_command(char *restrict buf, size_t len, const char *restrict file, con
     close(link[1]);
 
     /* NOTE: Sonarlint complains about a const qualifier drop here (c:S859),
-     * but this cast is deliberate and unavoidable.
+               but this cast is deliberate and unavoidable.
     */
     execv(file, (char *const *)argv);
 
