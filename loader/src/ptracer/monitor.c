@@ -24,7 +24,7 @@
 
 static bool update_status(const char *message);
 
-const char* monitor_stop_reason = NULL;
+const char *monitor_stop_reason = NULL;
 
 struct environment_information {
   char *root_impl;
@@ -880,7 +880,7 @@ static bool update_status(const char *message) {
 
     fprintf(json, "  \"monitor\": {\n");
     fprintf(json, "    \"state\": \"%d\"", tracing_state);
-    if (monitor_stop_reason[0] != '\0') fprintf(json, ",\n    \"reason\": \"%s\",\n", monitor_stop_reason);
+    if (monitor_stop_reason != NULL && monitor_stop_reason[0] != '\0') fprintf(json, ",\n    \"reason\": \"%s\",\n", monitor_stop_reason);
     else fprintf(json, "\n");
 
     if (status64.supported || status32.supported)
