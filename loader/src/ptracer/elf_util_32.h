@@ -2,7 +2,6 @@
 #define ELF_UTIL_32_H
 
 #include <stdint.h>
-#include <string.h>
 
 #ifdef __aarch64__
 

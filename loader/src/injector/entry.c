@@ -1,8 +1,3 @@
-#include <sys/mount.h>
-
-#include <pthread.h>
-#include <unistd.h>
-
 #include "daemon.h"
 #include "logging.h"
 #include "misc.h"

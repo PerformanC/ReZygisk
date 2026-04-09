@@ -6,7 +6,6 @@
 
 #include <stdlib.h>
 #include <inttypes.h>
-#include <limits.h>
 #include <string.h>
 
 #include <fcntl.h>

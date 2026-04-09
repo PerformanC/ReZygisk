@@ -12,8 +12,6 @@
 #include <pthread.h>
 #include <unistd.h>
 
-#include "companion.h"
-
 #define LOG_TAG "zygiskd-companion" LP_SELECT("32", "64")
 
 #include "utils.h"

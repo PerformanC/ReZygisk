@@ -10,7 +10,6 @@
 #include <string.h>
 
 #include <fcntl.h>
-#include <limits.h>
 #include <sys/mman.h>
 #include <sys/syscall.h>
 #include <unistd.h>
