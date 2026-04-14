@@ -15,39 +15,22 @@ jobs:
           submodules: "recursive"
           fetch-depth: 0
 
-      - name: Setup Java
-        uses: actions/setup-java@v5
-        with:
-          distribution: "temurin"
-          java-version: "17"
-
       - name: Accept NDK license
         run: echo "y" | /usr/local/lib/android/sdk/cmdline-tools/latest/bin/sdkmanager "ndk;29.0.13113456"
 
-      - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v6
-        with:
-          build-scan-publish: false
-          build-scan-terms-of-use-url: 'https://gradle.com/terms-of-service'
-          build-scan-terms-of-use-agree: 'yes'
-
-      - name: Build with Gradle
+      - name: Build
         run: |
-          echo 'org.gradle.parallel=true' >> gradle.properties
-          echo 'org.gradle.vfs.watch=true' >> gradle.properties
-          echo 'org.gradle.jvmargs=-Xmx2048m' >> gradle.properties
-          sed -i 's/org.gradle.unsafe.configuration-cache=true//g' gradle.properties
-          ./gradlew zipRelease
-          ./gradlew zipDebug
+          make release -j$(nproc)
+          make debug -j$(nproc)
 
       - name: Upload release
         uses: actions/upload-artifact@v7
         with:
-          path: "module/build/outputs/release/ReZygisk-v*-release.zip"
+          path: "build/out/ReZygisk-v*-release.zip"
           archive: false
 
       - name: Upload debug
         uses: actions/upload-artifact@v7
         with:
-          path: "module/build/outputs/release/ReZygisk-v*-debug.zip"
+          path: "build/out/ReZygisk-v*-debug.zip"
           archive: false

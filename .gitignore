@@ -1,8 +1,5 @@
 .clangd
 .clang-format
-.gradle
 .idea
 .vscode
 build
-local.properties
-Cargo.lock
