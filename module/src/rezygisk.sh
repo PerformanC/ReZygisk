@@ -9,7 +9,7 @@ set -e
 
 MODDIR=/data/adb/modules/rezygisk
 
-# INFO: Removes the [...] in description part of module.prop
-sed -i -E 's/(description=)\[.*\] /\1/' $MODDIR/module.prop
+# INFO: Resets ReZygisk's module.prop to its default state which is saved upon installation.
+cp "$MODDIR/module.prop.bak" "$MODDIR/module.prop"
 
 exit 0

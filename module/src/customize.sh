@@ -113,6 +113,8 @@ extract "$ZIPFILE" 'rezygisk.sh' "/data/adb/post-fs-data.d/"
 mkdir -p /data/adb/post-mount.d
 cp "/data/adb/post-fs-data.d/rezygisk.sh" "/data/adb/post-mount.d/rezygisk.sh"
 
+cp "$MODPATH/module.prop" "$MODPATH/module.prop.bak"
+
 chmod +x "$MODPATH/uninstall.sh"
 
 mv "$TMPDIR/sepolicy.rule" "$MODPATH"
