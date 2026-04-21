@@ -18,12 +18,19 @@ MODULE_NAME ?= ReZygisk
 
 NDK_VERSION ?= 29.0.13113456
 ANDROID_HOME ?= $(HOME)/Android/Sdk
-NDK_PATH = $(ANDROID_HOME)/ndk/$(NDK_VERSION)
+NDK_PATH ?= $(ANDROID_HOME)/ndk/$(NDK_VERSION)
 TOOLCHAIN = $(NDK_PATH)/toolchains/llvm/prebuilt/linux-x86_64
 SYSROOT = $(TOOLCHAIN)/sysroot
-CC = $(TOOLCHAIN)/bin/clang
-AR = $(TOOLCHAIN)/bin/llvm-ar
-STRIP = $(TOOLCHAIN)/bin/llvm-strip
+
+ifeq ($(TERMUX_VERSION),)
+	CC = $(TOOLCHAIN)/bin/clang
+	AR = $(TOOLCHAIN)/bin/llvm-ar
+	STRIP = $(TOOLCHAIN)/bin/llvm-strip
+else
+	CC = clang
+	AR = llvm-ar
+	STRIP = llvm-strip
+endif
 
 BUILD_DIR ?= $(ROOT_DIR)/build
 

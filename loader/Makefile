@@ -105,12 +105,12 @@ $(LIBZYGISK): $(INJECTOR_OBJS) $(LIBCOMMON) $(LSPLT_LIB) $(CSOLOADER_LIB)
 	$(CC_ARCH) -fPIC -shared -Wl,-soname,libzygisk.so               \
 		$(COMMON_LDFLAGS) $(TYPE_LDFLAGS) -nostartfiles             \
 		$(INJECTOR_OBJS) $(LIBCOMMON) $(LSPLT_LIB) $(CSOLOADER_LIB) \
-		-llog -latomic -lm -o $@
+		-llog -lm -o $@
 
 $(LIBPTRACE): $(PTRACER_OBJS) $(LIBCOMMON)
 	@mkdir -p $(dir $@)
 	$(CC_ARCH) $(COMMON_LDFLAGS) $(TYPE_LDFLAGS) \
-		$(PTRACER_OBJS) $(LIBCOMMON) -llog -latomic -lm -o $@
+		$(PTRACER_OBJS) $(LIBCOMMON) -llog -lm -o $@
 
 $(LIBZYGISK_STRIPPED): $(LIBZYGISK)
 	@mkdir -p $(dir $@)

@@ -11,6 +11,15 @@ ZKSU_VERSION = $(VER_NAME)-$(VER_CODE)-$(COMMIT_HASH)-$(BUILD_TYPE)
 ZIP_NAME = $(MODULE_NAME)-$(VER_NAME)-$(VER_CODE)-$(COMMIT_HASH)-$(BUILD_TYPE).zip
 ZIP_FILE = $(ZIP_DIR)/$(ZIP_NAME)
 
+ifeq ($(TERMUX_VERSION),)
+	ADB_CMD := adb push $(ZIP_FILE) /data/local/tmp && adb shell 
+	INSTALL_PATH := /data/local/tmp/$(ZIP_NAME)
+	REBOOT_CMD := adb reboot
+else
+	INSTALL_PATH := $(ZIP_FILE)
+	REBOOT_CMD := su -c reboot
+endif
+
 LOADER_DONE = $(OBJ_DIR)/loader/.done
 ZYGISKD_DONE = $(OBJ_DIR)/zygiskd/.done
 MODULE_DONE = $(BUILD_DIR)/module-$(BUILD_TYPE).done
@@ -109,25 +118,22 @@ $(ZIP_FILE): $(MODULE_DONE)
 	@cd $(MODULE_OUT) && zip -r9 $@ . -x '*.DS_Store' > /dev/null
 
 installKsu: build
-	adb push $(ZIP_FILE) /data/local/tmp/
-	adb shell su -c '/data/adb/ksu/bin/ksud module install /data/local/tmp/$(ZIP_NAME)'
+	$(ADB_CMD)su -c '/data/adb/ksu/bin/ksud module install $(INSTALL_PATH)'
 
 installMagisk: build
-	adb push $(ZIP_FILE) /data/local/tmp/
-	adb shell su -M -c "magisk --install-module /data/local/tmp/$(ZIP_NAME)"
+	$(ADB_CMD)su -M -c "magisk --install-module $(INSTALL_PATH)"
 
 installAPatch: build
-	adb push $(ZIP_FILE) /data/local/tmp/
-	adb shell su -c "/data/adb/apd module install /data/local/tmp/$(ZIP_NAME)"
+	$(ADB_CMD)su -c "/data/adb/apd module install $(INSTALL_PATH)"
 
 installKsuAndReboot: installKsu
-	adb reboot
+	$(REBOOT_CMD)
 
 installMagiskAndReboot: installMagisk
-	adb reboot
+	$(REBOOT_CMD)
 
 installAPatchAndReboot: installAPatch
-	adb reboot
+	$(REBOOT_CMD)
 
 clean:
 	rm -rf $(BUILD_DIR)
