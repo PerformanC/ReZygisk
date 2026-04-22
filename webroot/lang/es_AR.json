@@ -4,12 +4,12 @@
     "home": {
       "title": "Inicio",
       "unknown": "Desconocido",
-      "androidVersion": "Android Version",
-		  "linuxKernelVersion": "Linux Kernel Version",
+      "androidVersion": "Versión de Android",
+		  "linuxKernelVersion": "Versión del Kernel",
       "status": {
-        "notWorking": "No funciona",
+        "notWorking": "No funcionando",
         "ok": "Funcionando",
-        "partially": "Funciona parcialmente"
+        "partially": "Funcionando parcialmente"
       },
       "info": {
         "version": "Versión",
@@ -48,36 +48,36 @@
       "title": "Ajustes",
       "language": {
         "title": "Cambiar idioma",
-        "description": "Change the language of the WebUI to the selected one."
+        "description": "Cambia el idioma del WebUI al seleccionado."
       },
       "fullscreen": {
-        "title": "Disable fullscreen mode in WebUI",
-        "description": "This option will make the WebUI not fill the whole screen."
+        "title": "Desactivar el modo de pantalla completa en el WebUI",
+        "description": "Esta opción evitará que el WebUI ocupe toda la pantalla."
       },
       "theme": {
-        "title": "Change WebUI theme",
-        "description": "Choose your system theme for current WebUI"
+        "title": "Cambiar el tema del WebUI",
+        "description": "Elige el tema del sistema para el WebUI actual."
       },
       "font": {
         "title": "Activar fuente del sistema",
         "description": "Esta opción habilitará la fuente del sistema en el WebUI actual. NOTA: Puede no ser compatible con FlipFont"
       },
-      "moduleDevelopers": "Module Developer(s)",
-      "WebUIDevelopers": "WebUI Developer(s)",
-      "orginalDevelopers": "Original Module Developer(s)",
-      "moduleLicense": "Module License",
-      "WebUILicense": "WebUI License"
+      "moduleDevelopers": "Desarrollador(es) del módulo",
+      "WebUIDevelopers": "Desarrollador(es) del WebUI",
+      "orginalDevelopers": "Desarrollador(es) del Modulo Original",
+      "moduleLicense": "Licencia del Modulo",
+      "WebUILicense": "Licencia del WebUI"
     },
     "mini_settings_language": {
       "title": "Cambiar idioma"
     },
     "mini_settings_theme": {
-      "title": "Change WebUI theme",
+      "title": "Cambiar tema del WebUI",
       "theme": {
-        "dark": "Dark Theme",
-        "light": "Light Theme",
-        "amoled": "Amoled Theme",
-        "system_based": "System Based Theme"
+        "dark": "Modo Oscuro",
+        "light": "Modo Claro",
+        "amoled": "Modo AMOLED",
+        "system_based": "Tema basado en el sistema"
       }
     }
   },
