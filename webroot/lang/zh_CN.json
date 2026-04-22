@@ -4,8 +4,8 @@
     "home": {
       "title": "主页",
       "unknown": "未知",
-      "androidVersion": "Android Version",
-			"linuxKernelVersion": "Linux Kernel Version",
+      "androidVersion": "Android 版本",
+      "linuxKernelVersion": "Linux 内核版本",
       "status": {
         "notWorking": "未运行",
         "ok": "运行中",
@@ -13,7 +13,7 @@
       },
       "info": {
         "version": "版本",
-        "root": "Root实现",
+        "root": "Root 实现",
         "zygote": {
           "injected": "已注入",
           "notInjected": "未注入",
@@ -24,7 +24,7 @@
     "actions": {
       "title": "操作",
       "monitor": {
-        "title": "监视器",
+        "title": "监控",
         "status": {
           "tracing": "追踪中",
           "stopping": "正在停止",
@@ -41,43 +41,43 @@
     },
     "modules": {
       "title": "模块",
-      "notAvaliable": "目前没有模块使用Zygisk",
+      "notAvaliable": "目前没有模块使用 Zygisk",
       "arch": "架构: "
     },
     "settings": {
       "title": "设置",
       "language": {
         "title": "语言",
-        "description": "Change the language of the WebUI to the selected one."
+        "description": "将 WebUI 的语言切换为所选语言。"
       },
       "fullscreen": {
-        "title": "Disable fullscreen mode in WebUI",
-        "description": "This option will make the WebUI not fill the whole screen."
+        "title": "禁用 WebUI 全屏模式",
+        "description": "启用此选项后，WebUI 将不会占满整个屏幕。"
       },
       "theme": {
-        "title": "Change WebUI theme",
-        "description": "Choose your system theme for current WebUI"
+        "title": "更改 WebUI 主题",
+        "description": "为当前 WebUI 选择系统主题。"
       },
       "font": {
         "title": "启用系统字体",
         "description": "此选项会在Web界面启用系统字体。可能与FlipFont不兼容。"
       },
-      "moduleDevelopers": "Module Developer(s)",
-      "WebUIDevelopers": "WebUI Developer(s)",
-      "orginalDevelopers": "Original Module Developer(s)",
-      "moduleLicense": "Module License",
-      "WebUILicense": "WebUI License"
+      "moduleDevelopers": "模块开发者",
+      "WebUIDevelopers": "WebUI 开发者",
+      "orginalDevelopers": "原始模块开发者",
+      "moduleLicense": "模块许可证",
+      "WebUILicense": "WebUI 许可证"
     },
     "mini_settings_language": {
       "title": "语言"
     },
     "mini_settings_theme": {
-      "title": "Change WebUI theme",
+      "title": "更改 WebUI 主题",
       "theme": {
-        "dark": "Dark Theme",
-        "light": "Light Theme",
-        "amoled": "Amoled Theme",
-        "system_based": "System Based Theme"
+        "dark": "深色主题",
+        "light": "浅色主题",
+        "amoled": "Amoled 主题",
+        "system_based": "跟随系统"
       }
     }
   },
