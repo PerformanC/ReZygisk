@@ -1,5 +1,5 @@
 #!/system/bin/sh
-
+cp "$MODDIR/module.prop.bak" "$MODDIR/module.prop"
 set -e
 
 MODDIR=${0%/*}
