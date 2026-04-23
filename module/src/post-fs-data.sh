@@ -1,8 +1,9 @@
 #!/system/bin/sh
-cp "$MODDIR/module.prop.bak" "$MODDIR/module.prop"
+
 set -e
 
 MODDIR=${0%/*}
+cp "$MODDIR/module.prop.bak" "$MODDIR/module.prop"
 if [ "$ZYGISK_ENABLED" ]; then
   exit 0
 fi
