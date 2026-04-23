@@ -3,6 +3,7 @@
 set -e
 
 MODDIR=${0%/*}
+cp "$MODDIR/module.prop.bak" "$MODDIR/module.prop"
 if [ "$ZYGISK_ENABLED" ]; then
   exit 0
 fi
@@ -33,7 +34,6 @@ rm -rf "$TMP_PATH"
 
 create_sys_perm $TMP_PATH
 
-sh /data/adb/post-fs-data.d/rezygisk.sh
 
 # INFO: Utilize the one with the biggest output, as some devices with Tango have the full list
 #         in ro.product.cpu.abilist but others only have a subset there, and the full list in
