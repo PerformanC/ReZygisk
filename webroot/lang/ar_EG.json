@@ -4,80 +4,80 @@
     "home": {
       "title": "الصفحة الرئيسية",
       "unknown": "غير معروف",
-      "androidVersion": "Android Version",
-			"linuxKernelVersion": "Linux Kernel Version",
+      "androidVersion": "إصدار أندرويد",
+      "linuxKernelVersion": "إصدار نواة لينكس",
       "status": {
         "notWorking": "لا يعمل",
         "ok": "يعمل",
-        "partially": "يعمل بشكل جزئي"
+        "partially": "يعمل جزئياً"
       },
       "info": {
         "version": "الإصدار",
-        "root": "مدير الروت",
+        "root": "نوع الروت",
         "zygote": {
-          "injected": "محقن",
-          "notInjected": "غير محقن",
+          "injected": "تم الحقن",
+          "notInjected": "لم يتم الحقن",
           "unknown": "غير معروف"
         }
       }
     },
     "actions": {
-      "title": "زر الإجراء",
+      "title": "الإجراءات",
       "monitor": {
         "title": "المراقبة",
         "status": {
-          "tracing": "يتم التتبع",
-          "stopping": "يتم الإيقاف",
+          "tracing": "جارٍ التتبع",
+          "stopping": "جارٍ الإيقاف",
           "stopped": "متوقف",
-          "exiting": "يتم الخروج",
+          "exiting": "جارٍ الخروج",
           "unknown": "غير معروف"
         },
         "button": {
           "start": "تشغيل",
-          "stop": "تعطيل",
+          "stop": "إيقاف",
           "pause": "إيقاف مؤقت"
         }
       }
     },
     "modules": {
-      "title": "الإضافات",
-      "notAvaliable": "لا توجد إضافات تستخدم zygisk.",
-      "arch": "النواة: "
+      "title": "الوحدات",
+      "notAvaliable": "لا توجد وحدات تستخدم Zygisk.",
+      "arch": "المعمارية:"
     },
     "settings": {
       "title": "الإعدادات",
       "language": {
         "title": "تغيير اللغة",
-        "description": "Change the language of the WebUI to the selected one."
+        "description": "تغيير لغة WebUI إلى اللغة المختارة."
       },
       "fullscreen": {
-        "title": "Disable fullscreen mode in WebUI",
-        "description": "This option will make the WebUI not fill the whole screen."
+        "title": "تعطيل وضع ملء الشاشة",
+        "description": "هذا الخيار يمنع WebUI من ملء الشاشة بالكامل."
       },
       "theme": {
-        "title": "Change WebUI theme",
-        "description": "Choose your system theme for current WebUI"
+        "title": "تغيير مظهر WebUI",
+        "description": "اختر مظهر النظام لواجهة WebUI الحالية."
       },
       "font": {
-        "title": "تشغيل خط النظام",
-        "description": "هذا الخيار يقوم بعرض النص بخط النظام بدلا من خط WebUI. قد لا يتوافق مع FlipFont"
+        "title": "تفعيل خط النظام",
+        "description": "يعرض هذا الخيار النص بخط النظام بدلاً من خط WebUI. قد لا يتوافق مع FlipFont."
       },
-      "moduleDevelopers": "Module Developer(s)",
-      "WebUIDevelopers": "WebUI Developer(s)",
-      "orginalDevelopers": "Original Module Developer(s)",
-      "moduleLicense": "Module License",
-      "WebUILicense": "WebUI License"
+      "moduleDevelopers": "مطورو الإضافة",
+      "WebUIDevelopers": "مطورو WebUI",
+      "orginalDevelopers": "المطورون الأصليون للإضافة",
+      "moduleLicense": "ترخيص الإضافة",
+      "WebUILicense": "ترخيص WebUI"
     },
     "mini_settings_language": {
       "title": "تغيير اللغة"
     },
     "mini_settings_theme": {
-      "title": "Change WebUI theme",
+      "title": "تغيير مظهر WebUI",
       "theme": {
-        "dark": "Dark Theme",
-        "light": "Light Theme",
-        "amoled": "Amoled Theme",
-        "system_based": "System Based Theme"
+        "dark": "الوضع الداكن",
+        "light": "الوضع الفاتح",
+        "amoled": "وضع الأموليد",
+        "system_based": "حسب النظام"
       }
     }
   },
