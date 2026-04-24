@@ -4,8 +4,8 @@
     "home": {
       "title": "Главная",
       "unknown": "Неизвестно",
-      "androidVersion": "Android Version",
-			"linuxKernelVersion": "Linux Kernel Version",
+      "androidVersion": "Версия Android",
+			"linuxKernelVersion": "Версия Linux",
       "status": {
         "notWorking": "Не работает",
         "ok": "Работает",
@@ -48,36 +48,36 @@
       "title": "Настройки",
       "language": {
         "title": "Сменить язык",
-        "description": "Change the language of the WebUI to the selected one."
+        "description": "Сменить язык WebUI на выбранный."
       },
       "fullscreen": {
-        "title": "Disable fullscreen mode in WebUI",
-        "description": "This option will make the WebUI not fill the whole screen."
+        "title": "Выключить полноэкранный режим в WebUI",
+        "description": "С данной опцией, WebUI не будет занимать весь экран."
       },
       "theme": {
-        "title": "Change WebUI theme",
-        "description": "Choose your system theme for current WebUI"
+        "title": "Сменить тему WebUI",
+        "description": "Выберите вашу системную тему для текущего WebUI."
       },
       "font": {
         "title": "Включить системный шрифт",
         "description": "Эта опция включит системный шрифт в текущем WebUI. ПРИМЕЧАНИЕ: Может быть несовместимо с FlipFont"
       },
-      "moduleDevelopers": "Module Developer(s)",
-      "WebUIDevelopers": "WebUI Developer(s)",
-      "orginalDevelopers": "Original Module Developer(s)",
-      "moduleLicense": "Module License",
-      "WebUILicense": "WebUI License"
+      "moduleDevelopers": "Разработчик(и) модуля",
+      "WebUIDevelopers": "Разработчик(и) WebUI",
+      "orginalDevelopers": "Разработчик(и) оригинального модуля",
+      "moduleLicense": "Лицензия модуля",
+      "WebUILicense": "Лицензия WebUI"
     },
     "mini_settings_language": {
       "title": "Сменить язык"
     },
     "mini_settings_theme": {
-      "title": "Change WebUI theme",
+      "title": "Сменить тему WebUI",
       "theme": {
-        "dark": "Dark Theme",
-        "light": "Light Theme",
-        "amoled": "Amoled Theme",
-        "system_based": "System Based Theme"
+        "dark": "Тёмная тема",
+        "light": "Светлая тема",
+        "amoled": "Amoled тема",
+        "system_based": "Системная тема"
       }
     }
   },
