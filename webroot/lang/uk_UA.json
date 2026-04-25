@@ -62,10 +62,10 @@
         "title": "Увімкнути системний шрифт",
         "description": "Ця опція увімкне системний шрифт у поточному WebUI. Примітка: Може бути несумісною з FlipFont"
       },
-      "moduleDevelopers": "Розробник(и) модулю",
+      "moduleDevelopers": "Розробник(и) модуля",
       "WebUIDevelopers": "Розробник(и) веб-інтерфейсу",
-      "orginalDevelopers": "Розробник(и) оригінального модулю",
-      "moduleLicense": "Ліцензія модулю",
+      "orginalDevelopers": "Розробник(и) оригінального модуля",
+      "moduleLicense": "Ліцензія модуля",
       "WebUILicense": "Ліцензія веб-інтерфейсу"
     },
     "mini_settings_language": {
