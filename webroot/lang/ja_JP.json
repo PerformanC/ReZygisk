@@ -4,8 +4,8 @@
     "home": {
       "title": "ホーム",
       "unknown": "不明",
-      "androidVersion": "Android Version",
-			"linuxKernelVersion": "Linux Kernel Version",
+      "androidVersion": "Android バージョン",
+			"linuxKernelVersion": "Linux カーネルバージョン",
       "status": {
         "notWorking": "動作していません",
         "ok": "動作中",
@@ -48,36 +48,36 @@
       "title": "設定",
       "language": {
         "title": "言語の変更",
-        "description": "Change the language of the WebUI to the selected one."
+        "description": "WebUI の言語を選択した言語に変更します。"
       },
       "fullscreen": {
-        "title": "Disable fullscreen mode in WebUI",
-        "description": "This option will make the WebUI not fill the whole screen."
+        "title": "WebUI の全画面表示を無効化",
+        "description": "このオプションを有効にすると、WebUI は全画面表示されなくなります。"
       },
       "theme": {
-        "title": "Change WebUI theme",
-        "description": "Choose your system theme for current WebUI"
+        "title": "WebUI のテーマを変更",
+        "description": "現在の WebUI で使用するテーマを選択します。"
       },
       "font": {
         "title": "システムフォントを有効化",
         "description": "現在の WebUI でシステムフォントの使用を有効化します。注意: FlipFont との互換性がない場合があります"
       },
-      "moduleDevelopers": "Module Developer(s)",
-      "WebUIDevelopers": "WebUI Developer(s)",
-      "orginalDevelopers": "Original Module Developer(s)",
-      "moduleLicense": "Module License",
-      "WebUILicense": "WebUI License"
+      "moduleDevelopers": "モジュールの開発者",
+      "WebUIDevelopers": "WebUI の開発者",
+      "orginalDevelopers": "オリジナルのモジュールの開発者",
+      "moduleLicense": "モジュールのライセンス",
+      "WebUILicense": "WebUI のライセンス"
     },
     "mini_settings_language": {
       "title": "言語の変更"
     },
     "mini_settings_theme": {
-      "title": "Change WebUI theme",
+      "title": "WebUI のテーマを変更",
       "theme": {
-        "dark": "Dark Theme",
-        "light": "Light Theme",
-        "amoled": "Amoled Theme",
-        "system_based": "System Based Theme"
+        "dark": "ダークテーマ",
+        "light": "ライトテーマ",
+        "amoled": "Amoled テーマ",
+        "system_based": "システムに基づくテーマ"
       }
     }
   },
