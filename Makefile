@@ -45,6 +45,8 @@ debug:
 release:
 	$(MAKE) BUILD_TYPE=release BUILD_DIR=$(BUILD_DIR) build
 
+all: debug release
+
 build: $(ZIP_FILE)
 
 $(LOADER_DONE): $(LOADER_INPUTS)

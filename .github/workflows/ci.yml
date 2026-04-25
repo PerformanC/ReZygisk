@@ -15,13 +15,12 @@ jobs:
           submodules: "recursive"
           fetch-depth: 0
 
-      - name: Accept NDK license
-        run: echo "y" | /usr/local/lib/android/sdk/cmdline-tools/latest/bin/sdkmanager "ndk;29.0.13113456"
+      - name: Setup NDK_PATH
+        run: echo "NDK_PATH=$ANDROID_NDK_LATEST_HOME" >> $GITHUB_ENV
 
       - name: Build
         run: |
-          make release -j$(nproc)
-          make debug -j$(nproc)
+          make all -j$(nproc)
 
       - name: Upload release
         uses: actions/upload-artifact@v7
