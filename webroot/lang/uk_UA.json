@@ -4,8 +4,8 @@
     "home": {
       "title": "Головна",
       "unknown": "Невідомо",
-      "androidVersion": "Android Version",
-			"linuxKernelVersion": "Linux Kernel Version",
+      "androidVersion": "Версія Android",
+			"linuxKernelVersion": "Версія ядра Linux",
       "status": {
         "notWorking": "Не працює",
         "ok": "Працює",
@@ -48,36 +48,36 @@
       "title": "Налаштування",
       "language": {
         "title": "Змінити мову",
-        "description": "Change the language of the WebUI to the selected one."
+        "description": "Змінити мову веб-інтерфейсу на вибрану"
       },
       "fullscreen": {
-        "title": "Disable fullscreen mode in WebUI",
-        "description": "This option will make the WebUI not fill the whole screen."
+        "title": "Вимкнути повноекранний режим веб-інтерфейсу",
+        "description": "Ця опція не дозволить веб-інтерфейсу заповнювати весь екран."
       },
       "theme": {
-        "title": "Change WebUI theme",
-        "description": "Choose your system theme for current WebUI"
+        "title": "Змінити тему веб-інтерфейсу",
+        "description": "Виберіть тему системи для поточного веб-інтерфейсу"
       },
       "font": {
         "title": "Увімкнути системний шрифт",
         "description": "Ця опція увімкне системний шрифт у поточному WebUI. Примітка: Може бути несумісною з FlipFont"
       },
-      "moduleDevelopers": "Module Developer(s)",
-      "WebUIDevelopers": "WebUI Developer(s)",
-      "orginalDevelopers": "Original Module Developer(s)",
-      "moduleLicense": "Module License",
-      "WebUILicense": "WebUI License"
+      "moduleDevelopers": "Розробник(и) модулю",
+      "WebUIDevelopers": "Розробник(и) веб-інтерфейсу",
+      "orginalDevelopers": "Розробник(и) оригінального модулю",
+      "moduleLicense": "Ліцензія модулю",
+      "WebUILicense": "Ліцензія веб-інтерфейсу"
     },
     "mini_settings_language": {
       "title": "Змінити мову"
     },
     "mini_settings_theme": {
-      "title": "Change WebUI theme",
+      "title": "Змінити тему веб-інтерфейсу",
       "theme": {
-        "dark": "Dark Theme",
-        "light": "Light Theme",
-        "amoled": "Amoled Theme",
-        "system_based": "System Based Theme"
+        "dark": "Темна тема",
+        "light": "Світла тема",
+        "amoled": "Amoled-тема",
+        "system_based": "Тема на основі системи"
       }
     }
   },
