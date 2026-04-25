@@ -1,0 +1,88 @@
+{
+  "langName": "Polski",
+  "pages": {
+    "home": {
+      "title": "Strona główna",
+      "unknown": "Nieznany",
+      "androidVersion": "Wersja Androida",
+      "linuxKernelVersion": "Wersja jądra Linux",
+      "status": {
+        "notWorking": "Nie działa",
+        "ok": "Działa",
+        "partially": "Działa częściowo"
+      },
+      "info": {
+        "version": "Wersja",
+        "root": "Implementacja roota",
+        "zygote": {
+          "injected": "Wstrzyknięta",
+          "notInjected": "Nie wstrzyknięta",
+          "unknown": "Nieznany"
+        }
+      }
+    },
+    "actions": {
+      "title": "Akcje",
+      "monitor": {
+        "title": "Monitor",
+        "status": {
+          "tracing": "Śledzenie",
+          "stopping": "Zatrzymywanie",
+          "stopped": "Zatrzymano",
+          "exiting": "Kończenie",
+          "unknown": "Nieznany"
+        },
+        "button": {
+          "start": "Start",
+          "stop": "Stop",
+          "pause": "Pauza"
+        }
+      }
+    },
+    "modules": {
+      "title": "Moduły",
+      "notAvaliable": "Brak modułów używających Zygisk.",
+      "arch": "Architektura: "
+    },
+    "settings": {
+      "title": "Ustawienia",
+      "language": {
+        "title": "Zmień język",
+        "description": "Zmień język WebUI na wybrany."
+      },
+      "fullscreen": {
+        "title": "Wyłącz tryb pełnoekranowy w WebUI",
+        "description": "Ta opcja sprawi, że WebUI nie będzie wypełniać całego ekranu."
+      },
+      "theme": {
+        "title": "Zmień motyw WebUI",
+        "description": "Wybierz motyw systemowy dla bieżącego WebUI"
+      },
+      "font": {
+        "title": "Włącz czcionkę systemową",
+        "description": "Ta opcja włączy czcionkę systemową w bieżącym WebUI. UWAGA: Może być nie kompatybilna z FlipFont"
+      },
+      "moduleDevelopers": "Autorzy modułu",
+      "WebUIDevelopers": "Autorzy WebUI",
+      "orginalDevelopers": "Oryginalni autorzy modułu",
+      "moduleLicense": "Licencja modułu",
+      "WebUILicense": "Licencja WebUI"
+    },
+    "mini_settings_language": {
+      "title": "Zmień język"
+    },
+    "mini_settings_theme": {
+      "title": "Zmień motyw WebUI",
+      "theme": {
+        "dark": "Ciemny motyw",
+        "light": "Jasny motyw",
+        "amoled": "Motyw AMOLED",
+        "system_based": "Motyw oparty na systemie"
+      }
+    }
+  },
+  "globals": {
+    "unknown": "Nieznane"
+  }
+}
+
