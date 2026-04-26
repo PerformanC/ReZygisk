@@ -4,12 +4,12 @@
     "home": {
       "title": "Beranda",
       "unknown": "Tidak diketahui",
-      "androidVersion": "Android Version",
-			"linuxKernelVersion": "Linux Kernel Version",
+      "androidVersion": "Versi Android",
+			"linuxKernelVersion": "Versi Kernel Linux",
       "status": {
-        "notWorking": "Tidak Bekerja",
-        "ok": "Bekerja",
-        "partially": "Bekerja Sebagian"
+        "notWorking": "Tidak Berfungsi",
+        "ok": "Berfungsi",
+        "partially": "Berfungsi Sebagian"
       },
       "info": {
         "version": "Versi",
@@ -24,12 +24,12 @@
     "actions": {
       "title": "Tindakan",
       "monitor": {
-        "title": "Monitor",
+        "title": "Pemantauan",
         "status": {
           "tracing": "Melacak",
           "stopping": "Menghentikan",
           "stopped": "Terhenti",
-          "exiting": "Terkeluar",
+          "exiting": "Sedang Keluar",
           "unknown": "Tidak diketahui"
         },
         "button": {
@@ -41,43 +41,43 @@
     },
     "modules": {
       "title": "Modul",
-      "notAvaliable": "Tidak ada modul yang menggunakan Zygisk disini.",
+      "notAvaliable": "Tidak ada modul yang menggunakan Zygisk.",
       "arch": "Arsitektur: "
     },
     "settings": {
       "title": "Pengaturan",
       "language": {
         "title": "Ubah Bahasa",
-        "description": "Change the language of the WebUI to the selected one."
+        "description": "Ubah bahasa WebUI sesuai yang anda pilih."
       },
       "fullscreen": {
-        "title": "Disable fullscreen mode in WebUI",
-        "description": "This option will make the WebUI not fill the whole screen."
+        "title": "Mematikan mode layar penuh di WebUI",
+        "description": "Pilihan ini dapat membuat WebUI tidak menggunakan layar penuh."
       },
       "theme": {
-        "title": "Change WebUI theme",
-        "description": "Choose your system theme for current WebUI"
+        "title": "Ubah Tema WebUI",
+        "description": "Pilih tema sistem untuk WebUI saat ini."
       },
       "font": {
         "title": "Gunakan Font Sistem",
         "description": "Opsi ini akan mengaktifkan font sistem pada WebUI saat ini. (Mungkin tidak kompatibel dengan FlipFont)"
       },
-      "moduleDevelopers": "Module Developer(s)",
-      "WebUIDevelopers": "WebUI Developer(s)",
-      "orginalDevelopers": "Original Module Developer(s)",
-      "moduleLicense": "Module License",
-      "WebUILicense": "WebUI License"
+      "moduleDevelopers": "Pengembang Modul",
+      "WebUIDevelopers": "Pengembang WebUI",
+      "orginalDevelopers": "Pengembang Modul Asli",
+      "moduleLicense": "Lisensi Modul",
+      "WebUILicense": "Lisensi WebUI"
     },
     "mini_settings_language": {
       "title": "Ubah Bahasa"
     },
     "mini_settings_theme": {
-      "title": "Change WebUI theme",
+      "title": "Ubah Tema WebUI",
       "theme": {
-        "dark": "Dark Theme",
-        "light": "Light Theme",
-        "amoled": "Amoled Theme",
-        "system_based": "System Based Theme"
+        "dark": "Mode Gelap",
+        "light": "Mode Terang",
+        "amoled": "Mode Amoled",
+        "system_based": "Mengikuti Tema Sistem"
       }
     }
   },
