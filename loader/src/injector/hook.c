@@ -808,8 +808,8 @@ static void rz_sanitize_fds(struct zygisk_context *ctx) {
     jintArray fdsToIgnore = ctx->args.app->fds_to_ignore ? *ctx->args.app->fds_to_ignore : NULL;
     mark_fds_allowed(ctx, ctx->env, fdsToIgnore);
 
-    if (fdsToIgnore && ctx->exempted_fds_count > 0) {
-      jint len = (*ctx->env)->GetArrayLength(ctx->env, fdsToIgnore);
+    if (ctx->exempted_fds_count > 0) {
+      jint len = fdsToIgnore ? (*ctx->env)->GetArrayLength(ctx->env, fdsToIgnore) : 0;
       jintArray newArray = (*ctx->env)->NewIntArray(ctx->env, (jsize)(len + ctx->exempted_fds_count));
       if (newArray) {
         if (fdsToIgnore && len > 0) {
