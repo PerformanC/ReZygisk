@@ -1,11 +1,7 @@
-import { exec } from './kernelsu.js'
+import { exec, fullScreen } from './kernelsu.js'
 import { setDark } from './themes/dark.js'
 import { setThemeData, themeList } from './themes/main.js'
 import { setLight } from './themes/light.js'
-
-import { loadPage } from '../pageLoader.js'
-import utils from '../utils.js'
-import { fullScreen } from '../../kernelsu.js'
 
 /* INFO: This code are meant to load the link with any card have credit-link attribute inside it */
 document.addEventListener('click', async (event) => {
