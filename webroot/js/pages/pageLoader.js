@@ -566,31 +566,6 @@ export function setLanguage(langId) {
 (async () => {
   await loadPages()
 
-  let webui_config = localStorage.getItem('/ReZygisk/webui_config')
-
-  if (!webui_config) {
-    webui_config = {
-      disableFullscreen: false,
-      enableSystemFont: false
-    }
-    localStorage.setItem('/ReZygisk/webui_config', JSON.stringify(webui_config))
-  } else {
-    webui_config = JSON.parse(webui_config)
-  }
-
-  if (!webui_config.disableFullscreen) fullScreen(true)
-  if (webui_config.enableSystemFont) {
-    const headTag = document.getElementsByTagName('head')[0]
-    const styleTag = document.createElement('style')
-
-    styleTag.id = 'font-tag'
-    headTag.appendChild(styleTag)
-    styleTag.innerHTML = `
-      :root {
-        --font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif
-      }`
-  }
-
   loadPage('home')
   loadNavbar()
 })()
