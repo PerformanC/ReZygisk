@@ -6,23 +6,19 @@ import { runMainPageTransition, runMiniPageEnter, runMiniPageLeave } from './ani
 /* INFO: Prototypes */
 import utils from './utils.js'
 
+const moduleName = 'TreatWheel'
 const head = document.getElementsByTagName('head')[0]
 const miniPageRegex = /mini_(.*)_(.*)/
 
 export const allMainPages = [
   'home',
-  'modules',
   'actions',
   'settings'
 ]
 
-export const allMiniPages = [
-  'mini_settings_language',
-  'mini_settings_theme'
-]
+export const allMiniPages = []
 
 export const allPages = [ ...allMainPages, ...allMiniPages ]
-
 
 const loadedPageView = []
 /* INFO: Prevent overlapping page transitions when users tap navigation rapidly. */
@@ -109,14 +105,11 @@ async function solveStrings(html, pageId) {
       }
     })
   } catch (e) {
-    toast(`Failed to load ${localStorage.getItem('/ReZygisk/language') || 'en_US'} strings. Entering safe mode.`)
+    toast(`Failed to load ${localStorage.getItem(`/${moduleName}/language`) || 'en_US'} strings. Entering safe mode.`)
   }
 
   /* INFO: Perform navbar string replacement */
-  document.getElementById('nav_home_title').innerHTML = strings.navbar.home
-  document.getElementById('nav_actions_title').innerText = strings.navbar.actions
-  document.getElementById('nav_modules_title').innerText = strings.navbar.modules
-  document.getElementById('nav_settings_title').innerText = strings.navbar.settings
+  allPages.forEach((page) => document.getElementById(`nav_${page}_title`).innerText = strings.navbar[page])
 
   return html
 }
@@ -417,7 +410,6 @@ export async function loadPage(pageId) {
     if (!currentIsMiniPage && targetIsMiniPage) {
       await initializePage(pageId, pageSpecificContent, targetNeedsRevert)
       await runMiniPageEnter(pageSpecificContent)
-
       return true
     }
 
@@ -460,6 +452,74 @@ export async function loadPage(pageId) {
   }
 }
 
+function getMiniPage(miniPageId) {
+  return fetch(`js/pages/${whichCurrentPage()}/minipages/${miniPageId}.html`)
+    .then((response) => response.text())
+    .then((data) => {
+      return data
+    })
+    .catch(() => false)
+}
+
+export async function loadMiniPage(miniPageId, unloadCb) {
+  const minipage_html = await getMiniPage(miniPageId)
+  if (!minipage_html) {
+    toast('Error loading minipage')
+
+    return;
+  }
+
+  const page_content = document.getElementById('page_content')
+  const navbar = document.getElementById('navbar')
+  const navbar_support_div = document.getElementById('navbar_support_div')
+
+  page_content.style.transition = navbar.style.transition = 'filter 0.3s'
+  page_content.style.filter = navbar.style.filter = 'blur(10px)'
+  /* INFO: Not allow it to interact with the page, just click to close */
+  page_content.style.pointerEvents = navbar_support_div.style.pointerEvents = 'none'
+
+  window.onceTrueEvent('click', (event) => {
+    if (utils.isDivOrInsideDiv(event.target, 'minipage_content')) return;
+
+    const minipage_content = document.getElementById('minipage_content')
+    minipage_content.style.animation = 'fade-out 0.2s'
+
+    page_content.style.transition = navbar.style.transition = 'filter 0.2s'
+    page_content.style.filter = navbar.style.filter = null
+    page_content.style.pointerEvents = navbar_support_div.style.pointerEvents = null
+
+    setTimeout(() => {
+      minipage_content.style.cssText = null
+      minipage_content.innerHTML = null
+
+      page_content.style.transition = navbar.style.transition = null
+    }, 200)
+
+    unloadCb()
+
+    return true
+  })
+
+  const minipage_content = document.getElementById('minipage_content')
+  minipage_content.style.cssText = `
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 1;
+    background: none;
+    animation: fade-in 0.3s;
+  `
+
+  minipage_content.innerHTML = `
+    <div class="dim" style="padding: 20px; border-radius: 10px; width: 80vw;">
+      <div class="dim" style="border-radius: 10px;">
+        ${minipage_html}
+      </div>
+    </div>
+  `
+}
+
 export async function reloadPage() {
   const pageId = whichCurrentPage()
 
@@ -474,21 +534,16 @@ export async function reloadPage() {
 }
 
 export function getStrings(pageId, forceDefault = false) {
-  return fetch(`lang/${forceDefault ? 'en_US' : (localStorage.getItem('/ReZygisk/language') || 'en_US')}.json`)
+  return fetch(`lang/${forceDefault ? 'en_US' : (localStorage.getItem(`/${moduleName}/language`) || 'en_US')}.json`)
     .then((response) => response.json())
     .then((data) => {
       return {
         ...data.pages[pageId],
         ...data.globals,
-        navbar: {
-          home: data.pages.home.title,
-          modules: data.pages.modules.title,
-          actions: data.pages.actions.title,
-          settings: data.pages.settings.title
-        }
+        navbar: Object.fromEntries(allPages.map((page) => [page, data.pages[page].title]))
       }
     })
-    .catch(() => {
+    .catch((err) => {
        if (!forceDefault) {
         toast('Error loading strings for the selected language, loading default (en_US) strings.')
         
@@ -496,13 +551,14 @@ export function getStrings(pageId, forceDefault = false) {
        }
 
       toast('Error loading default strings!')
+      console.error(`Failed to load default strings for page ${pageId}: `, err)
 
       return false
     })
 }
 
 export function setLanguage(langId) {
-  localStorage.setItem('/ReZygisk/language', langId)
+  localStorage.setItem(`/${moduleName}/language`, langId)
 
   sufferedUpdate.length = 0
 }
