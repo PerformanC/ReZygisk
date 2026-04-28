@@ -3,18 +3,18 @@ const developmentResponse = {
     errno: 0,
     stdout: `
       {
-        "root": "KernelSU Next",
+        "root": "KernelSU",
         "monitor": {
           "state": "0"
         },
         "rezygiskd": {
           "64": {
             "state": 1,
-            "modules": ["zygisk_lsposed", "playintegrityfix"]
+            "modules": ["immense_cool", "rezygisk_module"]
           },
           "32": {
             "state": 1,
-            "modules": ["zygisk_lsposed", "playintegrityfix"]
+            "modules": ["immense_cool", "rezygisk_module"]
           }
         },
         "zygote": {
@@ -42,7 +42,7 @@ const developmentResponse = {
   },
   'module_lister': {
     errno: 0,
-    stdout: 'Zygisk - LSPosed\n\nPlay Integrity Fix [INJECT]',
+    stdout: 'Really Cool Module\n\nSome ReZygisk Module',
     stderr: ''
   },
   '/system/bin/ls /data/adb/modules/rezygisk/webroot/lang': {
@@ -56,8 +56,10 @@ export function getDevelopmentExecResponse(command) {
   if (developmentResponse[command]) {
     return developmentResponse[command]
   }
+
   if (command.includes('printf % ; if test -f')) {
     return developmentResponse['module_lister']
   }
-  return { errno: 0, stdout: "OK", stderr: "" }
+
+  return { errno: -1, stdout: '', stderr: 'Command not found in development response' }
 }

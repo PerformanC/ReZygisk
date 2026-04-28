@@ -166,5 +166,71 @@ body {
 #page_content {
   flex: 1;
   overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.page_loader_mini_layer {
+  position: fixed;
+  inset: 0;
+  pointer-events: auto;
+  z-index: 8;
+  background: var(--background);
+  box-shadow: -10px 0 30px rgb(0 0 0 / 20%);
+}
+
+.page_loader_main_in {
+  animation: pageLoaderMainIn 220ms cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.page_loader_main_out {
+  animation: pageLoaderMainOut 220ms cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.page_loader_mini_in {
+  animation: pageLoaderMiniIn 240ms cubic-bezier(0.2, 1, 0.3, 1);
+}
+
+.page_loader_mini_out {
+  animation: pageLoaderMiniOut 220ms cubic-bezier(0.4, 0, 1, 1);
+}
+
+@keyframes pageLoaderMainIn {
+  0% {
+    transform: translateX(var(--page_loader_main_in_from, 34%));
+    opacity: 0.7;
+  }
+  100% {
+    transform: translateX(0%);
+    opacity: 1;
+  }
+}
+
+@keyframes pageLoaderMainOut {
+  0% {
+    transform: translateX(0%);
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(var(--page_loader_main_out_to, -24%));
+    opacity: 0.55;
+  }
+}
+
+@keyframes pageLoaderMiniIn {
+  0% {
+    transform: translateX(100%);
+  }
+  100% {
+    transform: translateX(0%);
+  }
+}
+
+@keyframes pageLoaderMiniOut {
+  0% {
+    transform: translateX(0%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
 }
 

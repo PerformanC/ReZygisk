@@ -10,9 +10,7 @@ export function exec(command, options) {
   if (typeof ksu === "undefined") {
     /* INFO: Assume this is a computer for ReZygisk testing */
 
-    return new Promise((resolve, reject) => {
-      resolve(getDevelopmentExecResponse(command));
-    });
+    return getDevelopmentExecResponse(command);
   }
 
   if (typeof options === "undefined") {
