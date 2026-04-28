@@ -12,11 +12,15 @@ const miniPageRegex = /mini_(.*)_(.*)/
 
 export const allMainPages = [
   'home',
+  'modules',
   'actions',
   'settings'
 ]
 
-export const allMiniPages = []
+export const allMiniPages = [
+  'mini_settings_language',
+  'mini_settings_theme'
+]
 
 export const allPages = [ ...allMainPages, ...allMiniPages ]
 
@@ -109,7 +113,7 @@ async function solveStrings(html, pageId) {
   }
 
   /* INFO: Perform navbar string replacement */
-  allPages.forEach((page) => document.getElementById(`nav_${page}_title`).innerText = strings.navbar[page])
+  allMainPages.forEach((page) => document.getElementById(`nav_${page}_title`).innerText = strings.navbar[page])
 
   return html
 }
