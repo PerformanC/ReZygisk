@@ -596,10 +596,12 @@ window.addEventListener('unhandledrejection', function (event) {
   exec(`echo "Error (Unhandled Rejection): ${event.reason}\n\n${event.reason.stack}" > /data/adb/rezygisk/webui_error.log`)
 })
 
-window.addEventListener("popstate", async () => {
+window.addEventListener('popstate', async () => {
   if (!isKsuAvaliable) return;
+
   const pageId = location.pathname.split('/').pop()
   if (!pageId || pageId.length == 0) return;
-  if (pageId == 'index.html') return await loadPage('home', true)
+
+  if (pageId == 'index.html') return await loadPage('home', true)  
   await loadPage(pageId, true)
-});
+})
