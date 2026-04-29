@@ -1,4 +1,4 @@
-import { exec, fullScreen, toast } from '../kernelsu.js'
+import { exec, toast, isKsuAvaliable } from '../kernelsu.js'
 
 import { loadNavbar, setNavbar, whichCurrentPage } from './navbar.js'
 import { runMainPageTransition, runMiniPageEnter, runMiniPageLeave } from './animator.js'
@@ -9,6 +9,7 @@ import utils from './utils.js'
 const moduleName = 'TreatWheel'
 const head = document.getElementsByTagName('head')[0]
 const miniPageRegex = /mini_(.*)_(.*)/
+let pageCode = 0
 
 export const allMainPages = [
   'home',
@@ -381,7 +382,7 @@ function applyHTMLChanges(page, pageId) {
   })
 }
 
-export async function loadPage(pageId) {
+export async function loadPage(pageId, noSaveHistory) {
   /* INFO: Ignore navigation to the same page or while another transition is still running. */
   if (whichCurrentPage() === pageId) return false
   if (isPageTransitioning) return false
@@ -453,6 +454,10 @@ export async function loadPage(pageId) {
     return false
   } finally {
     isPageTransitioning = false
+    if (!noSaveHistory) {
+      pageCode = pageCode + 1
+      if (isKsuAvaliable) history.pushState({ page: pageCode }, '', `/${pageId}`)
+    }
   }
 }
 
@@ -590,3 +595,11 @@ window.addEventListener('unhandledrejection', function (event) {
 
   exec(`echo "Error (Unhandled Rejection): ${event.reason}\n\n${event.reason.stack}" > /data/adb/rezygisk/webui_error.log`)
 })
+
+window.addEventListener("popstate", async () => {
+  if (!isKsuAvaliable) return;
+  const pageId = location.pathname.split('/').pop()
+  if (!pageId || pageId.length == 0) return;
+  if (pageId == 'index.html') return await loadPage('home', true)
+  await loadPage(pageId, true)
+});
