@@ -37,11 +37,13 @@
 
 #navbar_support_div {
   position: fixed;
+  z-index: 7;
 }
 
 #navbar {
   display: flex;
   position: fixed;
+  z-index: 7;
   align-items: center;
   justify-content: space-between;
   background-color: var(--dim);

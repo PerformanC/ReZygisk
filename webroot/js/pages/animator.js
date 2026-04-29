@@ -7,38 +7,55 @@ function waitForAnimationEnd(element, fallbackMs = 280) {
       if (done) return
       done = true
       element.removeEventListener('animationend', finalize)
+      element.removeEventListener('animationcancel', finalize)
       resolve()
     }
 
     element.addEventListener('animationend', finalize, { once: true })
+    element.addEventListener('animationcancel', finalize, { once: true })
     setTimeout(finalize, fallbackMs)
   })
 }
 
-export async function runMainPageTransition(currentPageContent, nextPageContent, direction = 1, onHalfway = null) {
-  /* INFO: Flip the slide direction based on main page ordering (left/right navigation). */
-  const inFrom = direction > 0 ? '34%' : '-34%'
-  const outTo = direction > 0 ? '-24%' : '24%'
+export async function runMainPageTransition(currentPageContent, nextPageContent, direction = 1) {
+  /* INFO: MD3 shared-axis style navigation keeps pages side-by-side and pushes them together. */
+  const viewport = currentPageContent.parentElement
+  const incomingFrom = direction > 0 ? '100%' : '-100%'
+  const outgoingTo = direction > 0 ? '-100%' : '100%'
 
-  currentPageContent.style.setProperty('--page_loader_main_out_to', outTo)
-  nextPageContent.style.setProperty('--page_loader_main_in_from', inFrom)
+  viewport.classList.add('page_loader_main_viewport_transition')
 
-  currentPageContent.classList.add('page_loader_main_out')
-  await waitForAnimationEnd(currentPageContent)
-
-  currentPageContent.classList.remove('page_loader_main_out')
-  currentPageContent.style.removeProperty('--page_loader_main_out_to')
-  currentPageContent.style.display = 'none'
-
-  /* INFO: Run a midpoint callback between out/in animations so loader can switch active page/CSS safely. */
-  if (onHalfway) await onHalfway()
-
-  nextPageContent.classList.add('page_loader_main_in')
   nextPageContent.style.display = 'block'
-  await waitForAnimationEnd(nextPageContent)
+  currentPageContent.style.setProperty('--page_loader_main_from', '0%')
+  currentPageContent.style.setProperty('--page_loader_main_to', outgoingTo)
+  nextPageContent.style.setProperty('--page_loader_main_from', incomingFrom)
+  nextPageContent.style.setProperty('--page_loader_main_to', '0%')
 
-  nextPageContent.classList.remove('page_loader_main_in')
-  nextPageContent.style.removeProperty('--page_loader_main_in_from')
+  currentPageContent.style.pointerEvents = 'none'
+  nextPageContent.style.pointerEvents = 'none'
+  currentPageContent.classList.add('page_loader_main_transition', 'page_loader_main_push')
+  nextPageContent.classList.add('page_loader_main_transition', 'page_loader_main_push')
+
+  /* INFO: Force style application before animation starts */
+  nextPageContent.getBoundingClientRect()
+
+  await Promise.all([
+    waitForAnimationEnd(currentPageContent, 440),
+    waitForAnimationEnd(nextPageContent, 440),
+  ])
+
+  currentPageContent.classList.remove('page_loader_main_transition', 'page_loader_main_push')
+  nextPageContent.classList.remove('page_loader_main_transition', 'page_loader_main_push')
+  currentPageContent.style.removeProperty('--page_loader_main_from')
+  currentPageContent.style.removeProperty('--page_loader_main_to')
+  nextPageContent.style.removeProperty('--page_loader_main_from')
+  nextPageContent.style.removeProperty('--page_loader_main_to')
+  currentPageContent.style.removeProperty('pointer-events')
+  nextPageContent.style.removeProperty('pointer-events')
+  viewport.classList.remove('page_loader_main_viewport_transition')
+
+  currentPageContent.style.display = 'none'
+  nextPageContent.style.display = 'block'
 }
 
 export async function runMiniPageEnter(pageSpecificContent) {

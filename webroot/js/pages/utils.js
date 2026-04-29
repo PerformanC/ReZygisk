@@ -18,23 +18,40 @@ function addListener(element, type, cb) {
 function removeListener(element, type, cb) {
   if (!listeners[element.id] || !listeners[element.id][type]) return
 
+  element.removeEventListener(type, cb)
   listeners[element.id][type] = listeners[element.id][type].filter(listener => listener !== cb)
+}
+
+function getElementFromListenerId(elementId) {
+  if (elementId === 'window') return window
+
+  return document.getElementById(elementId)
 }
 
 function removeAllListeners(element) {
   if (element === undefined) {
-    for (const element in listeners) {
-      for (const type in listeners[element.id]) {
-        listeners[element.id][type].forEach(listener => element.removeEventListener(type, listener))
+    for (const elementId of Object.keys(listeners)) {
+      const target = getElementFromListenerId(elementId)
+
+      if (target) {
+        for (const type of Object.keys(listeners[elementId])) {
+          const callbacks = listeners[elementId][type]
+          if (!Array.isArray(callbacks)) continue
+
+          callbacks.forEach(listener => target.removeEventListener(type, listener))
+        }
       }
 
-      delete listeners[element.id]
+      delete listeners[elementId]
     }
   } else {
     if (!listeners[element.id]) return
 
-    for (const type in listeners[element.id]) {
-      listeners[element.id][type].forEach(listener => element.removeEventListener(type, listener))
+    for (const type of Object.keys(listeners[element.id])) {
+      const callbacks = listeners[element.id][type]
+      if (!Array.isArray(callbacks)) continue
+
+      callbacks.forEach(listener => element.removeEventListener(type, listener))
     }
 
     delete listeners[element.id]
@@ -47,14 +64,17 @@ function reapplyListeners() {
   removeAllListeners()
 
   /* INFO: Then reapply them */
-  for (const elementId in elementsCopy) {
-    const element = document.getElementById(elementId)
+  for (const elementId of Object.keys(elementsCopy)) {
+    const element = getElementFromListenerId(elementId)
     if (!element) continue
 
-    for (const type in elementsCopy[elementId]) {
-      // INFO: iterate is not defined in any of vanilla JS element event, so we should ignore it
-      if (type == "iterate") continue;
-      elementsCopy[elementId][type].forEach(listener => {
+    listeners[elementId] = {}
+    for (const type of Object.keys(elementsCopy[elementId])) {
+      const callbacks = elementsCopy[elementId][type]
+      if (!Array.isArray(callbacks)) continue
+
+      listeners[elementId][type] = [...callbacks]
+      callbacks.forEach(listener => {
         element.addEventListener(type, listener)
       })
     }
