@@ -69,7 +69,8 @@ export async function load() {
           --font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif
         }`
     } else {
-      document.getElementById('font-tag').remove()
+      const fontTag = document.getElementById('font-tag')
+      if (fontTag) fontTag.remove()
     }
 
     _writeState(ConfigState)
