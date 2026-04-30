@@ -1,7 +1,8 @@
-import { exec, fullScreen } from './kernelsu.js'
+import { exec, fullScreen, isKsuAvaliable } from './kernelsu.js'
 import { setDark } from './themes/dark.js'
 import { setThemeData, themeList } from './themes/main.js'
 import { setLight } from './themes/light.js'
+import { loadPage } from './pages/pageLoader.js'
 
 /* INFO: This sets the default theme to system if not set */
 let sys_theme = localStorage.getItem('/ReZygisk/theme')
@@ -41,4 +42,98 @@ window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (ev
   const newColorScheme = event.matches ? 'dark' : 'light'
   if (newColorScheme === 'dark') setDark()
   else if (newColorScheme === 'light') setLight()
+})
+
+/*
+ * INFO: This back gesture system is based in hijacking
+ * webview history so it may not usable in TW generic
+ * webui framework.
+ * 
+ * This system is supposed to work something like
+ * directory in file system. This is the reason why we
+ * have to hijack the webview history system because it
+ * only works differently (stack state by state), not like
+ * what we're expecting and somehow we still need to take
+ * advantage of back gesture in webview .
+ * 
+ * For example: home -> module -> mini_settings_language.
+ * 
+ * In this example, assume home is level 0, module is
+ * level 1 and mini_settings_language is level 2.
+ * 
+ * If user in mini_settings_language and use back function
+ * they can only got back one by one, like from level 2 to
+ * level 1 to level 0.
+ * 
+ * Now this code is very experimental and need more testing.
+ */
+const pageHistory = []
+const pageLevel = [
+  ['home'],
+  ['modules', 'actions', 'settings'],
+  ['mini_settings_language', 'mini_settings_theme']
+]
+
+/* 
+ * INFO: This function will check the level of the page.
+ * It will based in the index number of the element in
+ * pageLevel array and return the index number of which
+ * elements contain that pageId requested.
+ */
+function pageLevelFinder(pageId) {
+  for (let i = 0; i < pageLevel.length; i++) {
+    const level = pageLevel[i]
+    if (level.includes(pageId)) return i
+  }
+}
+
+/*
+ * INFO: This is pagechanged event, hope this will be
+ * in generic TW webui framework WebUI. This event will
+ * run when page changed, we will use it to check
+ * whenever changed to another page id.
+ */
+window.addEventListener('pagechanged', function (e) {
+  if (!isKsuAvaliable) return;
+  const newPageLevel = pageLevelFinder(e.detail.pageId)
+
+  if (!pageHistory[newPageLevel]) {
+    pageHistory.push(e.detail.pageId)
+    history.pushState({ pageLevel: newPageLevel }, '', `/${e.detail.pageId}`)
+  }
+
+  if (pageHistory[newPageLevel] !== e.detail.pageId) {
+    pageHistory[newPageLevel] = e.detail.pageId
+    history.replaceState({ pageLevel: newPageLevel }, '', `/${e.detail.pageId}`)
+  }
+  /*
+  * INFO: This code is what we will talks about a lot.
+  * Basically if the current page level (pageHistory.length - 1)
+  * minus with new page level equals 1, that means the users
+  * is going back and we have to erase the last element of
+  * page history.
+  * 
+  * Currently this code is worked pretty well in my test,
+  * I still not guarantee about it's stability and stuff.
+  */
+  if ((pageHistory.length - 1) - newPageLevel === 1) {
+    pageHistory.splice(-1, 1)
+  }
+
+  console.log('[ReZygisk WebUI debug]', pageHistory)
+  console.log('[ReZygisk WebUI debug]', newPageLevel, pageHistory.length - 1)
+})
+
+window.addEventListener('popstate', async () => {
+  if (!isKsuAvaliable) return;
+  const oldPageId = pageHistory[pageHistory.length - 2]
+  console.log('[ReZygisk WebUI debug]', oldPageId, pageHistory.length - 2)
+
+  /* 
+   * INFO: This code is supposed to close the webui, but I still
+   * not find a way to do it so currently we make this
+   * just returns nothing
+   */
+  if (location.pathname.split('/').pop() == 'index.html') return;
+  if (oldPageId) await loadPage(oldPageId)
 })

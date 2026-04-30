@@ -72,9 +72,6 @@ async function _updateDynamicElement() {
     const module_names = await _getModuleNames(all_modules)
     module_names.forEach((module_name, i) => all_modules[i].name = module_name)
 
-    console.log(`[rezygisk.js] Module list:`)
-    console.log(all_modules)
-
     all_modules.forEach((module) => {
       modules_list.innerHTML += 
         `<div class="dim card" style="padding: 25px 15px; cursor: pointer;">
