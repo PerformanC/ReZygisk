@@ -33,15 +33,22 @@ static bool inject_tango(int pid, const char *lib_path, uint32_t libc_init_targe
   struct user_regs_struct backup;
   memcpy(&backup, &regs, sizeof(regs));
 
-  char maps_path[64];
-  snprintf(maps_path, sizeof(maps_path), "/proc/%d/maps", pid);
+  /* INFO: The character limit for a 32-bit integer is 10 */
+  char pid_str[10 + 1];
+  snprintf(pid_str, sizeof(pid_str), "%d", pid);
 
-  struct maps *remote_map = parse_maps(maps_path);
-  struct maps *local_map = parse_maps("/proc/self/maps");
-  if (!remote_map || !local_map) {
-    LOGE("Failed to parse maps (remote=%p local=%p)", (void *)remote_map, (void *)local_map);
-    if (remote_map) free_maps(remote_map);
-    if (local_map) free_maps(local_map);
+  struct maps_info *remote_map = parse_maps(pid_str);
+  if (!remote_map) {
+    LOGE("Failed to parse remote maps for pid %d", pid);
+
+    return false;
+  }
+
+  struct maps_info *local_map = parse_maps("self");
+  if (!local_map) {
+    LOGE("Failed to parse local maps");
+
+    free_maps(remote_map);
 
     return false;
   }
@@ -97,8 +104,8 @@ static bool inject_tango(int pid, const char *lib_path, uint32_t libc_init_targe
   };
 
   uint32_t tramp = 0;
-  for (size_t i = 0; i < remote_map->size && !tramp; i++) {
-    const struct map *map = &remote_map->maps[i];
+  for (size_t i = 0; i < remote_map->length && !tramp; i++) {
+    const struct map_entry *map = &remote_map->maps[i];
     if (!map->path || !(map->perms & PROT_EXEC) || (uintptr_t)map->start >= 0x100000000ULL) continue;
 
     tramp = find_tramp_padding(pid, (uint32_t)(uintptr_t)map->start, (uint32_t)(uintptr_t)map->end, sizeof(code));
@@ -230,10 +237,11 @@ bool inject_on_main(int pid, const char *lib_path) {
 
   struct user_regs_struct regs = { 0 };
 
-  char pid_maps[PATH_MAX];
-  snprintf(pid_maps, sizeof(pid_maps), "/proc/%d/maps", pid);
+  /* INFO: The character limit for a 32-bit integer is 10 */
+  char pid_str[10 + 1];
+  snprintf(pid_str, sizeof(pid_str), "%d", pid);
 
-  struct maps *map = parse_maps(pid_maps);
+  struct maps_info *map = parse_maps(pid_str);
   if (map == NULL) {
     LOGE("failed to parse remote maps");
 
@@ -343,14 +351,14 @@ bool inject_on_main(int pid, const char *lib_path) {
 
     free_maps(map);
 
-    map = parse_maps(pid_maps);
+    map = parse_maps(pid_str);
     if (!map) {
       LOGE("failed to parse remote maps");
 
       return false;
     }
 
-    struct maps *local_map = parse_maps("/proc/self/maps");
+    struct maps_info *local_map = parse_maps("self");
     if (!local_map) {
       LOGE("failed to parse local maps");
 
@@ -393,7 +401,7 @@ bool inject_on_main(int pid, const char *lib_path) {
     #endif
     if (!injector_ok) {
       char stopped_region[1024];
-      struct maps *map_after = parse_maps(pid_maps);
+      struct maps_info *map_after = parse_maps(pid_str);
       if (map_after) {
         get_addr_mem_region(map_after, (uintptr_t)regs.REG_IP, stopped_region, sizeof(stopped_region));
 

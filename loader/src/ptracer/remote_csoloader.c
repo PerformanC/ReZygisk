@@ -131,9 +131,9 @@ static bool vaddr_to_offset(const ElfW(Phdr) *phdr, int phnum, ElfW(Addr) vaddr,
 }
 
 /* INFO: Find the full path of a loaded module by its soname in remote maps. */
-static const char *find_remote_module_path(struct maps *remote_map, const char *soname) {
-  for (size_t i = 0; i < remote_map->size; i++) {
-    const struct map *m = &remote_map->maps[i];
+static const char *find_remote_module_path(struct maps_info *remote_map, const char *soname) {
+  for (size_t i = 0; i < remote_map->length; i++) {
+    const struct map_entry *m = &remote_map->maps[i];
 
     if (!m->path) continue;
     if (m->offset != 0) continue;
@@ -437,7 +437,7 @@ static bool find_dynsym_value(int fd, const struct elf_dyn_info *info, const cha
 
 /* INFO: Resolve a symbol address - either local or from DT_NEEDED libraries. */
 static bool resolve_symbol_addr(int fd, const struct elf_dyn_info *info,
-                                struct maps *local_map, struct maps *remote_map,
+                                struct maps_info *local_map, struct maps_info *remote_map,
                                 const char *const *needed_paths, uintptr_t load_bias,
                                 size_t sym_idx, uintptr_t *out_addr) {
   ElfW(Sym) sym;
@@ -513,7 +513,7 @@ static bool read_remote_addr(int pid, uintptr_t addr, ElfW(Addr) *out) {
 
 /* INFO: Process RELA-format relocations from a given offset/size. */
 static bool apply_rela_section(int pid, int fd, const struct elf_dyn_info *info,
-                               struct maps *local_map, struct maps *remote_map,
+                               struct maps_info *local_map, struct maps_info *remote_map,
                                const char *const *needed_paths, uintptr_t load_bias,
                                off_t rela_off, size_t rela_sz) {
   size_t count = rela_sz / sizeof(ElfW(Rela));
@@ -573,7 +573,7 @@ static bool apply_rela_section(int pid, int fd, const struct elf_dyn_info *info,
 
 /* INFO: Process REL-format relocations from a given offset/size. */
 static bool apply_rel_section(int pid, int fd, const struct elf_dyn_info *info,
-                              struct maps *local_map, struct maps *remote_map,
+                              struct maps_info *local_map, struct maps_info *remote_map,
                               const char *const *needed_paths, uintptr_t load_bias,
                               off_t rel_off, size_t rel_sz) {
   size_t count = rel_sz / sizeof(ElfW(Rel));
@@ -649,7 +649,7 @@ static bool apply_rel_section(int pid, int fd, const struct elf_dyn_info *info,
 }
 
 static bool apply_relocations(int pid, int fd, const struct elf_dyn_info *info,
-                              struct maps *local_map, struct maps *remote_map,
+                              struct maps_info *local_map, struct maps_info *remote_map,
                               const char *const *needed_paths, uintptr_t load_bias) {
   /* INFO: Process RELA section */
   if (info->rela_sz && info->rela_off) {
@@ -682,7 +682,7 @@ static bool apply_relocations(int pid, int fd, const struct elf_dyn_info *info,
 }
 
 bool remote_csoloader_load_and_resolve_entry(int pid, struct user_regs_struct *regs,
-                                             struct maps *remote_map, struct maps *local_map,
+                                             struct maps_info *remote_map, struct maps_info *local_map,
                                              const char *lib_path, uintptr_t *out_base,
                                              size_t *out_total_size, uintptr_t *out_entry) {
   struct user_regs_struct regs_saved = *regs;

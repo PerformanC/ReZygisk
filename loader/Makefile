@@ -37,7 +37,7 @@ COMMON_OBJS = $(patsubst src/common/%.c,$(OBJ_DIR)/common/%.o,$(COMMON_SRCS))
 INJECTOR_OBJS = $(patsubst src/injector/%.c,$(OBJ_DIR)/injector/%.o,$(INJECTOR_SRCS))
 PTRACER_OBJS = $(patsubst src/ptracer/%.c,$(OBJ_DIR)/ptracer/%.o,$(PTRACER_SRCS))
 
-LSPLT_LIB = $(BUILD_DIR)/obj/$(BUILD_TYPE)/lsplt/$(ARCH)/liblsplt.a
+PLTI_LIB = $(BUILD_DIR)/obj/$(BUILD_TYPE)/plti/$(ARCH)/libplti.a
 CSOLOADER_LIB = $(BUILD_DIR)/obj/$(BUILD_TYPE)/csoloader/$(ARCH)/libcsoloader.a
 
 LIBCOMMON = $(OBJ_DIR)/libcommon.a
@@ -46,11 +46,11 @@ LIBPTRACE = $(OBJ_DIR)/libzygisk_ptrace.so
 LIBZYGISK_STRIPPED = $(OBJ_DIR)/stripped/libzygisk.so
 LIBPTRACE_STRIPPED = $(OBJ_DIR)/stripped/libzygisk_ptrace.so
 
-LSPLT_DIR = src/external/lsplt/lsplt/src/main/jni
+PLTI_DIR = src/external/plti
 CSOLOADER_DIR = src/external/csoloader
 
 COMMON_INCLUDES = -Isrc/include
-INJECTOR_INCLUDES = -Isrc/include -I$(LSPLT_DIR)/include -I$(CSOLOADER_DIR)/include
+INJECTOR_INCLUDES = -Isrc/include -I$(PLTI_DIR)/src -I$(CSOLOADER_DIR)/include
 
 .PHONY: all arch clean
 
@@ -66,14 +66,14 @@ arch: $(LIBZYGISK_STRIPPED) $(LIBPTRACE_STRIPPED)
 
 clean:
 	rm -rf $(BUILD_DIR)/obj/$(BUILD_TYPE)/loader
-	rm -rf $(BUILD_DIR)/obj/$(BUILD_TYPE)/lsplt
+	rm -rf $(BUILD_DIR)/obj/$(BUILD_TYPE)/plti
 	rm -rf $(BUILD_DIR)/obj/$(BUILD_TYPE)/csoloader
 
-$(LSPLT_LIB):
+$(PLTI_LIB):
 	@mkdir -p $(dir $@)
-	$(MAKE) -C $(LSPLT_DIR) BUILD_TYPE=$(BUILD_TYPE) ARCH=$(ARCH) \
-		NDK_PATH=$(NDK_PATH) API_LEVEL=$(API_LEVEL)               \
-		out=$(BUILD_DIR)/obj/$(BUILD_TYPE)/lsplt/$(ARCH)
+	$(MAKE) -C $(PLTI_DIR) BUILD_TYPE=$(BUILD_TYPE) ARCH=$(ARCH) \
+		NDK_PATH=$(NDK_PATH) API_LEVEL=$(API_LEVEL)              \
+		out=$(BUILD_DIR)/obj/$(BUILD_TYPE)/plti/$(ARCH)
 
 $(CSOLOADER_LIB):
 	@mkdir -p $(dir $@)
@@ -100,11 +100,11 @@ $(LIBCOMMON): $(COMMON_OBJS)
 	@mkdir -p $(dir $@)
 	$(AR) rcs $@ $^
 
-$(LIBZYGISK): $(INJECTOR_OBJS) $(LIBCOMMON) $(LSPLT_LIB) $(CSOLOADER_LIB)
+$(LIBZYGISK): $(INJECTOR_OBJS) $(LIBCOMMON) $(PLTI_LIB) $(CSOLOADER_LIB)
 	@mkdir -p $(dir $@)
-	$(CC_ARCH) -fPIC -shared -Wl,-soname,libzygisk.so               \
-		$(COMMON_LDFLAGS) $(TYPE_LDFLAGS) -nostartfiles             \
-		$(INJECTOR_OBJS) $(LIBCOMMON) $(LSPLT_LIB) $(CSOLOADER_LIB) \
+	$(CC_ARCH) -fPIC -shared -Wl,-soname,libzygisk.so              \
+		$(COMMON_LDFLAGS) $(TYPE_LDFLAGS) -nostartfiles            \
+		$(INJECTOR_OBJS) $(LIBCOMMON) $(PLTI_LIB) $(CSOLOADER_LIB) \
 		-llog -lm -o $@
 
 $(LIBPTRACE): $(PTRACER_OBJS) $(LIBCOMMON)

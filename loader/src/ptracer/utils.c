@@ -23,107 +23,6 @@
 
 #include "utils.h"
 
-struct maps *parse_maps(const char *filename) {
-  FILE *fp = fopen(filename, "r");
-  if (!fp) {
-    LOGE("Failed to open %s", filename);
-
-    return NULL;
-  }
-
-  struct maps *maps = (struct maps *)malloc(sizeof(struct maps));
-  if (!maps) {
-    LOGE("Failed to allocate memory for maps");
-
-    fclose(fp);
-
-    return NULL;
-  }
-
-  /* INFO: To ensure in the realloc the libc will know it is meant
-             to allocate, and not reallocate from a garbage address. */
-  maps->maps = NULL;
-
-  char line[4096 * 2];
-  size_t i = 0;
-
-  while (fgets(line, sizeof(line), fp) != NULL) {
-    line[strcspn(line, "\n")] = '\0';
-
-    uintptr_t addr_start;
-    uintptr_t addr_end;
-    uintptr_t addr_offset;
-    ino_t inode;
-    unsigned int dev_major;
-    unsigned int dev_minor;
-    char permissions[5] = "";
-    int path_offset;
-
-    sscanf(line,
-           "%" PRIxPTR "-%" PRIxPTR " %4s %" PRIxPTR " %x:%x %lu %n%*s",
-           &addr_start, &addr_end, permissions, &addr_offset, &dev_major, &dev_minor,
-           &inode, &path_offset);
-
-    while (isspace(line[path_offset])) {
-      path_offset++;
-    }
-
-    struct map *tmp_maps = (struct map *)realloc(maps->maps, (i + 1) * sizeof(struct map));
-    if (!tmp_maps) {
-      LOGE("Failed to allocate memory for maps->maps");
-
-      maps->size = i;
-
-      fclose(fp);
-      free_maps(maps);
-
-      return NULL;
-    }
-    maps->maps = tmp_maps;
-
-    maps->maps[i].start = addr_start;
-    maps->maps[i].end = addr_end;
-    maps->maps[i].offset = addr_offset;
-
-    maps->maps[i].perms = 0;
-    if (permissions[0] == 'r') maps->maps[i].perms |= PROT_READ;
-    if (permissions[1] == 'w') maps->maps[i].perms |= PROT_WRITE;
-    if (permissions[2] == 'x') maps->maps[i].perms |= PROT_EXEC;
-
-    maps->maps[i].is_private = permissions[3] == 'p';
-    maps->maps[i].dev = makedev(dev_major, dev_minor);
-    maps->maps[i].inode = inode;
-    maps->maps[i].path = strdup(line + path_offset);
-    if (!maps->maps[i].path) {
-      LOGE("Failed to allocate memory for maps->maps[%zu].path", i);
-
-      maps->size = i;
-
-      fclose(fp);
-      free_maps(maps);
-
-      return NULL;
-    }
-
-    i++;
-  }
-
-  fclose(fp);
-
-  maps->size = i;
-
-  return maps;
-}
-
-void free_maps(struct maps *maps) {
-  for (size_t i = 0; i < maps->size; i++) {
-    free((void *)maps->maps[i].path);
-  }
-
-  free(maps->maps);
-  free(maps);
-}
-
 ssize_t write_proc(int pid, uintptr_t remote_addr, const void *buf, size_t len) {
   LOGV("write to remote addr %" PRIxPTR " size %zu", remote_addr, len);
 
@@ -220,9 +119,9 @@ bool set_regs(int pid, struct user_regs_struct *regs) {
   return true;
 }
 
-void get_addr_mem_region(struct maps *info, uintptr_t addr, char *buf, size_t buf_size) {
-  for (size_t i = 0; i < info->size; i++) {
-    const struct map *m = &info->maps[i];
+void get_addr_mem_region(struct maps_info *info, uintptr_t addr, char *buf, size_t buf_size) {
+  for (size_t i = 0; i < info->length; i++) {
+    const struct map_entry  *m = &info->maps[i];
     if (m->start <= addr && m->end > addr) {
       const char *path = m->path ? m->path : "<anonymous>";
       snprintf(buf, buf_size, "%s %s%s%s",
@@ -244,9 +143,9 @@ const char *position_after(const char *str, const char needle) {
   return positioned ? positioned + 1 : str;
 }
 
-void *find_module_return_addr(struct maps *map, const char *suffix) {
-  for (size_t i = 0; i < map->size; i++) {
-    const struct map *m = &map->maps[i];
+void *find_module_return_addr(struct maps_info *map, const char *suffix) {
+  for (size_t i = 0; i < map->length; i++) {
+    const struct map_entry  *m = &map->maps[i];
     const char *file_name;
 
     if (!m->path || (m->perms & PROT_EXEC)) continue;
@@ -260,9 +159,9 @@ void *find_module_return_addr(struct maps *map, const char *suffix) {
   return NULL;
 }
 
-void *find_module_base(struct maps *map, const char *file) {
-  for (size_t i = 0; i < map->size; i++) {
-    const struct map *m = &map->maps[i];
+void *find_module_base(struct maps_info *map, const char *file) {
+  for (size_t i = 0; i < map->length; i++) {
+    const struct map_entry  *m = &map->maps[i];
     if (!m->path || m->offset != 0) continue;
     if (strcmp(m->path, file) != 0) continue;
 
@@ -272,7 +171,7 @@ void *find_module_base(struct maps *map, const char *file) {
   return NULL;
 }
 
-void *find_func_addr(struct maps *local_info, struct maps *remote_info, const char *module, const char *func) {
+void *find_func_addr(struct maps_info *local_info, struct maps_info *remote_info, const char *module, const char *func) {
   uint8_t *local_base = (uint8_t *)find_module_base(local_info, module);
   if (local_base == NULL) {
     LOGD("failed to find local base for module %s", module);
@@ -457,7 +356,7 @@ int fork_dont_care() {
   return pid;
 }
 
-uintptr_t find_syscall_gadget(int pid, struct maps *remote_map) {
+uintptr_t find_syscall_gadget(int pid, struct maps_info *remote_map) {
   /* INFO: Find a syscall instruction (svc #0 on aarch64, svc 0 on arm32,
            syscall on x86_64, int 0x80 on i386) in executable memory.
            We search vdso first as it's always present. */
@@ -482,8 +381,8 @@ uintptr_t find_syscall_gadget(int pid, struct maps *remote_map) {
   for (int pass = 0; pass < 2; pass++) {
     bool vdso_only = pass == 0;
 
-    for (size_t i = 0; i < remote_map->size; i++) {
-      const struct map *m = &remote_map->maps[i];
+    for (size_t i = 0; i < remote_map->length; i++) {
+      const struct map_entry  *m = &remote_map->maps[i];
       bool is_vdso = m->path && strstr(m->path, "[vdso]") != NULL;
       size_t region_size = m->end - m->start;
 
@@ -769,10 +668,11 @@ static bool find_jump_slot_got_offset_elf32(const char *elf_path, const char *sy
 bool tango_wait_linker_ready(int pid, struct tango_linker_watch *watch) {
   while (1) {
     if (!watch->libc_init_got_slot) {
-      char maps_path[64];
-      snprintf(maps_path, sizeof(maps_path), "/proc/%d/maps", pid);
+      /* INFO: The character limit for a 32-bit integer is 10 */
+      char pid_str[10 + 1];
+      snprintf(pid_str, sizeof(pid_str), "%d", pid);
 
-      struct maps *remote_map = parse_maps(maps_path);
+      struct maps_info *remote_map = parse_maps(pid_str);
       if (!remote_map) {
         LOGE("Failed to parse remote maps for pid %d", pid);
 
@@ -780,8 +680,8 @@ bool tango_wait_linker_ready(int pid, struct tango_linker_watch *watch) {
       }
 
       memset(watch, 0, sizeof(*watch));
-      for (size_t i = 0; i < remote_map->size; i++) {
-        const struct map *m = &remote_map->maps[i];
+      for (size_t i = 0; i < remote_map->length; i++) {
+        const struct map_entry  *m = &remote_map->maps[i];
         if (!m->path || (uintptr_t)m->start >= 0x100000000ULL || m->offset != 0 || !strstr(m->path, "app_process32")) continue;
 
         uint32_t bias = 0, got_off = 0;
@@ -887,11 +787,11 @@ bool ptrace_poke_u32(pid_t pid, uintptr_t addr, uint32_t value) {
   return true;
 }
 
-uintptr_t find_arm32_ret_gadget(int pid, struct maps *remote_map) {
+uintptr_t find_arm32_ret_gadget(int pid, struct maps_info *remote_map) {
   const uint16_t bx_lr = 0x4770;
 
-  for (size_t i = 0; i < remote_map->size; i++) {
-    const struct map *m = &remote_map->maps[i];
+  for (size_t i = 0; i < remote_map->length; i++) {
+    const struct map_entry  *m = &remote_map->maps[i];
     if (!(m->perms & PROT_EXEC)) continue;
     if ((uintptr_t)m->start >= 0x100000000ULL) continue;
 

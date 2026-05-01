@@ -1,4 +1,3 @@
-#include <asm-generic/socket.h>
 #include <stdlib.h>
 #include <string.h>
 #include <errno.h>
@@ -108,6 +107,39 @@ ssize_t read_loop(int fd, void *buf, size_t count) {
   }
 
   return read_bytes;
+}
+
+ssize_t write_fd(int fd, int sendfd) {
+  char cmsgbuf[CMSG_SPACE(sizeof(int))];
+  char buf[1] = { 0 };
+
+  struct iovec iov = {
+    .iov_base = buf,
+    .iov_len = 1
+  };
+
+  struct msghdr msg = {
+    .msg_iov = &iov,
+    .msg_iovlen = 1,
+    .msg_control = cmsgbuf,
+    .msg_controllen = sizeof(cmsgbuf)
+  };
+
+  struct cmsghdr *cmsg = CMSG_FIRSTHDR(&msg);
+  cmsg->cmsg_len = CMSG_LEN(sizeof(int));
+  cmsg->cmsg_level = SOL_SOCKET;
+  cmsg->cmsg_type = SCM_RIGHTS;
+
+  memcpy(CMSG_DATA(cmsg), &sendfd, sizeof(int));
+
+  ssize_t ret = sendmsg(fd, &msg, 0);
+  if (ret == -1) {
+    LOGE("sendmsg: %s\n", strerror(errno));
+
+    return -1;
+  }
+
+  return ret;
 }
 
 /* TODO: Standardize how to log errors */

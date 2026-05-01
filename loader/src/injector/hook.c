@@ -9,15 +9,15 @@
 #include <dirent.h>
 #include <fcntl.h>
 #include <limits.h>
-#include <signal.h>
 #include <sys/mman.h>
 #include <sys/stat.h>
 #include <sys/types.h>
+#include <sys/sysmacros.h>
 
 #include <unistd.h>
 
 #include <csoloader.h>
-#include <lsplt.h>
+#include <plti.h>
 
 #include "daemon.h"
 #include "misc.h"
@@ -111,10 +111,10 @@ static inline bool is_zygote_child(struct zygisk_context *ctx) {
 }
 
 struct plt_hook_entry {
-  dev_t dev;
-  ino_t inode;
+  const char *lib_path;
   const char *symbol;
-  void **old_func;
+  void *new_func;
+  void **backup;
 };
 
 struct jni_hook_entry {
@@ -123,58 +123,48 @@ struct jni_hook_entry {
   size_t methods_count;
 };
 
+struct plti plti_ctx;
+
 static struct plt_hook_entry *plt_hook_list = NULL;
 static size_t plt_hook_list_count = 0;
-static size_t plt_hook_list_capacity = 0;
 
 static struct jni_hook_entry *jni_hook_list = NULL;
 static size_t jni_hook_list_count = 0;
-static size_t jni_hook_list_capacity = 0;
 
-static bool modules_loaded = false;
 struct rezygisk_module *zygisk_modules = NULL;
 size_t zygisk_module_length = 0;
 
 static bool should_unmap_zygisk = false;
 static bool enable_unloader = false;
-static bool hooked_unloader = false;
 
 /* INFO: Helper function to add to PLT hook list */
-static void plt_hook_list_add(dev_t dev, ino_t inode, const char *symbol, void **old_func) {
-  if (plt_hook_list_count >= plt_hook_list_capacity) {
-    size_t new_capacity = plt_hook_list_capacity == 0 ? 16 : plt_hook_list_capacity * 2;
-    struct plt_hook_entry *new_list = realloc(plt_hook_list, new_capacity * sizeof(struct plt_hook_entry));
-    if (!new_list) {
-      LOGE("Failed to reallocate buffer for hook list");
+static bool plt_hook_list_add(const char *lib_path, const char *symbol, void *new_func, void **backup) {
+  struct plt_hook_entry *new_plt_hook_list = realloc(plt_hook_list, (plt_hook_list_count + 1) * sizeof(struct plt_hook_entry));
+  if (!new_plt_hook_list) {
+    LOGE("Failed to reallocate buffer for PLT hook list");
 
-      return;
-    }
-
-    plt_hook_list = new_list;
-    plt_hook_list_capacity = new_capacity;
+    return false;
   }
+  plt_hook_list = new_plt_hook_list;
 
-  plt_hook_list[plt_hook_list_count].dev = dev;
-  plt_hook_list[plt_hook_list_count].inode = inode;
+  plt_hook_list[plt_hook_list_count].lib_path = lib_path;
   plt_hook_list[plt_hook_list_count].symbol = symbol;
-  plt_hook_list[plt_hook_list_count].old_func = old_func;
+  plt_hook_list[plt_hook_list_count].new_func = new_func;
+  plt_hook_list[plt_hook_list_count].backup = backup;
   plt_hook_list_count++;
+
+  return true;
 }
 
 /* INFO: Helper function to add to JNI hook list */
 static void jni_hook_list_add(const char *class_name, JNINativeMethod *methods, size_t count) {
-  if (jni_hook_list_count >= jni_hook_list_capacity) {
-    size_t new_capacity = jni_hook_list_capacity == 0 ? 4 : jni_hook_list_capacity * 2;
-    struct jni_hook_entry *new_list = realloc(jni_hook_list, new_capacity * sizeof(struct jni_hook_entry));
-    if (!new_list) {
-      LOGE("Failed to reallocate buffer for hook list");
+  struct jni_hook_entry *new_jni_hook_list = realloc(jni_hook_list, (jni_hook_list_count + 1) * sizeof(struct jni_hook_entry));
+  if (!new_jni_hook_list) {
+    LOGE("Failed to reallocate buffer for JNI hook list");
 
-      return;
-    }
-
-    jni_hook_list = new_list;
-    jni_hook_list_capacity = new_capacity;
+    return;
   }
+  jni_hook_list = new_jni_hook_list;
 
   jni_hook_list[jni_hook_list_count].class_name = strdup(class_name);
   if (!jni_hook_list[jni_hook_list_count].class_name) {
@@ -331,7 +321,7 @@ DCL_HOOK_FUNC(int, pthread_attr_setstacksize, void *target, size_t size) {
       free(zygisk_modules);
       zygisk_modules = NULL;
 
-      lsplt_free_resources();
+      plti_deinit(&plti_ctx);
 
       return res;
     }
@@ -341,7 +331,7 @@ DCL_HOOK_FUNC(int, pthread_attr_setstacksize, void *target, size_t size) {
     free(zygisk_modules);
     zygisk_modules = NULL;
 
-    lsplt_free_resources();
+    plti_deinit(&plti_ctx);
 
     LOGD("unmap libzygisk.so loaded at %p with size %zu", start_addr, block_size);
 
@@ -460,16 +450,16 @@ void hook_jni_methods(JNIEnv *env, const char *clz, JNINativeMethod *methods, in
 static void initialize_jni_hook(void) {
   jint (*get_created_java_vms)(JavaVM **, jsize, jsize *) = (jint (*)(JavaVM **, jsize, jsize *))dlsym(RTLD_DEFAULT, "JNI_GetCreatedJavaVMs");
   if (!get_created_java_vms) {
-    struct lsplt_map_info *map_infos = lsplt_scan_maps("self");
-    if (!map_infos) {
-      LOGE("Failed to scan maps for self");
+    struct maps_info *maps = parse_maps_safe("self");
+    if (!maps) {
+      LOGE("Failed to scan maps for plt_hook_register_v4");
 
       return;
     }
 
-    for (size_t i = 0; i < map_infos->length; i++) {
-      struct lsplt_map_entry *map = &map_infos->maps[i];
-      if (!strstr(map->path, "/libnativehelper.so")) continue;
+    for (size_t i = 0; i < maps->length; i++) {
+      struct map_entry *map = &maps->maps[i];
+      if (map->path && !strstr(map->path, "/libnativehelper.so")) continue;
 
       /* TODO: Add RTLD_NOLOAD? */
       void *handle = dlopen(map->path, RTLD_LAZY);
@@ -485,7 +475,7 @@ static void initialize_jni_hook(void) {
       break;
     }
 
-    lsplt_free_maps(map_infos);
+    free_maps(maps);
 
     if (!get_created_java_vms) {
       LOGE("Failed to find JNI_GetCreatedJavaVMs");
@@ -565,7 +555,7 @@ static bool api_plt_hook_commit(void) {
 
   pthread_mutex_lock(&g_ctx->hook_info_lock);
 
-  struct lsplt_map_info *map_infos = lsplt_scan_maps("self");
+  struct maps_info *map_infos = parse_maps_safe("self");
   if (!map_infos) {
     LOGE("Failed to scan maps for self");
 
@@ -574,8 +564,9 @@ static bool api_plt_hook_commit(void) {
     return false;
   }
 
+  bool any_failed = false;
   for (size_t i = 0; i < map_infos->length; i++) {
-    struct lsplt_map_entry *map = &map_infos->maps[i];
+    struct map_entry *map = &map_infos->maps[i];
     if (map->offset != 0 || !map->is_private || !(map->perms & PROT_READ)) continue;
 
     for (size_t r = 0; r < g_ctx->register_info_count; r++) {
@@ -593,12 +584,15 @@ static bool api_plt_hook_commit(void) {
         break;
       }
 
-      if (!ignored)
-        lsplt_register_hook(map->dev, map->inode, reg->symbol, reg->callback, reg->backup);
+      if (!ignored && !plti_add_hook(&plti_ctx, map->path, reg->symbol, reg->callback, reg->backup)) {
+        LOGE("Failed to register PLT hook for %s in %s", reg->symbol, map->path);
+
+        any_failed = true;
+      }
     }
   }
 
-  lsplt_free_maps(map_infos);
+  free_maps(map_infos);
 
   /* INFO: Clear register_info and ignore_info */
   for (size_t i = 0; i < g_ctx->register_info_count; i++) {
@@ -615,19 +609,75 @@ static bool api_plt_hook_commit(void) {
 
   pthread_mutex_unlock(&g_ctx->hook_info_lock);
 
-  return lsplt_commit_hook();
+  return !any_failed;
 }
 
 static void api_plt_hook_register_v4(dev_t dev, ino_t inode, const char *symbol, void *fn, void **backup) {
-  if (!g_ctx) return;
+  if (!g_ctx || !symbol || !fn) return;
 
-  if (dev == 0 || inode == 0 || !symbol || !fn) {
-    LOGE("Invalid arguments to plt_hook_register");
+  struct maps_info *maps = parse_maps_safe("self");
+  if (!maps) {
+    LOGE("Failed to scan maps for plt_hook_register_v4");
 
     return;
   }
 
-  lsplt_register_hook(dev, inode, symbol, fn, backup);
+  uintptr_t lib_start = 0;
+  const char *lib_path = NULL;
+  for (size_t i = 0; i < maps->length; i++) {
+    struct map_entry *entry = &maps->maps[i];
+    if (entry->dev != dev || entry->inode != inode) continue;
+
+    lib_start = entry->start;
+    lib_path = entry->path;
+
+    break;
+  }
+
+  if (!lib_path) {
+    LOGE("Failed to find library with dev %zu and inode %zu for hook %s", (size_t)dev, (size_t)inode, symbol);
+
+    free_maps(maps);
+
+    return;
+  }
+
+  char *lib_path_copy = strdup(lib_path);
+  if (!lib_path_copy) {
+    LOGE("Failed to duplicate library path for hook %s: %s", symbol, lib_path);
+
+    free_maps(maps);
+
+    return;
+  }
+
+  free_maps(maps);
+
+  if (!plti_add_manual_lib(&plti_ctx, lib_path_copy, lib_start)) {
+    LOGE("Failed to add manual library for hook %s: %s", symbol, lib_path_copy);
+
+    free(lib_path_copy);
+
+    return;
+  }
+
+  char *symbol_copy = strdup(symbol);
+  if (!symbol_copy) {
+    LOGE("Failed to duplicate symbol name for hook %s in %s", symbol, lib_path_copy);
+
+    free(lib_path_copy);
+
+    return;
+  }
+
+  if (!plt_hook_list_add(lib_path_copy, symbol_copy, fn, backup)) {
+    LOGE("Failed to add plt_hook entry for %s in %s", symbol, lib_path_copy);
+
+    free(lib_path_copy);
+    free(symbol_copy);
+
+    return;
+  }
 }
 
 static void api_exempt_fd(int fd) {
@@ -645,7 +695,28 @@ static void api_exempt_fd(int fd) {
 static bool api_plt_hook_commit_v4(void) {
   if (!g_ctx) return false;
 
-  return lsplt_commit_hook();
+  bool any_failed = false;
+  for (size_t i = 0; i < plt_hook_list_count; i++) {
+    struct plt_hook_entry *entry = &plt_hook_list[i];
+    if (!plti_add_hook(&plti_ctx, entry->lib_path, entry->symbol, entry->new_func, entry->backup)) {
+      LOGE("Failed to register plt_hook \"%s\" in %s with PLTI", entry->symbol, entry->lib_path);
+
+      any_failed = true;
+    }
+  }
+
+  if (plt_hook_list) {
+    for (size_t i = 0; i < plt_hook_list_count; i++) {
+      free((void *)plt_hook_list[i].lib_path);
+      free((void *)plt_hook_list[i].symbol);
+    }
+
+    free(plt_hook_list);
+    plt_hook_list = NULL;
+    plt_hook_list_count = 0;
+  }
+
+  return !any_failed;
 }
 
 /* INFO: Avoid common mistakes of not utilizing implementation member (impl) when calling
@@ -1174,7 +1245,6 @@ static void rz_cleanup(struct zygisk_context *ctx) {
   free(jni_hook_list);
   jni_hook_list = NULL;
   jni_hook_list_count = 0;
-  jni_hook_list_capacity = 0;
 
   for (size_t i = 0; i < ctx->register_info_count; i++) {                                                                                                                        
     regfree(&ctx->register_info[i].regex);                                                                                                                                       
@@ -1186,7 +1256,18 @@ static void rz_cleanup(struct zygisk_context *ctx) {
     regfree(&ctx->ignore_info[i].regex);                                                                                                                                         
     free(ctx->ignore_info[i].symbol);                                                                                                                                            
   }                                                                                                                                                                              
-  ctx->ignore_info_count = 0; 
+  ctx->ignore_info_count = 0;
+
+  if (plt_hook_list) {
+    for (size_t i = 0; i < plt_hook_list_count; i++) {
+      free((void *)plt_hook_list[i].lib_path);
+      free((void *)plt_hook_list[i].symbol);
+    }
+
+    free(plt_hook_list);
+    plt_hook_list = NULL;
+    plt_hook_list_count = 0;
+  }
 
   /* INFO: Strip out all API function pointers */
   for (size_t i = 0; i < zygisk_module_length; i++) {
@@ -1198,145 +1279,76 @@ static void rz_cleanup(struct zygisk_context *ctx) {
 }
 
 /* INFO: PLT hook commit helper */
-static bool hook_commit(struct lsplt_map_info *map_infos) {
-  if (map_infos ? lsplt_commit_hook_manual(map_infos) : lsplt_commit_hook()) return true;
-  else {
-    LOGE("Failed to commit hook for %zu symbols", plt_hook_list_count);
+
+static bool hook_register(const char *lib_name, const char *symbol, bool is_prefix, void *new_func, void **backup) {
+  if (!(is_prefix ? plti_add_hook_by_prefix : plti_add_hook)(&plti_ctx, lib_name, symbol, new_func, backup)) {
+    LOGE("Failed to register plt_hook \"%s\" with PLTI", symbol);
 
     return false;
   }
+
+  LOGD("Registered plt_hook for symbol \"%s\" in library \"%s\"", symbol, lib_name);
+
+  return true;
 }
 
-static void hook_register(dev_t dev, ino_t inode, const char *symbol, bool is_prefix, void *new_func, void **old_func) {
-  bool res = false;
-  if (is_prefix) res = lsplt_register_hook_by_prefix(dev, inode, symbol, new_func, old_func);
-  else res = lsplt_register_hook(dev, inode, symbol, new_func, old_func);
+static bool hook_unregister(const char *lib_name, const char *symbol, bool is_prefix, void **backup) {
+  if (!(is_prefix ? plti_remove_hook_by_prefix : plti_remove_hook)(&plti_ctx, lib_name, symbol, backup)) {
+    LOGE("Failed to unregister plt_hook \"%s\" with PLTI", symbol);
 
-  if (!res) {
-    LOGE("Failed to register plt_hook \"%s\"", symbol);
-
-    return;
+    return false;
   }
 
-  plt_hook_list_add(dev, inode, symbol, old_func);
+  LOGD("Unregistered plt_hook for symbol \"%s\" in library \"%s\"", symbol, lib_name);
+
+  return true;
 }
 
-#define PLT_HOOK_REGISTER_SYM(DEV, INODE, SYM, NAME, IS_PREFIX)                      \
-  hook_register(DEV, INODE, SYM, IS_PREFIX, (void*)new_##NAME, (void **)&old_##NAME)
+#define PLT_HOOK_REGISTER_SYM(LIB, SYM, NAME, IS_PREFIX)                       \
+  hook_register(LIB, SYM, IS_PREFIX, (void *)new_##NAME, (void **)&old_##NAME)
 
-#define PLT_HOOK_REGISTER(DEV, INODE, NAME, IS_PREFIX)      \
-  PLT_HOOK_REGISTER_SYM(DEV, INODE, #NAME, NAME, IS_PREFIX)
+#define PLT_HOOK_REGISTER(LIB, SYM, IS_PREFIX)     \
+  PLT_HOOK_REGISTER_SYM(LIB, #SYM, SYM, IS_PREFIX)
+
+#define PLT_HOOK_UNREGISTER_SYM(LIB, SYM, NAME, IS_PREFIX)   \
+  hook_unregister(LIB, SYM, IS_PREFIX, (void **)&old_##NAME)
+
+#define PLT_HOOK_UNREGISTER(LIB, SYM, IS_PREFIX)     \
+  PLT_HOOK_UNREGISTER_SYM(LIB, #SYM, SYM, IS_PREFIX)
 
 void hook_functions(void) {
-  ino_t android_runtime_inode = 0;
-  dev_t android_runtime_dev = 0;
+  plti_init(&plti_ctx);
 
-  struct lsplt_map_info *map_infos = lsplt_scan_maps("self");
-  if (!map_infos) {
-    LOGE("Failed to scan maps for self");
+  plti_add_lib(&plti_ctx, "libandroid_runtime.so");
 
-    return;
-  }
-
-  for (size_t i = 0; i < map_infos->length; i++) {
-    struct lsplt_map_entry map = map_infos->maps[i];
-
-    if (!strstr(map.path, "libandroid_runtime.so")) continue;
-
-    android_runtime_inode = map.inode;
-    android_runtime_dev = map.dev;
-
-    LOGD("Found libandroid_runtime.so at [%zu:%lu]", android_runtime_dev, android_runtime_inode);
-
-    break;
-  }
-
-  PLT_HOOK_REGISTER(android_runtime_dev, android_runtime_inode, fork, false);
-  PLT_HOOK_REGISTER(android_runtime_dev, android_runtime_inode, strdup, false);
-  PLT_HOOK_REGISTER(android_runtime_dev, android_runtime_inode, property_get, false);
-  PLT_HOOK_REGISTER_SYM(android_runtime_dev, android_runtime_inode, "_ZNK18FileDescriptorInfo14ReopenOrDetach", _ZNK18FileDescriptorInfo14ReopenOrDetach, true);
-
-  if (!hook_commit(map_infos)) {
-    plt_hook_list_count = 0;
-
-    PLT_HOOK_REGISTER(android_runtime_dev, android_runtime_inode, fork, false);
-    PLT_HOOK_REGISTER(android_runtime_dev, android_runtime_inode, strdup, false);
-    PLT_HOOK_REGISTER(android_runtime_dev, android_runtime_inode, property_get, false);
-
-    if (hook_commit(map_infos)) {
-      LOGW("Hooked without ReopenOrDetach hook! Umounting overlays will cause problems");
-    } else {
-      LOGE("Failed to hook neccessary symbols to function");
-    }
-  }
-
-  lsplt_free_maps(map_infos);
+  PLT_HOOK_REGISTER("libandroid_runtime.so", fork, false);
+  PLT_HOOK_REGISTER("libandroid_runtime.so", strdup, false);
+  PLT_HOOK_REGISTER("libandroid_runtime.so", property_get, false);
+  PLT_HOOK_REGISTER_SYM("libandroid_runtime.so", "_ZNK18FileDescriptorInfo14ReopenOrDetach", _ZNK18FileDescriptorInfo14ReopenOrDetach, true);
 }
 
 static void hook_unloader(void) {
-  if (hooked_unloader) return;
-  hooked_unloader = true;
-
-  ino_t art_inode = 0;
-  dev_t art_dev = 0;
-
-  struct lsplt_map_info *map_infos = lsplt_scan_maps("self");
-  if (!map_infos) {
-    LOGE("Failed to scan maps for self");
+  if (!plti_add_lib(&plti_ctx, "libart.so")) {
+    LOGE("Failed to add libart.so to PLTI");
 
     return;
   }
 
-  for (size_t i = 0; i < map_infos->length; i++) {
-    struct lsplt_map_entry *map = &map_infos->maps[i];
-    if (!strstr(map->path, "/libart.so")) continue;
+  PLT_HOOK_REGISTER("libart.so", pthread_attr_setstacksize, false);
 
-    art_inode = map->inode;
-    art_dev = map->dev;
-
-    LOGD("Found libart.so at [%zu:%lu]", art_dev, art_inode);
-
-    break;
-  }
-
-  if (art_dev == 0 || art_inode == 0) {
-    LOGE("Could not find libart.so. Unloader hook failed");
-
-    hooked_unloader = false;
-  } else {
-    LOGD("Successfully found libart.so [%zu:%lu] for ReZygisk unloading", art_dev, art_inode);
-
-    PLT_HOOK_REGISTER(art_dev, art_inode, pthread_attr_setstacksize, false);
-    hook_commit(map_infos);
-  }
-
-  lsplt_free_maps(map_infos);
+  PLT_HOOK_UNREGISTER("libandroid_runtime.so", property_get, false);
 
   /* INFO: Load modules early on (before system server fork) to spread through all Zygotes */
-  if (!modules_loaded) {
-    if (!load_modules_only()) {
-      LOGE("Failed to load modules in hook_unloader");
-    } else modules_loaded = true;
+  if (!load_modules_only()) {
+    LOGE("Failed to load modules in hook_unloader");
   }
+
+  LOGD("ReZygisk unloader hooked successfully");
 }
 
 static void unhook_functions(void) {
-  /* INFO: Unhook plt_hook */
-  for (size_t i = 0; i < plt_hook_list_count; i++) {
-    struct plt_hook_entry *entry = &plt_hook_list[i];
-    if (!lsplt_register_hook(entry->dev, entry->inode, entry->symbol, *entry->old_func, NULL)) {
-      LOGE("Failed to register plt_hook [%s]", entry->symbol);
-    }
-  }
-
-  free(plt_hook_list);
-  plt_hook_list = NULL;
-  plt_hook_list_count = 0;
-  plt_hook_list_capacity = 0;
-
-  if (!hook_commit(NULL)) {
-    LOGE("Failed to restore plt_hook");
-
-    should_unmap_zygisk = false;
-  }
+  PLT_HOOK_UNREGISTER("libandroid_runtime.so", fork, false);
+  PLT_HOOK_UNREGISTER("libandroid_runtime.so", strdup, false);
+  PLT_HOOK_UNREGISTER_SYM("libandroid_runtime.so", "_ZNK18FileDescriptorInfo14ReopenOrDetach", _ZNK18FileDescriptorInfo14ReopenOrDetach, true);
+  PLT_HOOK_UNREGISTER("libart.so", pthread_attr_setstacksize, false);
 }
