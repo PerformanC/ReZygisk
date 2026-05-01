@@ -1,4 +1,4 @@
-import { exec, fullScreen, isKsuAvaliable, toast } from './kernelsu.js'
+import { exec, fullScreen } from './kernelsu.js'
 import { setDark } from './themes/dark.js'
 import { setThemeData, themeList } from './themes/main.js'
 import { setLight } from './themes/light.js'
@@ -94,47 +94,26 @@ function pageLevelFinder(pageId) {
  * whenever changed to another page id.
  */
 window.addEventListener('pagechanged', function (e) {
-  if (!isKsuAvaliable) return;
   const newPageLevel = pageLevelFinder(e.detail.pageId)
 
   if (!pageHistory[newPageLevel]) {
     pageHistory.push(e.detail.pageId)
-    history.pushState({ pageLevel: newPageLevel }, '', `/${e.detail.pageId}`)
+    history.pushState({ pageLevel: newPageLevel }, '', location.pathname)
   }
 
   if (pageHistory[newPageLevel] !== e.detail.pageId) {
     pageHistory[newPageLevel] = e.detail.pageId
-    history.replaceState({ pageLevel: newPageLevel }, '', `/${e.detail.pageId}`)
-  }
-  /*
-  * INFO: This code is what we will talks about a lot.
-  * Basically if the current page level (pageHistory.length - 1)
-  * minus with new page level equals 1, that means the users
-  * is going back and we have to erase the last element of
-  * page history.
-  * 
-  * Currently this code is worked pretty well in my test,
-  * I still not guarantee about it's stability and stuff.
-  */
-  if ((pageHistory.length - 1) - newPageLevel === 1) {
-    pageHistory.splice(-1, 1)
+    history.replaceState({ pageLevel: newPageLevel }, '', location.pathname)
   }
 
-  console.log('[ReZygisk WebUI debug]', pageHistory)
-  console.log('[ReZygisk WebUI debug]', newPageLevel, pageHistory.length - 1)
+  if ((pageHistory.length - 1) - newPageLevel === 1)
+    pageHistory.splice(-1, 1)
+
+  if (e.detail.pageId == 'home') history.go(-1)
 })
 
 window.addEventListener('popstate', async () => {
-  if (!isKsuAvaliable) return;
   const oldPageId = pageHistory[pageHistory.length - 2]
-  console.log('[ReZygisk WebUI debug]', oldPageId, pageHistory.length - 2)
-
-  /*
-   * INFO: This is the workaround for RZ back gesture, the problem 
-   * with it is when we're in home page, we will have to swipe 2 time
-   * to escape.
-   */
-  if (!oldPageId) return history.go(-1)
-  if (oldPageId == 'home') history.go(-1)
+  if (!oldPageId) return;
   await loadPage(oldPageId)
 })

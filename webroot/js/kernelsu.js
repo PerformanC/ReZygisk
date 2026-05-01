@@ -6,8 +6,6 @@ function getUniqueCallbackName(prefix) {
   return `${prefix}_callback_${Date.now()}_${callbackCounter++}`;
 }
 
-export const isKsuAvaliable = typeof ksu !== "undefined"
-
 export function exec(command, options) {
   if (typeof ksu === "undefined") {
     /* INFO: Assume this is a computer for ReZygisk testing */
