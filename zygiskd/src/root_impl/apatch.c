@@ -12,7 +12,8 @@
 #include "apatch.h"
 
 void apatch_get_existence(struct root_impl_state *state) {
-  if (access("/data/adb/apd", F_OK) != 0) {
+  if (access("/data/adb/ap/bin/apd", F_OK) != 0) {
+
     state->state = Inexistent;
 
     return;
