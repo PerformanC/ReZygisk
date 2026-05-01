@@ -194,6 +194,11 @@ body {
 
 .page_loader_mini_layer {
   position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  overflow-y: scroll;
   inset: 0;
   pointer-events: auto;
   z-index: 8;

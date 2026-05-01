@@ -37,7 +37,7 @@
 
 #navbar_support_div {
   position: fixed;
-  z-index: 7;
+  z-index: 10;
 }
 
 #navbar {
