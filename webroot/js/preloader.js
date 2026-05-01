@@ -1,4 +1,4 @@
-import { exec, fullScreen, isKsuAvaliable } from './kernelsu.js'
+import { exec, fullScreen, isKsuAvaliable, toast } from './kernelsu.js'
 import { setDark } from './themes/dark.js'
 import { setThemeData, themeList } from './themes/main.js'
 import { setLight } from './themes/light.js'
@@ -129,11 +129,12 @@ window.addEventListener('popstate', async () => {
   const oldPageId = pageHistory[pageHistory.length - 2]
   console.log('[ReZygisk WebUI debug]', oldPageId, pageHistory.length - 2)
 
-  /* 
-   * INFO: This code is supposed to close the webui, but I still
-   * not find a way to do it so currently we make this
-   * just returns nothing
+  /*
+   * INFO: This is the workaround for RZ back gesture, the problem 
+   * with it is when we're in home page, we will have to swipe 2 time
+   * to escape.
    */
-  if (location.pathname.split('/').pop() == 'index.html') return;
-  if (oldPageId) await loadPage(oldPageId)
+  if (!oldPageId) return history.go(-1)
+  if (oldPageId == 'home') history.go(-1)
+  await loadPage(oldPageId)
 })
