@@ -1,30 +1,11 @@
 {
   "langName": "Українська (Україна)",
-  "global": {
-    "unknown": "Невідомо"
-  },
-  "smallPage": {
-    "language": {
-      "header": "Оберіть нову мову"
-    },
-    "theme": {
-      "header": "Оберіть нову тему",
-      "dark": "Темна",
-      "light": "Світла",
-      "system": "За системною"
-    },
-    "errorh": {
-      "buttons": {
-        "copy": "Копіювати",
-        "clear": "Очистити всі записи"
-      },
-      "header": "Історія помилок",
-      "placeholder": "Жодної помилки не було записано тут!"
-    }
-  },
-  "page": {
+  "pages": {
     "home": {
-      "header": "Головна",
+      "title": "Головна",
+      "unknown": "Невідомо",
+      "androidVersion": "Версія Android",
+			"linuxKernelVersion": "Версія ядра Linux",
       "status": {
         "notWorking": "Не працює",
         "ok": "Працює",
@@ -40,54 +21,67 @@
         }
       }
     },
+    "actions": {
+      "title": "Дії",
+      "monitor": {
+        "title": "Моніторинг",
+        "status": {
+          "tracing": "Відстежується",
+          "stopping": "Зупиняється",
+          "stopped": "Зупинено",
+          "exiting": "Виходить",
+          "unknown": "Невідомий"
+        },
+        "button": {
+          "start": "Почати",
+          "stop": "Зупинити",
+          "pause": "Пауза"
+        }
+      }
+    },
     "modules": {
-      "header": "Модулі",
-      "notAvaliable": "Немає модулів, які б використовували Zygisk.",
+      "title": "Модулі",
+      "notAvaliable": "Немає модулів, які би використовували Zygisk.",
       "arch": "Архітектура: "
     },
-    "actions": {
-      "header": "Дії",
-      "monitorButton": {
-        "start": "Почати",
-        "stop": "Зупинити",
-        "pause": "Пауза"
-      },
-      "monitor": "Моніторинг",
-      "status": {
-        "tracing": "Відстежується",
-        "stopping": "Зупиняється",
-        "stopped": "Зупинено",
-        "exiting": "Виходить",
-        "unknown": "Невідомий"
-      }
-    },
     "settings": {
-      "header": "Налаштування",
-      "font": {
-        "header": "Увімкнути системний шрифт",
-        "description": "Ця опція увімкне системний шрифт у поточному WebUI. Примітка: Може бути несумісною з FlipFont"
+      "title": "Налаштування",
+      "language": {
+        "title": "Змінити мову",
+        "description": "Змінити мову веб-інтерфейсу на вибрану"
+      },
+      "fullscreen": {
+        "title": "Вимкнути повноекранний режим веб-інтерфейсу",
+        "description": "Ця опція не дозволить веб-інтерфейсу заповнювати весь екран."
       },
       "theme": {
-        "header": "Системна тема",
-        "description": "Виберіть системну тему для поточного WebUI"
+        "title": "Змінити тему веб-інтерфейсу",
+        "description": "Виберіть тему системи для поточного веб-інтерфейсу"
       },
-      "language": {
-        "header": "Змінити мову",
-        "description": "Змінити на вашу нову мову"
+      "font": {
+        "title": "Увімкнути системний шрифт",
+        "description": "Ця опція увімкне системний шрифт у поточному WebUI. Примітка: Може бути несумісною з FlipFont"
       },
-      "logs": {
-        "header": "Журнал помилок",
-        "description": "Переглянути весь журнал помилок"
-      },
-      "credits": {
-        "module": "Розробники модуля",
-        "original": "Оригінальний розробник модуля",
-        "web": "Розробник WebUI"
-      },
-      "license": {
-        "module": "Ліцензія модуля",
-        "web": "Ліцензія WebUI"
+      "moduleDevelopers": "Розробник(и) модуля",
+      "WebUIDevelopers": "Розробник(и) веб-інтерфейсу",
+      "orginalDevelopers": "Розробник(и) оригінального модуля",
+      "moduleLicense": "Ліцензія модуля",
+      "WebUILicense": "Ліцензія веб-інтерфейсу"
+    },
+    "mini_settings_language": {
+      "title": "Змінити мову"
+    },
+    "mini_settings_theme": {
+      "title": "Змінити тему веб-інтерфейсу",
+      "theme": {
+        "dark": "Темна тема",
+        "light": "Світла тема",
+        "amoled": "Amoled-тема",
+        "system_based": "Системна тема"
       }
     }
+  },
+  "globals": {
+    "unknown": "Невідомо"
   }
 }

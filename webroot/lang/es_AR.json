@@ -1,34 +1,15 @@
 {
-  "langName": "Español",
-  "global": {
-    "unknown": "Desconocido"
-  },
-  "smallPage": {
-    "language": {
-      "header": "Selecciona tu nuevo idioma"
-    },
-    "theme": {
-      "header": "Elige tu nuevo tema",
-      "dark": "Oscuro",
-      "light": "Claro",
-      "system": "Basado en el sistema"
-    },
-    "errorh": {
-      "buttons": {
-        "copy": "COPIAR",
-        "clear": "BORRAR TODOS LOS REGISTROS"
-      },
-      "header": "Historial de errores",
-      "placeholder": "¡No se registró ningún error aquí!"
-    }
-  },
-  "page": {
+  "langName": "Español (Argentina)",
+  "pages": {
     "home": {
-      "header": "Inicio",
+      "title": "Inicio",
+      "unknown": "Desconocido",
+      "androidVersion": "Versión de Android",
+		  "linuxKernelVersion": "Versión del Kernel",
       "status": {
-        "notWorking": "No funciona",
+        "notWorking": "No funcionando",
         "ok": "Funcionando",
-        "partially": "Funciona parcialmente"
+        "partially": "Funcionando parcialmente"
       },
       "info": {
         "version": "Versión",
@@ -40,54 +21,67 @@
         }
       }
     },
+    "actions": {
+      "title": "Acciones",
+      "monitor": {
+        "title": "Monitor",
+        "status": {
+          "tracing": "Trazando",
+          "stopping": "Deteniendo",
+          "stopped": "Detenido",
+          "exiting": "Saliendo",
+          "unknown": "Desconocido"
+        },
+        "button": {
+          "pause": "Pausar",
+          "stop": "Detener",
+          "start": "Iniciar"
+        }
+      }
+    },
     "modules": {
-      "header": "Módulos",
+      "title": "Módulos",
       "notAvaliable": "No hay módulos que usen Zygisk aquí.",
       "arch": "Arquitectura: "
     },
     "settings": {
-      "header": "Ajustes",
-      "font": {
-        "header": "Activar fuente del sistema",
-        "description": "Esta opción habilitará la fuente del sistema en el WebUI actual. NOTA: Puede no ser compatible con FlipFont"
+      "title": "Ajustes",
+      "language": {
+        "title": "Cambiar idioma",
+        "description": "Cambia el idioma del WebUI al seleccionado."
+      },
+      "fullscreen": {
+        "title": "Desactivar el modo de pantalla completa en el WebUI",
+        "description": "Esta opción evitará que el WebUI ocupe toda la pantalla."
       },
       "theme": {
-        "header": "Tema del sistema",
-        "description": "Elija el tema del sistema para el WebUI actual"
+        "title": "Cambiar el tema del WebUI",
+        "description": "Elige el tema del sistema para el WebUI actual."
       },
-      "language": {
-        "header": "Cambiar idioma",
-        "description": "Selecciona tu nuevo idioma"
+      "font": {
+        "title": "Activar fuente del sistema",
+        "description": "Esta opción habilitará la fuente del sistema en el WebUI actual. NOTA: Puede no ser compatible con FlipFont"
       },
-      "logs": {
-        "header": "Historial de errores",
-        "description": "Ver todos tus registros de errores"
-      },
-      "credits": {
-        "module": "Desarrollador del módulo",
-        "original": "Desarrollador original del módulo",
-        "web": "Desarrollador de la WebUI"
-      },
-      "license": {
-        "module": "Licencia del módulo",
-        "web": "Licencia de la WebUI"
-      }
+      "moduleDevelopers": "Desarrollador(es) del módulo",
+      "WebUIDevelopers": "Desarrollador(es) del WebUI",
+      "orginalDevelopers": "Desarrollador(es) del Modulo Original",
+      "moduleLicense": "Licencia del Modulo",
+      "WebUILicense": "Licencia del WebUI"
     },
-    "actions": {
-      "header": "Acciones",
-      "monitorButton": {
-        "pause": "Pausar",
-        "stop": "Detener",
-        "start": "Iniciar"
-      },
-      "monitor": "Monitor",
-      "status": {
-        "tracing": "Trazando",
-        "stopping": "Deteniendo",
-        "stopped": "Detenido",
-        "exiting": "Saliendo",
-        "unknown": "Desconocido"
+    "mini_settings_language": {
+      "title": "Cambiar idioma"
+    },
+    "mini_settings_theme": {
+      "title": "Cambiar tema del WebUI",
+      "theme": {
+        "dark": "Modo Oscuro",
+        "light": "Modo Claro",
+        "amoled": "Modo AMOLED",
+        "system_based": "Tema basado en el sistema"
       }
     }
+  },
+  "globals": {
+    "unknown": "Desconocido"
   }
 }

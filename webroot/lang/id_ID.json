@@ -1,34 +1,15 @@
 {
   "langName": "Bahasa Indonesia (Indonesia)",
-  "global": {
-    "unknown": "Tidak diketahui"
-  },
-  "smallPage": {
-    "language": {
-      "header": "Pilih bahasa baru Anda"
-    },
-    "theme": {
-      "header": "Pilih tema baru Anda",
-      "dark": "Gelap",
-      "light": "Terang",
-      "system": "Bawaan Sistem"
-    },
-    "errorh": {
-      "buttons": {
-        "copy": "SALIN",
-        "clear": "BERSIHKAN SEMUA LOG"
-      },
-      "header": "Log Error",
-      "placeholder": "Tidak ada log error tercatat disini!"
-    }
-  },
-  "page": {
+  "pages": {
     "home": {
-      "header": "Beranda",
+      "title": "Beranda",
+      "unknown": "Tidak diketahui",
+      "androidVersion": "Versi Android",
+			"linuxKernelVersion": "Versi Kernel Linux",
       "status": {
-        "notWorking": "Tidak Bekerja",
-        "ok": "Bekerja",
-        "partially": "Bekerja Sebagian"
+        "notWorking": "Tidak Berfungsi",
+        "ok": "Berfungsi",
+        "partially": "Berfungsi Sebagian"
       },
       "info": {
         "version": "Versi",
@@ -40,54 +21,67 @@
         }
       }
     },
+    "actions": {
+      "title": "Tindakan",
+      "monitor": {
+        "title": "Pemantauan",
+        "status": {
+          "tracing": "Melacak",
+          "stopping": "Menghentikan",
+          "stopped": "Terhenti",
+          "exiting": "Sedang Keluar",
+          "unknown": "Tidak diketahui"
+        },
+        "button": {
+          "pause": "Jeda",
+          "stop": "Berhenti",
+          "start": "Mulai"
+        }
+      }
+    },
     "modules": {
-      "header": "Modul",
-      "notAvaliable": "Tidak ada modul yang menggunakan Zygisk disini.",
+      "title": "Modul",
+      "notAvaliable": "Tidak ada modul yang menggunakan Zygisk.",
       "arch": "Arsitektur: "
     },
     "settings": {
-      "header": "Pengaturan",
-      "font": {
-        "header": "Gunakan Font Sistem",
-        "description": "Opsi ini akan mengaktifkan font sistem pada WebUI saat ini. (Mungkin tidak kompatibel dengan FlipFont)"
+      "title": "Pengaturan",
+      "language": {
+        "title": "Ubah Bahasa",
+        "description": "Ubah bahasa WebUI sesuai yang anda pilih."
+      },
+      "fullscreen": {
+        "title": "Mematikan mode layar penuh di WebUI",
+        "description": "Pilihan ini dapat membuat WebUI tidak menggunakan layar penuh."
       },
       "theme": {
-        "header": "Tema Sistem",
-        "description": "Pilih tema untuk tampilan WebUI Anda saat ini"
+        "title": "Ubah Tema WebUI",
+        "description": "Pilih tema sistem untuk WebUI saat ini."
       },
-      "language": {
-        "header": "Ubah Bahasa",
-        "description": "Ubah ke bahasa baru Anda"
+      "font": {
+        "title": "Gunakan Font Sistem",
+        "description": "Opsi ini akan mengaktifkan font sistem pada WebUI saat ini. (Mungkin tidak kompatibel dengan FlipFont)"
       },
-      "logs": {
-        "header": "Log Error",
-        "description": "Lihat semua log Error Anda"
-      },
-      "credits": {
-        "module": "Developer Modul",
-        "original": "Developer Modul Asli",
-        "web": "Developer WebUI"
-      },
-      "license": {
-        "module": "Lisensi Modul",
-        "web": "Lisensi WebUI"
-      }
+      "moduleDevelopers": "Pengembang Modul",
+      "WebUIDevelopers": "Pengembang WebUI",
+      "orginalDevelopers": "Pengembang Modul Asli",
+      "moduleLicense": "Lisensi Modul",
+      "WebUILicense": "Lisensi WebUI"
     },
-    "actions": {
-      "header": "Tindakan",
-      "monitorButton": {
-        "pause": "Jeda",
-        "stop": "Berhenti",
-        "start": "Mulai"
-      },
-      "monitor": "Monitor",
-      "status": {
-        "tracing": "Melacak",
-        "stopping": "Menghentikan",
-        "stopped": "Terhenti",
-        "exiting": "Terkeluar",
-        "unknown": "Tidak diketahui"
+    "mini_settings_language": {
+      "title": "Ubah Bahasa"
+    },
+    "mini_settings_theme": {
+      "title": "Ubah Tema WebUI",
+      "theme": {
+        "dark": "Mode Gelap",
+        "light": "Mode Terang",
+        "amoled": "Mode Amoled",
+        "system_based": "Mengikuti Tema Sistem"
       }
     }
+  },
+  "globals": {
+    "unknown": "Tidak diketahui"
   }
 }

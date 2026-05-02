@@ -1,93 +1,87 @@
 {
   "langName": "Türkçe (Türkiye)",
-  "global": {
-    "unknown": "Bilinmiyor"
-  },
-  "smallPage": {
-    "language": {
-      "header": "Yeni dilinizi seçin"
-    },
-    "theme": {
-      "header": "Yeni temanızı seçin",
-      "dark": "Koyu",
-      "light": "Açık",
-      "system": "Sistem Tabanlı"
-    },
-    "errorh": {
-      "buttons": {
-        "copy": "KOPYALA",
-        "clear": "BÜTÜN KAYITLARI SİL"
-      },
-      "header": "Hata Geçmişi",
-      "placeholder": "Burada kaydedilmiş hata yok!"
-    }
-  },
-  "page": {
+  "pages": {
     "home": {
-      "header": "Anasayfa",
+      "title": "Ana Sayfa",
+      "unknown": "Bilinmiyor",
+      "androidVersion": "Android Sürümü",
+      "linuxKernelVersion": "Linux Çekirdek Sürümü",
       "status": {
-        "notWorking": "Aktif Değil",
-        "ok": "Aktif",
-        "partially": "Yarı-Aktif"
+        "notWorking": "Çalışmıyor",
+        "ok": "Çalışıyor",
+        "partially": "Kısmen Çalışıyor"
       },
       "info": {
-        "version": "Versiyon",
-        "root": "Root İmplementasyonu",
+        "version": "Sürüm",
+        "root": "Root Uygulama Metodu",
         "zygote": {
-          "injected": "Enjekte",
-          "notInjected": "Enjekte Değil",
+          "injected": "Enjekte Edildi",
+          "notInjected": "Enjekte Edilmedi",
           "unknown": "Bilinmiyor"
         }
       }
     },
+    "actions": {
+      "title": "İşlemler",
+      "monitor": {
+        "title": "Durum",
+        "status": {
+          "tracing": "Çalışıyor",
+          "stopping": "Durduruluyor",
+          "stopped": "Durduruldu",
+          "exiting": "Çıkılıyor",
+          "unknown": "Bilinmiyor"
+        },
+        "button": {
+          "start": "Başlat",
+          "stop": "Durdur",
+          "pause": "Duraklat"
+        }
+      }
+    },
     "modules": {
-      "header": "Modüller",
-      "notAvaliable": "Burada Zygisk kullanan modül yok.",
+      "title": "Modüller",
+      "notAvaliable": "Zygisk kullanan hiçbir modül yok.",
       "arch": "Mimari: "
     },
-    "actions": {
-      "header": "Hareketler",
-      "monitorButton": {
-        "start": "Başlat",
-        "stop": "Bitir",
-        "pause": "Durdur"
-      },
-      "monitor": "Monitör",
-      "status": {
-        "tracing": "İzleniyor",
-        "stopping": "Durduluyor",
-        "stopped": "Durdu",
-        "exiting": "Çıkılıyor",
-        "unknown": "Bilinmiyor"
-      }
-    },
     "settings": {
-      "header": "Ayarlar",
-      "font": {
-        "header": "Sistem yazı tipini aktifleştir",
-        "description": "Bu seçenek anlık WebUI (Web Arayüzü) için sistem yazıt tipini aktifleştirir. NOT: FlipFont ile uyumlu olmayabilir!"
+      "title": "Ayarlar",
+      "language": {
+        "title": "Dil değiştir",
+        "description": "Web arayüzünün dilini seçilen dille değiştirin."
+      },
+      "fullscreen": {
+        "title": "WebUI'de tam ekran modunu devre dışı bırak",
+        "description": "Bu seçenek, WebUI'nin ekranın tamamını kaplamamasını sağlayacaktır."
       },
       "theme": {
-        "header": "Sistem Teması",
-        "description": "Anlık WebUI için sistem temanı seç"
+        "title": "WebUI temasını değiştir",
+        "description": "Mevcut WebUI için sistem temanızı seçin"
       },
-      "language": {
-        "header": "Dil değiştir",
-        "description": "Yeni dilini seç"
+      "font": {
+        "title": "Sistem yazı tipini etkinleştir",
+        "description": "Bu seçenek, mevcut WebUI sistem yazı tipini etkinleştirecektir.\nNOT: FlipFont ile uyumlu olmayabilir"
       },
-      "logs": {
-        "header": "Hata Geçmişi",
-        "description": "Bütün hata kayıtlarını görüntüle"
-      },
-      "credits": {
-        "module": "Modül Geliştiricisi",
-        "original": "Orijinal Modül Geliştiricisi",
-        "web": "WebUI Geliştiricisi"
-      },
-      "license": {
-        "module": "Modül Lisansı",
-        "web": "WebUI Lisansı"
+      "moduleDevelopers": "Modül Geliştirici(leri)",
+      "WebUIDevelopers": "WebUI Geliştirici(leri)",
+      "orginalDevelopers": "Orijinal Modül Geliştirici(leri)",
+      "moduleLicense": "Modül Lisansı",
+      "WebUILicense": "WebUI Lisansı"
+    },
+    "mini_settings_language": {
+      "title": "Dili değiştir"
+    },
+    "mini_settings_theme": {
+      "title": "WebUI temasını değiştir",
+      "theme": {
+        "dark": "Karanlık Tema",
+        "light": "Açık Tema",
+        "amoled": "Amoled Tema",
+        "system_based": "Sisteme Göre Tema"
       }
     }
+  },
+  "globals": {
+    "unknown": "Bilinmiyor"
   }
 }

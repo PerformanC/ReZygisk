@@ -1,93 +1,87 @@
 {
   "langName": "العربية",
-  "global": {
-    "unknown": "غير معروف"
-  },
-  "smallPage": {
-    "language": {
-      "header": "اختر اللغة"
-    },
-    "theme": {
-      "header": "اختر السمة",
-      "dark": "مظلم",
-      "light": "مضئ",
-      "system": "تلقائي"
-    },
-    "errorh": {
-      "buttons": {
-        "copy": "نسخ",
-        "clear": "حذف كل السجلات"
-      },
-      "header": "سجلات الأخطاء",
-      "placeholder": "لا توجد أخطاء!"
-    }
-  },
-  "page": {
+  "pages": {
     "home": {
-      "header": "الصفحة الرئيسية",
+      "title": "الصفحة الرئيسية",
+      "unknown": "غير معروف",
+      "androidVersion": "إصدار أندرويد",
+      "linuxKernelVersion": "إصدار نواة لينكس",
       "status": {
         "notWorking": "لا يعمل",
         "ok": "يعمل",
-        "partially": "يعمل بشكل جزئي"
+        "partially": "يعمل جزئياً"
       },
       "info": {
         "version": "الإصدار",
-        "root": "مدير الروت",
+        "root": "نوع الروت",
         "zygote": {
-          "injected": "محقن",
-          "notInjected": "غير محقن",
+          "injected": "تم الحقن",
+          "notInjected": "لم يتم الحقن",
           "unknown": "غير معروف"
         }
       }
     },
-    "modules": {
-      "header": "الإضافات",
-      "notAvaliable": "لا توجد إضافات تستخدم zygisk.",
-      "arch": "النواة: "
-    },
     "actions": {
-      "header": "زر الإجراء",
-      "monitorButton": {
-        "start": "تشغيل",
-        "stop": "تعطيل",
-        "pause": "إيقاف مؤقت"
-      },
-      "monitor": "المراقبة",
-      "status": {
-        "tracing": "يتم التتبع",
-        "stopping": "يتم الإيقاف",
-        "stopped": "متوقف",
-        "exiting": "يتم الخروج",
-        "unknown": "غير معروف"
+      "title": "الإجراءات",
+      "monitor": {
+        "title": "المراقبة",
+        "status": {
+          "tracing": "جارٍ التتبع",
+          "stopping": "جارٍ الإيقاف",
+          "stopped": "متوقف",
+          "exiting": "جارٍ الخروج",
+          "unknown": "غير معروف"
+        },
+        "button": {
+          "start": "تشغيل",
+          "stop": "إيقاف",
+          "pause": "إيقاف مؤقت"
+        }
       }
+    },
+    "modules": {
+      "title": "الوحدات",
+      "notAvaliable": "لا توجد وحدات تستخدم Zygisk.",
+      "arch": "المعمارية:"
     },
     "settings": {
-      "header": "الإعدادات",
-      "font": {
-        "header": "تشغيل خط النظام",
-        "description": "هذا الخيار يقوم بعرض النص بخط النظام بدلا من خط WebUI. قد لا يتوافق مع FlipFont"
+      "title": "الإعدادات",
+      "language": {
+        "title": "تغيير اللغة",
+        "description": "تغيير لغة WebUI إلى اللغة المختارة."
+      },
+      "fullscreen": {
+        "title": "تعطيل وضع ملء الشاشة",
+        "description": "هذا الخيار يمنع WebUI من ملء الشاشة بالكامل."
       },
       "theme": {
-        "header": "الثيمات",
-        "description": "اختر الثيم المناسب"
+        "title": "تغيير مظهر WebUI",
+        "description": "اختر مظهر النظام لواجهة WebUI الحالية."
       },
-      "language": {
-        "header": "تغيير اللغة",
-        "description": "غير إلى لغة أخرى"
+      "font": {
+        "title": "تفعيل خط النظام",
+        "description": "يعرض هذا الخيار النص بخط النظام بدلاً من خط WebUI. قد لا يتوافق مع FlipFont."
       },
-      "logs": {
-        "header": "سجل الأخطاء",
-        "description": "إعرض كل سجلات الأخطاء"
-      },
-      "credits": {
-        "module": "مطور الإضافة",
-        "original": "المطورون الأصليون",
-        "web": "مطور واجهة الويب"
-      },
-      "license": {
-        "module": "ترخيص الإضافة",
-        "web": "ترخيص واجهة الويب"
+      "moduleDevelopers": "مطورو الإضافة",
+      "WebUIDevelopers": "مطورو WebUI",
+      "orginalDevelopers": "المطورون الأصليون للإضافة",
+      "moduleLicense": "ترخيص الإضافة",
+      "WebUILicense": "ترخيص WebUI"
+    },
+    "mini_settings_language": {
+      "title": "تغيير اللغة"
+    },
+    "mini_settings_theme": {
+      "title": "تغيير مظهر WebUI",
+      "theme": {
+        "dark": "الوضع الداكن",
+        "light": "الوضع الفاتح",
+        "amoled": "وضع الأموليد",
+        "system_based": "حسب النظام"
       }
     }
+  },
+  "globals": {
+    "unknown": "غير معروف"
   }
 }

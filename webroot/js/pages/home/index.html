@@ -1,0 +1,58 @@
+<div class="panel">
+  <div class="header">ReZygisk</div>
+
+  <!-- INFO: Status card -->
+  <div id="info_card" class="bright card list">
+    <div class="brightc" style="display: flex; align-items: center;">
+      <div id="rz_icon_state" class="brightc" style="display: flex; align-items: center;">
+        <img class="brightc" src="assets/mark.svg">
+      </div>
+
+      <div id="rz_state" class="brightc lock" style="font-size: 1.2em; padding-left: 15px;">
+        {{unknown}}
+      </div>
+    </div>
+  </div>
+
+  <!-- INFO: Info card -->
+  <div class="dim card">
+    <div class="dimc" style="margin-bottom: 14px;">
+      <div class="dimc" style="font-size: 0.8em">ROM / Kernel</div>
+    </div>
+
+    <div id="android_version" class="dimc">
+      <div class="dimc" style="font-size: 17px">{{androidVersion}}</div>
+      <div class="dimc desc" id="android_version_div" style="font-size: 13px; margin-top: 1px;">{{unknown}}</div>
+    </div>
+    <div id="kernel_version" class="dimc" style="margin-top: 5px;">
+      <div class="dimc" style="font-size: 17px">{{linuxKernelVersion}}</div>
+      <div class="dimc desc" id="kernel_version_div" style="font-size: 13px; margin-top: 1px;">{{unknown}}</div>
+    </div>
+
+    <div class="dimc" style="margin-top: 18px; margin-bottom: 14px;">
+      <div class="dimc" style="font-size: 0.8em;">Root / ReZygisk</div>
+    </div>
+
+    <div class="dimc content">
+      <div class="dimc" style="font-size: 17px">{{info.version}}</div>
+      <div class="dimc desc" id="version_code" style="font-size: 13px; margin-top: 1px;">{{unknown}}</div>
+    </div>
+    <div class="dimc content">
+      <div class="dimc" style="font-size: 17px">{{info.root}}</div>
+      <div class="dimc desc" id="root_impl" style="font-size: 13px; margin-top: 1px;">{{unknown}}</div>
+    </div>
+
+    <div id="zygote_class" class="dimc" style="margin-top: 12px; margin-bottom: 14px;">
+      <div class="dimc" style="font-size: 0.8em">Zygotes</div>
+    </div>
+
+    <div id="zygote32" class="dimc content">
+      <div class="dimc" style="font-size: 17px">Zygote32</div>
+      <div class="dimc desc" id="zygote32_status" style="font-size: 13px; margin-top: 1px;">{{unknown}}</div>
+    </div>
+    <div id="zygote64" class="dimc">
+      <div class="dimc" style="font-size: 17px">Zygote64</div>
+      <div class="dimc desc" id="zygote64_status" style="font-size: 13px; margin-top: 1px;">{{unknown}}</div>
+    </div>
+  </div>
+</div>

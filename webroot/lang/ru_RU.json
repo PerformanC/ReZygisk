@@ -1,30 +1,11 @@
 {
   "langName": "Русский (Россия)",
-  "global": {
-    "unknown": "Неизвестно"
-  },
-  "smallPage": {
-    "language": {
-      "header": "Выберите ваш новый язык"
-    },
-    "theme": {
-      "header": "Выберите свою новую тему",
-      "dark": "Темная",
-      "light": "Светлая",
-      "system": "На основе системной темы"
-    },
-    "errorh": {
-      "buttons": {
-        "copy": "Копировать",
-        "clear": "Очистить все логи"
-      },
-      "header": "Журнал ошибок",
-      "placeholder": "Журнал ошибок здесь не ведется!"
-    }
-  },
-  "page": {
+  "pages": {
     "home": {
-      "header": "Главная",
+      "title": "Главная",
+      "unknown": "Неизвестно",
+      "androidVersion": "Версия Android",
+			"linuxKernelVersion": "Версия Linux",
       "status": {
         "notWorking": "Не работает",
         "ok": "Работает",
@@ -40,54 +21,67 @@
         }
       }
     },
+    "actions": {
+      "title": "Действия",
+      "monitor": {
+        "title": "Обзор",
+        "status": {
+          "tracing": "Состояние",
+          "stopping": "Остановка",
+          "stopped": "Остановлено",
+          "exiting": "Выход",
+          "unknown": "Неизвестно"
+        },
+        "button": {
+          "pause": "Пауза",
+          "stop": "Стоп",
+          "start": "Начать"
+        }
+      }
+    },
     "modules": {
-      "header": "Модули",
+      "title": "Модули",
       "notAvaliable": "Здесь нет модулей, использующих Zygisk.",
       "arch": "Архитектура: "
     },
     "settings": {
-      "header": "Настройки",
-      "font": {
-        "header": "Включить системный шрифт",
-        "description": "Эта опция включит системный шрифт в текущем WebUI. ПРИМЕЧАНИЕ: Может быть несовместимо с FlipFont"
+      "title": "Настройки",
+      "language": {
+        "title": "Сменить язык",
+        "description": "Сменить язык WebUI на выбранный."
+      },
+      "fullscreen": {
+        "title": "Выключить полноэкранный режим в WebUI",
+        "description": "С данной опцией, WebUI не будет занимать весь экран."
       },
       "theme": {
-        "header": "Системная тема",
-        "description": "Выберите вашу системную тему для текущего WebUI"
+        "title": "Сменить тему WebUI",
+        "description": "Выберите вашу системную тему для текущего WebUI."
       },
-      "language": {
-        "header": "Сменить язык",
-        "description": "Измените на ваш новый язык"
+      "font": {
+        "title": "Включить системный шрифт",
+        "description": "Эта опция включит системный шрифт в текущем WebUI. ПРИМЕЧАНИЕ: Может быть несовместимо с FlipFont"
       },
-      "logs": {
-        "header": "История ошибок",
-        "description": "Просмотреть весь журнал ваших ошибок"
-      },
-      "credits": {
-        "module": "Разработчик модуля",
-        "original": "Разработчик оригинального модуля",
-        "web": "Разработчик WebUI"
-      },
-      "license": {
-        "module": "Лицензия модуля",
-        "web": "Лицензия WebUI"
-      }
+      "moduleDevelopers": "Разработчик(и) модуля",
+      "WebUIDevelopers": "Разработчик(и) WebUI",
+      "orginalDevelopers": "Разработчик(и) оригинального модуля",
+      "moduleLicense": "Лицензия модуля",
+      "WebUILicense": "Лицензия WebUI"
     },
-    "actions": {
-      "header": "Действия",
-      "monitorButton": {
-        "pause": "Пауза",
-        "stop": "Стоп",
-        "start": "Начать"
-      },
-      "monitor": "Обзор",
-      "status": {
-        "tracing": "Состояние",
-        "stopping": "Остановка",
-        "stopped": "Остановлено",
-        "exiting": "Выход",
-        "unknown": "Неизвестно"
+    "mini_settings_language": {
+      "title": "Сменить язык"
+    },
+    "mini_settings_theme": {
+      "title": "Сменить тему WebUI",
+      "theme": {
+        "dark": "Тёмная тема",
+        "light": "Светлая тема",
+        "amoled": "Amoled тема",
+        "system_based": "Системная тема"
       }
     }
+  },
+  "globals": {
+    "unknown": "Неизвестно"
   }
 }
