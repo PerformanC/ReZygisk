@@ -10,6 +10,7 @@ export function setLight(chooseSet) {
   rootCss.style.setProperty('--dim', '#e0e0e0')
   rootCss.style.setProperty('--icon', '#acacac')
   rootCss.style.setProperty('--desktop-navbar', '#fefefe')
+  rootCss.style.setProperty('--icon-filter', 'invert(0.3)')
   rootCss.style.setProperty('--desktop-navicon', '#eeeeee')
   rootCss.style.setProperty('--button-enabled', '#eeeeee')
   rootCss.style.setProperty('--icon-bc', '#c9c9c9')

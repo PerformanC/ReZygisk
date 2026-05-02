@@ -1,17 +1,4 @@
 /* INFO: Code shared with settings page */
-.panel {
-  min-height: 100dvh;
-  margin-bottom: 140px;
-  display: flex;
-  flex-direction: column;
-}
-
-#lang_list {
-  flex: 1;
-  position: relative;
-  min-height: 0;
-}
-
 .lang_loader_center {
   position: absolute;
   inset: 0;

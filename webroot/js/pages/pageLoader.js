@@ -35,13 +35,6 @@ const pageReplacements = allPages.reduce((obj, pageId) => {
   return obj
 }, {})
 
-// TW webui framework event functions
-function eventPageChanged(pageId) {
-  var evt = new CustomEvent('pagechanged', { detail: { pageId } });
-  window.dispatchEvent(evt);
-}
-
-
 async function loadHTML(pageId) {
   if (miniPageRegex.test(pageId)) {
     const miniPageIdData = miniPageRegex.exec(pageId)
@@ -390,13 +383,14 @@ function applyHTMLChanges(page, pageId) {
 
 export async function loadPage(pageId) {
   /* INFO: Ignore navigation to the same page or while another transition is still running. */
-  if (whichCurrentPage() === pageId) return false
+  const currentPage = whichCurrentPage()
+
+  if (currentPage === pageId) return false
   if (isPageTransitioning) return false
 
   isPageTransitioning = true
 
   try {
-    const currentPage = whichCurrentPage()
     setNavbar(pageId)
 
     const targetIsMiniPage = isMiniPage(pageId)
@@ -417,18 +411,62 @@ export async function loadPage(pageId) {
     }
 
     const currentPageContent = document.getElementById(`${currentPage}_content`)
-
     if (!currentIsMiniPage && targetIsMiniPage) {
+      history.pushState(true, '', location.pathname)
+
+      if (!loadedPageView.includes(pageId)) {
+        const minipage_header = `
+          <div class="header" style="padding-left: 20px; display: flex; align-items: center; justify-content: initial;">
+            <div id="minipage_close" class="back_icon" style="width: 36px; height: 36px; margin-right: 6px;"></div>
+            <div id="minipage_title">ReZygisk: {{title}}</div>
+          </div>
+        `
+        pageSpecificContent.insertAdjacentHTML('afterbegin', minipage_header)
+      }
+
       await initializePage(pageId, pageSpecificContent, targetNeedsRevert)
+
+      const minipage_back_icon = pageSpecificContent.querySelector('.back_icon')
+
+      let isClosing = false
+      async function miniPageCloseListener(isClick) {
+        if (isClosing) return true
+        isClosing = true
+
+        if (isClick) history.back()
+
+        const parentPage = miniPageRegex.exec(pageId)[1]
+        setNavbar(parentPage)
+
+        await runMiniPageLeave(pageSpecificContent)
+        unuseHTML(pageSpecificContent, pageId)
+        document.getElementById(`${pageId}_css`).media = 'not all'
+
+        return true
+      }
+
+      minipage_back_icon.addEventListener('click', () => miniPageCloseListener(true), { once: true })
+      window.onceTrueEvent('popstate', () => miniPageCloseListener(false))
+
       await runMiniPageEnter(pageSpecificContent)
+
       return true
     }
 
     if (currentIsMiniPage) {
+      history.back()
+
       /* INFO: Leaving a mini page always closes its overlay first, then opens the target page. */
       await runMiniPageLeave(currentPageContent)
       unuseHTML(currentPageContent, currentPage)
       document.getElementById(`${currentPage}_css`).media = 'not all'
+
+      const parentPage = miniPageRegex.exec(currentPage)[1]
+      if (parentPage !== pageId && !targetIsMiniPage) {
+        document.getElementById(`${parentPage}_content`).style.display = 'none'
+        unuseHTML(document.getElementById(`${parentPage}_content`), parentPage, false)
+        document.getElementById(`${parentPage}_css`).media = 'not all'
+      }
 
       await initializePage(pageId, pageSpecificContent, targetNeedsRevert)
 
@@ -461,7 +499,11 @@ export async function loadPage(pageId) {
     return false
   } finally {
     isPageTransitioning = false
-    eventPageChanged(pageId)
+
+    if (pageId === 'home' && currentPage !== 'home')
+      history.back()
+    else if (pageId !== 'home' && currentPage === 'home')
+      history.pushState(true, '', location.pathname)
   }
 }
 
@@ -491,8 +533,10 @@ export async function loadMiniPage(miniPageId, unloadCb) {
   /* INFO: Not allow it to interact with the page, just click to close */
   page_content.style.pointerEvents = navbar_support_div.style.pointerEvents = 'none'
 
-  window.onceTrueEvent('click', (event) => {
+  function cleanup(isClick) {
     if (utils.isDivOrInsideDiv(event.target, 'minipage_content')) return;
+
+    if (isClick) history.back()
 
     const minipage_content = document.getElementById('minipage_content')
     minipage_content.style.animation = 'fade-out 0.2s'
@@ -511,7 +555,10 @@ export async function loadMiniPage(miniPageId, unloadCb) {
     unloadCb()
 
     return true
-  })
+  }
+
+  window.onceTrueEvent('click', (event) => cleanup(true))
+  window.onceTrueEvent('popstate', () => cleanup(false))
 
   const minipage_content = document.getElementById('minipage_content')
   minipage_content.style.cssText = `
@@ -531,6 +578,8 @@ export async function loadMiniPage(miniPageId, unloadCb) {
       </div>
     </div>
   `
+
+  history.pushState(true, '', location.pathname)
 }
 
 export async function reloadPage() {
@@ -598,4 +647,10 @@ window.addEventListener('unhandledrejection', function (event) {
   console.error('Unhandled promise rejection:', event.reason)
 
   exec(`echo "Error (Unhandled Rejection): ${event.reason}\n\n${event.reason.stack}" > /data/adb/rezygisk/webui_error.log`)
+})
+
+window.addEventListener('popstate', async () => {
+  if (history.state !== null) return;
+
+  await loadPage('home')
 })

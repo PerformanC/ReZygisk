@@ -14,7 +14,7 @@
   left: 0;
   top: 0;
   background: var(--background);
-  z-index: 10;
+  z-index: 9999;
   justify-content: center;
   display: flex;
   align-items: center;

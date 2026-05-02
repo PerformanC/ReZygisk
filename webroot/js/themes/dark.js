@@ -11,6 +11,7 @@ export function setDark(chooseSet) {
   rootCss.style.setProperty('--icon-bc', '#292929')
   rootCss.style.setProperty('--desktop-navbar', '#252525')
   rootCss.style.setProperty('--button-enabled', '#535353')
+  rootCss.style.setProperty('--icon-filter', 'invert(1)')
   rootCss.style.setProperty('--desktop-navicon', '#3a3a3a')
   rootCss.style.setProperty('--button', 'var(--background)')
 

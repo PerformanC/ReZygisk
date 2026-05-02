@@ -194,16 +194,12 @@ body {
 
 .page_loader_mini_layer {
   position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  overflow-y: scroll;
   inset: 0;
   pointer-events: auto;
-  z-index: 8;
+  z-index: 11;
   background: var(--background);
   box-shadow: -10px 0 30px rgb(0 0 0 / 20%);
+  overflow-y: auto;
 }
 
 .page_loader_mini_in {

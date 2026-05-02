@@ -11,6 +11,7 @@ export function setAmoled(chooseSet) {
   rootCss.style.setProperty('--icon-bc', '#202020ff')
   rootCss.style.setProperty('--desktop-navbar', '#161616ff')
   rootCss.style.setProperty('--desktop-navicon', '#242424ff')
+  rootCss.style.setProperty('--icon-filter', 'invert(1)')
   rootCss.style.setProperty('--button', 'var(--background)')
 
   if (chooseSet) setData('amoled')
