@@ -18,16 +18,16 @@ Meskipun developer Zygisk Next terkenal dan dipercaya dalam komunitas Android, h
 
 ## Komponen Pendukung
 
-| Alat             | Deskripsi                                  |
-|------------------|--------------------------------------------|
-| `Android NDK`    | Native Development Kit untuk Android       |
+| Alat          | Deskripsi                            |
+|---------------|--------------------------------------|
+| `Android NDK` | Native Development Kit untuk Android |
 
 ### Komponen Pendukung C++
 
-| Ketergantungan | Deskripsi                       |
-|----------------|---------------------------------|
-| `LSPLt`        | Simple PLT Hook untuk Android   |
-| `CSOLoader`    | Penghubung khusus SOTA Linux    |
+| Ketergantungan | Deskripsi                     |
+|----------------|-------------------------------|
+| `PLTI`         | Simple PLT Hook untuk Android |
+| `CSOLoader`    | Penghubung khusus SOTA Linux  |
 
 ## Instalasi
 

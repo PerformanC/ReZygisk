@@ -18,15 +18,15 @@ Os desenvolvedores do Zygisk Next são famosos e confiados pela comunidade Andro
 
 ## Dependências
 
-| Ferramenta      | Descrição                                    |
-|-----------------|----------------------------------------------|
-| `Android NDK`   | Kit de Desenvolvimento Nativo para o Android |
+| Ferramenta    | Descrição                                    |
+|---------------|----------------------------------------------|
+| `Android NDK` | Kit de Desenvolvimento Nativo para o Android |
 
 ### Dependências C
 
 | Dependência | Descrição                         |
 |-------------|-----------------------------------|
-| `LSPLt`     | PLT Hook simples para o Android   |
+| `PLTI`      | PLT Hook simples para o Android   |
 | `CSOLoader` | Custom linker SOTA para o Android |
 
 ## Instalação

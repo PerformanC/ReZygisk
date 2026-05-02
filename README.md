@@ -26,7 +26,7 @@ The Zygisk Next developers are famous and trusted in the Android community, howe
 
 | Dependency  | Description                   |
 |-------------|-------------------------------|
-| `LSPLt`     | Simple PLT Hook for Android   |
+| `PLTI`      | Simple PLT Hook for Android   |
 | `CSOLoader` | SOTA Linux custom linker      |
 
 ## Installation
