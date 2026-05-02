@@ -439,7 +439,7 @@ export async function loadPage(pageId) {
         setNavbar(parentPage)
 
         await runMiniPageLeave(pageSpecificContent)
-        unuseHTML(pageSpecificContent, pageId)
+        unuseHTML(pageSpecificContent, pageId, false)
         document.getElementById(`${pageId}_css`).media = 'not all'
 
         return true
