@@ -4,7 +4,7 @@
 
 ReZygisk é uma fork do Zygisk Next, uma implementação do Zygisk independente, fornecendo a API do Zygisk para o KernelSU, APatch e Magisk (além do embutido).
 
-Ele foca em modernizar e re-escrever todo o código fonte para C, permitindo uma implementação da API do Zygisk com uma licença mais permissiva e amigável a FOSS.
+O código fonte foi totalmente reescrito para C, trazendo não só um código fonte muito mais fácil de entender, mas também binários mais leves que também são mais rápidos. Custom linkers também foram adicionados para deixar o ReZygisk à prova de futuro contra detecções, não usando o linker do sistema em nenhuma ocasião normal, derrotando qualquer detecção baseada em linker.
 
 ## Por quê?
 
@@ -18,15 +18,16 @@ Os desenvolvedores do Zygisk Next são famosos e confiados pela comunidade Andro
 
 ## Dependências
 
-| Ferramenta      | Descrição                                    |
-|-----------------|----------------------------------------------|
-| `Android NDK`   | Kit de Desenvolvimento Nativo para o Android |
+| Ferramenta    | Descrição                                    |
+|---------------|----------------------------------------------|
+| `Android NDK` | Kit de Desenvolvimento Nativo para o Android |
 
-### Dependências C++
+### Dependências C
 
-| Dependência | Descrição                        |
-|-------------|----------------------------------|
-| `lsplt`     | PLT Hook simples para o Android  |
+| Dependência | Descrição                         |
+|-------------|-----------------------------------|
+| `PLTI`      | PLT Hook simples para o Android   |
+| `CSOLoader` | Custom linker SOTA para o Android |
 
 ## Instalação
 
@@ -72,4 +73,4 @@ Para quaisquer problemas no ReZygisk ou qualquer projeto da PerformanC, sinta-se
 
 ## Licença
 
-ReZygisk é majoritamente licenciado em GPL, por Dr-TSNG, mas também em AGPL 3.0, pela A Organização PerformanC (The PerformanC Organization) para código re-escrito. Você pode ler mais em [Open Source Initiative](https://opensource.org/licenses/AGPL-3.0).
+ReZygisk é licenciado em [AGPL 3.0](./LICENSE). Você pode ler mais em [Open Source Initiative](https://opensource.org/licenses/AGPL-3.0).

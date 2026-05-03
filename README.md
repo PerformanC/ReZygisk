@@ -1,10 +1,10 @@
 # ReZygisk
 
-[Bahasa Indonesia](/READMEs/README_id-ID.md)|[Tiếng Việt](/READMEs/README_vi-VN.md)|[Português Brasileiro](/READMEs/README_pt-BR.md)|[French](/READMEs/README_fr-FR.md)|[日本語](/READMEs/README_ja-JP.md)|[العربية السعودية](/READMEs/README_ar-SA.md)|[Русский](/READMEs/README_ru-RU.md)
+[Español(Argentina)](/READMEs/README_es-AR.md)|[Bahasa Indonesia](/READMEs/README_id-ID.md)|[Português Brasileiro](/READMEs/README_pt-BR.md)|[Українська](/READMEs/README_uk-UA.md)|[Tiếng Việt](/READMEs/README_vi-VN.md)|
 
 ReZygisk is a fork of Zygisk Next, a standalone implementation of Zygisk, providing Zygisk API support for KernelSU, APatch and Magisk (Official and Kitsune).
 
-It rewrites the codebase to C entirely, bringing not only a much cleaner codebase that is easier to follow, but also a lighter binaries that are also faster. Not only that, but also introduces the usage of custom linkers to future-proof ReZygisk against future detections, not using system linker at all in normal circunstances, defeating any linker-based detection.
+The codebase has been rewritten to C entirely, bringing not only a much cleaner codebase that is easier to follow, but also a lighter binaries that are also faster. Custom linkers also have been introduced to future-proof ReZygisk against future detections, not using system linker at all in normal circunstances, defeating any linker-based detection.
 
 ## Why?
 
@@ -26,7 +26,7 @@ The Zygisk Next developers are famous and trusted in the Android community, howe
 
 | Dependency  | Description                   |
 |-------------|-------------------------------|
-| `LSPLt`     | Simple PLT Hook for Android   |
+| `PLTI`      | Simple PLT Hook for Android   |
 | `CSOLoader` | SOTA Linux custom linker      |
 
 ## Installation

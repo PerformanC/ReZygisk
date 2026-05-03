@@ -18,15 +18,16 @@ Meskipun developer Zygisk Next terkenal dan dipercaya dalam komunitas Android, h
 
 ## Komponen Pendukung
 
-| Alat             | Deskripsi                                  |
-|------------------|--------------------------------------------|
-| `Android NDK`    | Native Development Kit untuk Android       |
+| Alat          | Deskripsi                            |
+|---------------|--------------------------------------|
+| `Android NDK` | Native Development Kit untuk Android |
 
 ### Komponen Pendukung C++
 
-| Ketergantungan | Deskripsi                       |
-|----------------|---------------------------------|
-| `lsplt`        | Simple PLT Hook untuk Android   |
+| Ketergantungan | Deskripsi                     |
+|----------------|-------------------------------|
+| `PLTI`         | Simple PLT Hook untuk Android |
+| `CSOLoader`    | Penghubung khusus SOTA Linux  |
 
 ## Instalasi
 
@@ -35,13 +36,13 @@ Meskipun developer Zygisk Next terkenal dan dipercaya dalam komunitas Android, h
 Pemilihan build/zip sangat penting, karena ini akan menentukan seberapa tersembunyi dan stabil ReZygisk. Namun, ini bukan tugas yang sulit:
 
 - `release`: Direkomendasikan untuk penggunaan normal. Binary lebih optimal, logging minimal.
-- `debug`: Untuk keperluan debug. Logging lengkap, tanpa optimasi.
+- `debug`: Untuk keperluan debug. Logging lengkap, tanpa optimasi. Dikarenakan keterangan sebelumnya, **hanya gunakan module ini untuk proses debugging** dan **untuk mendapatkan log ketika menyusun Issue di GitHub**.
 
-Untuk branch, selalu gunakan main branch, kecuali diinstruksikan oleh pengembang, atau jika Anda ingin menguji fitur mendatang dan menyadari risikonya.
+Untuk branch, selalu gunakan `main` branch, kecuali diinstruksikan oleh pengembang untuk menggunakan branch lain, atau jika Anda ingin menguji fitur mendatang dan menyadari risikonya.
 
 ### 2. Flash file ZIP
 
-Setelah memilih build yang tepat, Anda harus mem-flash-nya menggunakan pengelola root Anda saat ini, seperti Magisk atau KernelSU. Anda dapat melakukannya dengan masuk ke bagian Modules di pengelola root Anda dan memilih zip yang telah diunduh.
+Setelah memilih build yang tepat, Anda harus mem-flash-nya menggunakan pengelola root Anda saat ini, seperti Magisk atau KernelSU. Anda dapat melakukannya dengan masuk ke bagian `Modules` di pengelola root Anda dan memilih zip yang telah diunduh.
 
 Setelah mem-flash, periksa log instalasi untuk memastikan tidak ada kesalahan, dan jika semuanya selesai, Anda dapat me-reboot perangkat Anda
 
