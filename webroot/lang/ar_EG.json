@@ -65,8 +65,7 @@
       "moduleDevelopers": "مطورو الإضافة",
       "WebUIDevelopers": "مطورو WebUI",
       "orginalDevelopers": "المطورون الأصليون للإضافة",
-      "moduleLicense": "ترخيص الإضافة",
-      "WebUILicense": "ترخيص WebUI"
+      "moduleLicense": "ترخيص الإضافة"
     },
     "mini_settings_language": {
       "title": "تغيير اللغة"

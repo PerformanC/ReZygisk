@@ -65,8 +65,7 @@
       "moduleDevelopers": "Modül Geliştirici(leri)",
       "WebUIDevelopers": "WebUI Geliştirici(leri)",
       "orginalDevelopers": "Orijinal Modül Geliştirici(leri)",
-      "moduleLicense": "Modül Lisansı",
-      "WebUILicense": "WebUI Lisansı"
+      "moduleLicense": "Modül Lisansı"
     },
     "mini_settings_language": {
       "title": "Dili değiştir"

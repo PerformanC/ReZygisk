@@ -65,8 +65,7 @@
       "moduleDevelopers": "モジュールの開発者",
       "WebUIDevelopers": "WebUI の開発者",
       "orginalDevelopers": "オリジナルのモジュールの開発者",
-      "moduleLicense": "モジュールのライセンス",
-      "WebUILicense": "WebUI のライセンス"
+      "moduleLicense": "モジュールのライセンス"
     },
     "mini_settings_language": {
       "title": "言語の変更"

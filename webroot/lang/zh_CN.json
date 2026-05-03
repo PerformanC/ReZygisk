@@ -65,8 +65,7 @@
       "moduleDevelopers": "模块开发者",
       "WebUIDevelopers": "WebUI 开发者",
       "orginalDevelopers": "原始模块开发者",
-      "moduleLicense": "模块许可证",
-      "WebUILicense": "WebUI 许可证"
+      "moduleLicense": "模块许可证"
     },
     "mini_settings_language": {
       "title": "语言"

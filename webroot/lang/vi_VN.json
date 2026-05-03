@@ -65,8 +65,7 @@
       "moduleDevelopers": "Những nhà phát triển mô-đun",
       "WebUIDevelopers": "Những nhà phát triển WebUI",
       "orginalDevelopers": "Những nhà phát triển mô-đun gốc",
-      "moduleLicense": "Giấy phép bản quyền mô-đun",
-      "WebUILicense": "Giấy phép bản quyền WebUI"
+      "moduleLicense": "Giấy phép bản quyền mô-đun"
     },
     "mini_settings_language": {
       "title": "Thay đổi ngôn ngữ"

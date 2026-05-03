@@ -65,8 +65,7 @@
       "moduleDevelopers": "Desarrollador(es) del módulo",
       "WebUIDevelopers": "Desarrollador(es) del WebUI",
       "orginalDevelopers": "Desarrollador(es) del Modulo Original",
-      "moduleLicense": "Licencia del Modulo",
-      "WebUILicense": "Licencia del WebUI"
+      "moduleLicense": "Licencia del Modulo"
     },
     "mini_settings_language": {
       "title": "Cambiar idioma"

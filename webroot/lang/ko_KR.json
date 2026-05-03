@@ -65,8 +65,7 @@
       "moduleDevelopers": "모듈 개발자",
       "WebUIDevelopers": "WebUI 개발자",
       "orginalDevelopers": "원작 모듈 개발자",
-      "moduleLicense": "모듈 라이선스",
-      "WebUILicense": "WebUI 라이선스"
+      "moduleLicense": "모듈 라이선스"
     },
     "mini_settings_language": {
       "title": "언어 변경"

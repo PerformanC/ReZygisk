@@ -65,8 +65,7 @@
       "moduleDevelopers": "Pengembang Modul",
       "WebUIDevelopers": "Pengembang WebUI",
       "orginalDevelopers": "Pengembang Modul Asli",
-      "moduleLicense": "Lisensi Modul",
-      "WebUILicense": "Lisensi WebUI"
+      "moduleLicense": "Lisensi Modul"
     },
     "mini_settings_language": {
       "title": "Ubah Bahasa"

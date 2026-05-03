@@ -65,8 +65,7 @@
       "moduleDevelopers": "Розробник(и) модуля",
       "WebUIDevelopers": "Розробник(и) веб-інтерфейсу",
       "orginalDevelopers": "Розробник(и) оригінального модуля",
-      "moduleLicense": "Ліцензія модуля",
-      "WebUILicense": "Ліцензія веб-інтерфейсу"
+      "moduleLicense": "Ліцензія модуля"
     },
     "mini_settings_language": {
       "title": "Змінити мову"
