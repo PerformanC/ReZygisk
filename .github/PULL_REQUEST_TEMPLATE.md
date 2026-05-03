@@ -2,7 +2,7 @@
 
 Write here about the changes you've made
 
-## Why 
+## Why
 
 Write here why you think this should be merged
 

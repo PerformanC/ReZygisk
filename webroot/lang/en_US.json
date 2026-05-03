@@ -5,7 +5,7 @@
       "title": "Home",
       "unknown": "Unknown",
       "androidVersion": "Android Version",
-			"linuxKernelVersion": "Linux Kernel Version",
+      "linuxKernelVersion": "Linux Kernel Version",
       "status": {
         "notWorking": "Not Working",
         "ok": "Working",

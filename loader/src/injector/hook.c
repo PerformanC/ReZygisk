@@ -1246,16 +1246,16 @@ static void rz_cleanup(struct zygisk_context *ctx) {
   jni_hook_list = NULL;
   jni_hook_list_count = 0;
 
-  for (size_t i = 0; i < ctx->register_info_count; i++) {                                                                                                                        
-    regfree(&ctx->register_info[i].regex);                                                                                                                                       
-    free(ctx->register_info[i].symbol);                                                                                                                                          
-  }                                                                                                                                                                              
-  ctx->register_info_count = 0;                                                                                                                                                  
-                                                                                                                                                                                
-  for (size_t i = 0; i < ctx->ignore_info_count; i++) {                                                                                                                          
-    regfree(&ctx->ignore_info[i].regex);                                                                                                                                         
-    free(ctx->ignore_info[i].symbol);                                                                                                                                            
-  }                                                                                                                                                                              
+  for (size_t i = 0; i < ctx->register_info_count; i++) {
+    regfree(&ctx->register_info[i].regex);
+    free(ctx->register_info[i].symbol);
+  }
+  ctx->register_info_count = 0;
+
+  for (size_t i = 0; i < ctx->ignore_info_count; i++) {
+    regfree(&ctx->ignore_info[i].regex);
+    free(ctx->ignore_info[i].symbol);
+  }
   ctx->ignore_info_count = 0;
 
   if (plt_hook_list) {

@@ -158,7 +158,7 @@ static int spawn_companion(char *restrict argv[], char *restrict name, int lib_f
 
     return -1;
   }
-  
+
   if (pid > 0) {
     close(companion_fd);
 

@@ -30,7 +30,7 @@
 }
 
 .button:active {
-  transform: scale(90%) 
+  transform: scale(90%);
 }
 
 /* Responsive CSS */
@@ -49,6 +49,6 @@
     font-size: 18px;
   }
   .button:active {
-    transform: scale(90%) 
+    transform: scale(90%);
   }
 }

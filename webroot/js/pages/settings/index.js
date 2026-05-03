@@ -57,7 +57,7 @@ export async function load() {
   utils.addListener(rz_webui_font_switch, 'click', () => {
     /* INFO: This is swapped, as it meant to enable the system font */
     ConfigState.enableSystemFont = !ConfigState.enableSystemFont
-  
+
     if (ConfigState.enableSystemFont) {
       const headTag = document.getElementsByTagName('head')[0]
       const styleTag = document.createElement('style')

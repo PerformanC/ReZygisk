@@ -5,7 +5,7 @@
       "title": "Головна",
       "unknown": "Невідомо",
       "androidVersion": "Версія Android",
-			"linuxKernelVersion": "Версія ядра Linux",
+      "linuxKernelVersion": "Версія ядра Linux",
       "status": {
         "notWorking": "Не працює",
         "ok": "Працює",

@@ -5,7 +5,7 @@
       "title": "Beranda",
       "unknown": "Tidak diketahui",
       "androidVersion": "Versi Android",
-			"linuxKernelVersion": "Versi Kernel Linux",
+      "linuxKernelVersion": "Versi Kernel Linux",
       "status": {
         "notWorking": "Tidak Berfungsi",
         "ok": "Berfungsi",

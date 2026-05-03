@@ -5,7 +5,7 @@
       "title": "홈",
       "unknown": "알 수 없음",
       "androidVersion": "Android 버전",
-			"linuxKernelVersion": "Linux 커널 버전",
+      "linuxKernelVersion": "Linux 커널 버전",
       "status": {
         "notWorking": "작동 안 함",
         "ok": "정상",

@@ -606,11 +606,11 @@ export function getStrings(pageId, forceDefault = false) {
       }
     })
     .catch((err) => {
-       if (!forceDefault) {
+      if (!forceDefault) {
         toast('Error loading strings for the selected language, loading default (en_US) strings.')
-        
+
         return getStrings(pageId, true)
-       }
+      }
 
       toast('Error loading default strings!')
       console.error(`Failed to load default strings for page ${pageId}: `, err)

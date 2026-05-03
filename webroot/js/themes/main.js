@@ -9,7 +9,7 @@ export const themeList = {
   light: () => setLight(true),
   system: (unavaliable) => {
     const isDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
-    if (isDark && unavaliable) setDark() 
+    if (isDark && unavaliable) setDark()
     else setLight()
   },
 }
