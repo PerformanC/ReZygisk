@@ -1,6 +1,7 @@
 # 🌎 Translators
 
 - **ar_EG** by [@ZG089](https://github.com/ZG089) & [@MahdiBoumaaraf](https://github.com/MahdiBoumaaraf)
+- **de_DE** by [@Blazzycrafer](https://github.com/Blazzycrafter) & [@j4nDr01d](https://github.com/j4nDr01d)
 - **en_US** by [@PerformanC (The PerformanC Organization)](https://github.com/PerformanC)
 - **es_AR** by [@Flopster101](https://github.com/Flopster101) & [@juanma0511](https://github.com/juanma0511)
 - **id_ID** by [@bpanca05](https://github.com/bpanca05) & [@LuckyKiddos](https://github.com/GuitarHeroStyles) & [@rizqi-developer](https://github.com/rizqi-developer)
@@ -16,7 +17,6 @@
 
 # Old Translators
 
-- **de_DE** by [@Blazzycrafer](https://github.com/Blazzycrafter)
 - **es_ES** by [@LuchoModzzz](https://github.com/Lxchoooo)
 - **es_MX** by [@LuchoModzzz](https://github.com/Lxchoooo) & [Berserkr2k](https://github.com/Berserkr2k)
 - **fr_FR** by [@GhostFRR](https://github.com/GhostFRR)
