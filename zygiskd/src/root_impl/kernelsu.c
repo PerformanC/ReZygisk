@@ -52,7 +52,7 @@ struct ksu_set_feature_cmd {
 };
 
 struct ksu_get_hook_mode_cmd {
-	char mode[16];
+  char mode[16];
 };
 
 #define KSU_IOCTL_UID_GRANTED_ROOT _IOC(_IOC_READ|_IOC_WRITE, 'K', 8, 0)

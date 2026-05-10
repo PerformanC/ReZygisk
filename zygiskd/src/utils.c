@@ -556,7 +556,7 @@ bool parse_mountinfo(const char *restrict pid, struct mountinfos *restrict mount
     int optional_start = 0, optional_end = 0;
     unsigned int id, parent, maj, min;
     sscanf(line,
-      "%u "           /* INFO: id */        
+      "%u "           /* INFO: id */
       "%u "           /* INFO: parent id */
       "%u:%u "        /* INFO: maj:min */
       "%n%*s%n "      /* INFO: mountroot */

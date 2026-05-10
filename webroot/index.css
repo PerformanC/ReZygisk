@@ -81,7 +81,7 @@
   #navbar {
     background-color: var(--desktop-navbar);
     transform: scale(0.85);
-    left: auto; 
+    left: auto;
     right: auto;
     margin-bottom: 30px;
     border-radius: 60px;

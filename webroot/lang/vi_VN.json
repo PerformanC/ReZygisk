@@ -4,8 +4,8 @@
     "home": {
       "title": "Trang Chủ",
       "unknown": "Không xác định",
-			"androidVersion": "Phiên bản Android",
-			"linuxKernelVersion": "Phiên bản hạt nhân Linux",
+      "androidVersion": "Phiên bản Android",
+      "linuxKernelVersion": "Phiên bản hạt nhân Linux",
       "status": {
         "notWorking": "Không hoạt động",
         "ok": "Đang hoạt động",
@@ -26,11 +26,11 @@
       "monitor": {
         "title": "Trình theo dõi",
         "status": {
-        	"tracing": "Đang chạy",
-        	"stopping": "Đang Dừng",
-        	"stopped": "Đã Dừng",
-        	"exiting": "Đã Thoát",
-        	"unknown": "Không Xác Định"
+          "tracing": "Đang chạy",
+          "stopping": "Đang Dừng",
+          "stopped": "Đã Dừng",
+          "exiting": "Đã Thoát",
+          "unknown": "Không Xác Định"
         },
         "button": {
           "start": "Chạy",

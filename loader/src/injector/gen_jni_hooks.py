@@ -238,13 +238,13 @@ def gen_jni_def(clz, methods):
         hook_map[clz] = []
 
     decl = ''
-    
+
     # Generate function pointer typedef for original function
     func_ptr_type = f'{methods[0].base_name()}_fn'
     # Use the first method's signature as the base (they differ only in args count)
     first_m = methods[0]
     decl += ind(0) + f'typedef {first_m.ret.type.cpp} (*{func_ptr_type})(JNIEnv *, jclass, ...);'
-    
+
     for m in methods:
         decl += ind(0) + f'__attribute__((no_stack_protector)) static {m.ret.type.cpp} {m.name}(JNIEnv *env, jclass clazz, {m.cpp()}) {{'
         decl += m.body()

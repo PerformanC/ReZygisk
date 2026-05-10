@@ -5,7 +5,7 @@
       "title": "ホーム",
       "unknown": "不明",
       "androidVersion": "Android バージョン",
-			"linuxKernelVersion": "Linux カーネルバージョン",
+      "linuxKernelVersion": "Linux カーネルバージョン",
       "status": {
         "notWorking": "動作していません",
         "ok": "動作中",

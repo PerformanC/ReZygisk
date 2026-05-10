@@ -20,7 +20,7 @@
 /* INFO: Code shared with actions page */
 .slider {
   position: absolute;
-  inset: 0; 
+  inset: 0;
   cursor: pointer;
   background-color: var(--button);
   transition: 0.4s;
@@ -78,7 +78,7 @@ input:checked + .slider {
   margin-left: 10px;
 }
 
-.switch input { 
+.switch input {
   opacity: 0;
   width: 0;
   height: 0;
