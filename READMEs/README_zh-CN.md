@@ -2,7 +2,7 @@
 
 [English](/README.md)
 
-ReZygisk 是 Zygisk Next 的一个分支，是 Zygisk 的独立实现，为 KernelSU、APatch 和 Magisk（官方版和 Kitsune 版）提供 Zygisk API 支持。
+ReZygisk 是 Zygisk Next 的一个分支，是 Zygisk 的独立实现，为 KernelSU、APatch 和 Magisk 提供 Zygisk API 支持。
 
 代码库已经完全重写为 C 语言，这不仅带来了更干净、更易读的代码库，还让生成的二进制文件更轻量、更快速。同时还引入了自定义链接器，在正常情况下完全不使用系统链接器，从而让 ReZygisk 能够应对未来的检测，并规避所有基于链接器的检测。
 
