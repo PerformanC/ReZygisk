@@ -62,26 +62,37 @@ static void load_modules(struct Context *restrict context) {
 
   struct dirent *entry;
   while ((entry = readdir(dir)) != NULL) {
-    if (entry->d_type != DT_DIR) continue; /* INFO: Only directories */
-    if (strcmp(entry->d_name, ".") == 0 || strcmp(entry->d_name, "..") == 0 || strcmp(entry->d_name, "rezygisk") == 0) continue;
+    
+    if (entry->d_type != DT_DIR) {
+      continue; /* INFO: Only directories */
+    }
+    
+    if (strcmp(entry->d_name, ".") == 0 || strcmp(entry->d_name, "..") == 0 || strcmp(entry->d_name, "rezygisk") == 0) {
+      continue;
+    }
 
     char *name = entry->d_name;
     char so_path[PATH_MAX];
     snprintf(so_path, PATH_MAX, "/data/adb/modules/%s/zygisk/" ARCH_STR ".so", name);
 
-    if (access(so_path, R_OK) == -1) continue;
-
-    char disabled[PATH_MAX];
-    snprintf(disabled, PATH_MAX, "/data/adb/modules/%s/disable", name);
-
-    if (access(disabled, F_OK) == 0) continue;
-
     int lib_fd = open(so_path, O_RDONLY | O_CLOEXEC);
+    
     if (lib_fd == -1) {
-      LOGE("Failed loading module \"%s\"", name);
-
+      if (errno != ENOENT) {
+        LOGE("Failed loading module \"%s\": %s", name, strerror(errno));
+      }
       continue;
     }
+    
+    char disabled[PATH_MAX];
+    snprintf(disabled, PATH_MAX, "/data/adb/modules/%s/disable", name);
+    
+    if (access(disabled, F_OK) == 0) {
+      close(lib_fd);
+      continue;
+    }
+    
+    
 
     struct Module *tmp_modules = realloc(context->modules, (context->len + 1) * sizeof(struct Module));
     if (tmp_modules == NULL) {
