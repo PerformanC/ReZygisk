@@ -264,7 +264,7 @@ bool inject_on_main(int pid, const char *lib_path) {
   read_proc(pid, arg, &argc, sizeof(argc));
   LOGV("argc %d", argc);
 
-  /* fix integar overflow */
+  /* fix integar overflow by Y-0x*/
   if (argc < 0 || argc > 4096) {
       LOGE("unreasonable argc value: %d", argc);
       free_maps(map);
@@ -274,14 +274,26 @@ bool inject_on_main(int pid, const char *lib_path) {
   char **envp = argv + argc + 1;
   LOGV("envp %p", (void *)envp);
 
+  /* fixed by Joe */
   char **p = envp;
-  while (1) {
-    uintptr_t *buf;
-    read_proc(pid, (uintptr_t)p, &buf, sizeof(buf));
-
-    if (buf == NULL) break;
-
-    p++;
+  int scan_limit = 4096;
+  while (scan_limit-- > 0) {
+      uintptr_t *buf = NULL;
+      if (read_proc(pid, (uintptr_t)p, &buf, sizeof(buf)) != (ssize_t)sizeof(buf)) {
+          LOGE("read_proc failed during envp scan");
+          free_maps(map);
+          return false;
+      }
+      if (buf == NULL) {
+          break;
+      }
+      p++;
+  }
+           
+  if (scan_limit <= 0) {
+      LOGE("envp scan exceeded safety limit");
+      free_maps(map);
+      return false;
   }
 
   p++;
