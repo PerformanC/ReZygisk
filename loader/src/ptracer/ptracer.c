@@ -306,27 +306,34 @@ bool inject_on_main(int pid, const char *lib_path) {
   ElfW(auxv_t) *v = auxv;
   uintptr_t entry_addr = 0;
   uintptr_t addr_of_entry_addr = 0;
+  int auxv_limit = 64;
 
-  while (1) {
-    ElfW(auxv_t) buf;
+  /* fixed by Y-0x */
+  while (auxv_limit-- > 0) {
+      ElfW(auxv_t) buf = { 0 };
+      if (read_proc(pid, (uintptr_t)v, &buf, sizeof(buf)) != (ssize_t)sizeof(buf)) {
+          LOGE("read_proc failed during auxv scan");
+          free_maps(map);
+          return false;
+      }
+      if (buf.a_type == AT_ENTRY) {
+          entry_addr = (uintptr_t)buf.a_un.a_val;
+          addr_of_entry_addr = (uintptr_t)v + offsetof(ElfW(auxv_t), a_un);
+          break;
+      }
 
-    read_proc(pid, (uintptr_t)v, &buf, sizeof(buf));
+      if (buf.a_type == AT_NULL) {
+                 break;
+      }
 
-    if (buf.a_type == AT_ENTRY) {
-      entry_addr = (uintptr_t)buf.a_un.a_val;
-      addr_of_entry_addr = (uintptr_t)v + offsetof(ElfW(auxv_t), a_un);
-
-      get_addr_mem_region(map, entry_addr, addr_mem_region, sizeof(addr_mem_region));
-      LOGV("entry address %" PRIxPTR " %s (entry=%" PRIxPTR ", entry_addr=%" PRIxPTR ")", entry_addr,
-            addr_mem_region, (uintptr_t)v, addr_of_entry_addr);
-
-      break;
+      v++;
     }
 
-    if (buf.a_type == AT_NULL) break;
-
-    v++;
-  }
+    if (auxv_limit <= 0) {
+        LOGE("auxv scan exceeded safety limit");
+        free_maps(map);
+        return false;
+    }
 
   if (entry_addr == 0) {
     LOGE("failed to get entry");
