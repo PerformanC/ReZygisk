@@ -75,7 +75,7 @@ static void load_modules(struct Context *restrict context) {
     char so_path[PATH_MAX];
     snprintf(so_path, PATH_MAX, "/data/adb/modules/%s/zygisk/" ARCH_STR ".so", name);
 
-    int lib_fd = open(so_path, O_RDONLY | O_CLOEXEC);
+    int lib_fd = open(so_path, O_RDONLY | O_CLOEXEC);  /* fix race condition by Joe */
     
     if (lib_fd == -1) {
       if (errno != ENOENT) {
@@ -121,6 +121,27 @@ static void load_modules(struct Context *restrict context) {
       LOGE("Failed to strdup for the module \"%s\": %s", name, strerror(errno));
 
       close(lib_fd);
+
+      /* fix FD leak by Joe */
+      for (size_t i = 0; i < context->len; i++) {
+        free(context->modules[i].name);
+        
+        if (context->modules[i].companion >= 0) {
+          close(context->modules[i].companion);
+        }
+        
+        if (context->modules[i].lib_fd >= 0) {
+          close(context->modules[i].lib_fd);
+        }
+        
+      }
+
+      free(context->modules);
+      
+      context->modules = NULL;
+      context->len = 0;
+
+      closedir(dir);
 
       return;
     }
