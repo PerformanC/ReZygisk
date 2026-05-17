@@ -196,11 +196,12 @@ static bool inject_tango(int pid, const char *lib_path, uint32_t libc_init_targe
   ptrace_poke_u32(pid, (uintptr_t)(tramp + 40), 0x00004760 /* BX r12 ; (padding) */);
   ptrace_poke_u32(pid, (uintptr_t)(tramp + 44), libc_init_target);
 
+  /* remove stub from memory to prevent detection by joe */
   if (ptrace(PTRACE_SYSCALL, pid, 0, 0) == -1) {
     PLOGE("PTRACE_SYSCALL for tail-call stub");
-
+    for (size_t i = 0; i < 4; i++)
+        ptrace_poke_u32(pid, (uintptr_t)(tramp + 32 + i * 4), 0);
     ok = true;
-
     goto tango_done;
   }
 
