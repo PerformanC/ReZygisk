@@ -829,9 +829,12 @@ static char post_section[1024];
                                                                                      \
     if (!status ## suffix.daemon_running) {                                          \
       if (status ## suffix.daemon_error_info) {                                      \
-        strcat(status_text, "(ReZygiskd: ");                                         \
-        strcat(status_text, status ## suffix.daemon_error_info);                     \
-        strcat(status_text, ")");                                                    \
+        size_t rem = sizeof(status_text) - strlen(status_text) - 1;                  \
+        strncat(status_text, "(ReZygiskd: ", rem);                                   \
+        rem = sizeof(status_text) - strlen(status_text) - 1;                         \
+        strncat(status_text, status ## suffix.daemon_error_info, rem);               \
+        rem = sizeof(status_text) - strlen(status_text) - 1;                         \
+        strncat(status_text, ")", rem);                                              \
       } else {                                                                       \
         strcat(status_text, "(ReZygiskd: not running)");                             \
       }                                                                              \
