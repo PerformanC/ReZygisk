@@ -350,7 +350,15 @@ bool inject_on_main(int pid, const char *lib_path) {
             we set the last bit to the same as the entry address.
   */
   uintptr_t break_addr = (uintptr_t)((intptr_t)(-0x0F & ~1) | (intptr_t)((uintptr_t)entry_addr & 1));
-  if (!write_proc(pid, (uintptr_t)addr_of_entry_addr, &break_addr, sizeof(break_addr))) return false;
+  
+  /* partial write fixed by joe*/
+  if (write_proc(pid, (uintptr_t)addr_of_entry_addr, &break_addr, sizeof(break_addr)) != (ssize_t)sizeof(break_addr)) {
+      if (!ptrace_poke_u32(pid, (uintptr_t)addr_of_entry_addr, (uint32_t)break_addr)) {
+          PLOGE("failed to patch AT_ENTRY with break_addr");
+          free_maps(map);
+          return false;
+      }
+  }
 
   ptrace(PTRACE_CONT, pid, 0, 0);
 
@@ -369,7 +377,12 @@ bool inject_on_main(int pid, const char *lib_path) {
     LOGD("stopped at entry");
 
     /* INFO: Restore entry address */
-    if (!write_proc(pid, (uintptr_t) addr_of_entry_addr, &entry_addr, sizeof(entry_addr))) return false;
+    if (write_proc(pid, (uintptr_t)addr_of_entry_addr, &entry_addr, sizeof(entry_addr)) != (ssize_t)sizeof(entry_addr)) {
+        if (!ptrace_poke_u32(pid, (uintptr_t)addr_of_entry_addr, (uint32_t)entry_addr)) {
+            PLOGE("failed to restore AT_ENTRY");
+            return false;
+        }
+    }
 
     /* INFO: Backup registers */
     struct user_regs_struct backup;
