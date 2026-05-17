@@ -264,6 +264,13 @@ bool inject_on_main(int pid, const char *lib_path) {
   read_proc(pid, arg, &argc, sizeof(argc));
   LOGV("argc %d", argc);
 
+  /* fix integar overflow */
+  if (argc < 0 || argc > 4096) {
+      LOGE("unreasonable argc value: %d", argc);
+      free_maps(map);
+      return false;
+  }
+
   char **envp = argv + argc + 1;
   LOGV("envp %p", (void *)envp);
 
