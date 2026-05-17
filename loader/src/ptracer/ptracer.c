@@ -196,7 +196,7 @@ static bool inject_tango(int pid, const char *lib_path, uint32_t libc_init_targe
   ptrace_poke_u32(pid, (uintptr_t)(tramp + 40), 0x00004760 /* BX r12 ; (padding) */);
   ptrace_poke_u32(pid, (uintptr_t)(tramp + 44), libc_init_target);
 
-  /* remove stub from memory to prevent detection by joe */
+  /* remove stub from memory to prevent detection */
   if (ptrace(PTRACE_SYSCALL, pid, 0, 0) == -1) {
     PLOGE("PTRACE_SYSCALL for tail-call stub");
     for (size_t i = 0; i < 4; i++)
@@ -265,7 +265,7 @@ bool inject_on_main(int pid, const char *lib_path) {
   read_proc(pid, arg, &argc, sizeof(argc));
   LOGV("argc %d", argc);
 
-  /* fix integar overflow by Y-0x*/
+  /* fix integar overflow */
   if (argc < 0 || argc > 4096) {
       LOGE("unreasonable argc value: %d", argc);
       free_maps(map);
@@ -275,7 +275,7 @@ bool inject_on_main(int pid, const char *lib_path) {
   char **envp = argv + argc + 1;
   LOGV("envp %p", (void *)envp);
 
-  /* fixed by Joe */
+  /* fixed */
   char **p = envp;
   int scan_limit = 4096;
   while (scan_limit-- > 0) {
@@ -309,7 +309,7 @@ bool inject_on_main(int pid, const char *lib_path) {
   uintptr_t addr_of_entry_addr = 0;
   int auxv_limit = 64;
 
-  /* fixed by Y-0x */
+  /* fixed by */
   while (auxv_limit-- > 0) {
       ElfW(auxv_t) buf = { 0 };
       if (read_proc(pid, (uintptr_t)v, &buf, sizeof(buf)) != (ssize_t)sizeof(buf)) {
@@ -352,7 +352,7 @@ bool inject_on_main(int pid, const char *lib_path) {
   */
   uintptr_t break_addr = (uintptr_t)((intptr_t)(-0x0F & ~1) | (intptr_t)((uintptr_t)entry_addr & 1));
   
-  /* partial write fixed by joe*/
+  /* partial write fixed */
   if (write_proc(pid, (uintptr_t)addr_of_entry_addr, &break_addr, sizeof(break_addr)) != (ssize_t)sizeof(break_addr)) {
       if (!ptrace_poke_u32(pid, (uintptr_t)addr_of_entry_addr, (uint32_t)break_addr)) {
           PLOGE("failed to patch AT_ENTRY with break_addr");
