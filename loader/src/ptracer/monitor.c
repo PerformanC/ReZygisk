@@ -976,8 +976,16 @@ static bool prepare_environment() {
   char line[1024];
   while (fgets(line, sizeof(line), orig_prop) != NULL) {
     if (strncmp(line, "description=", strlen("description=")) == 0) {
-      strcat(pre_section, "description=");
-      strcat(post_section, line + strlen("description="));
+      /* strcat(pre_section, "description=");  this is before*/
+
+      size_t pre_rem = sizeof(pre_section) - strlen(pre_section) - 1; /* fixed stack overflow that will happen in feature by Joe */
+      strncat(pre_section, "description=", pre_rem);
+      
+      /* strcat(post_section, line + strlen("description=")); this is before */
+
+      size_t post_rem = sizeof(post_section) - strlen(post_section) - 1; /* fixed stack overflow that will happen in feature by Joe */
+      strncat(post_section, line + strlen("description="), post_rem);
+      
       after_description = true;
 
       continue;
