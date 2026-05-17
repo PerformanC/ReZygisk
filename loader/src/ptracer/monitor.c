@@ -165,6 +165,9 @@ bool rezygiskd_listener_init() {
   socklen_t socklen = sizeof(sa_family_t) + sun_path_len;
   if (bind(monitor_sock_fd, (struct sockaddr *)&addr, socklen) == -1) {
     PLOGE("bind socket");
+    
+    close(monitor_sock_fd); /* fixing FD leak by joe */
+    monitor_sock_fd = -1;
 
     return false;
   }
