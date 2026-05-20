@@ -166,7 +166,7 @@ bool rezygiskd_listener_init() {
   if (bind(monitor_sock_fd, (struct sockaddr *)&addr, socklen) == -1) {
     PLOGE("bind socket");
     
-    close(monitor_sock_fd); /* fixing FD leak */
+    close(monitor_sock_fd);
     monitor_sock_fd = -1;
 
     return false;
@@ -896,7 +896,7 @@ static bool update_status(const char *message) {
     fprintf(json, "  \"monitor\": {\n");
     fprintf(json, "    \"state\": \"%d\"", tracing_state);
     if (monitor_stop_reason) {
-      fprintf(json, ",\n    \"reason\": \"%s\"", monitor_stop_reason); /* fixing invaild json */
+      fprintf(json, ",\n    \"reason\": \"%s\"", monitor_stop_reason);
     }
     fprintf(json, "\n");
 
@@ -904,7 +904,6 @@ static bool update_status(const char *message) {
       fprintf(json, "  },\n");
     else
       fprintf(json, "  }\n");
-
 
     if (status64.supported || status32.supported) {
       fprintf(json, "  \"rezygiskd\": {\n");
@@ -997,10 +996,10 @@ static bool prepare_environment() {
   while (fgets(line, sizeof(line), orig_prop) != NULL) {
     if (strncmp(line, "description=", strlen("description=")) == 0) {
 
-      size_t pre_rem = sizeof(pre_section) - strlen(pre_section) - 1; /* fixed stack overflow that will happen in future */
+      size_t pre_rem = sizeof(pre_section) - strlen(pre_section) - 1;
       strncat(pre_section, "description=", pre_rem);
 
-      size_t post_rem = sizeof(post_section) - strlen(post_section) - 1; /* fixed stack overflow that will happen in feature */
+      size_t post_rem = sizeof(post_section) - strlen(post_section) - 1;
       strncat(post_section, line + strlen("description="), post_rem);
       
       after_description = true;
