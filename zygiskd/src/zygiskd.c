@@ -75,7 +75,7 @@ static void load_modules(struct Context *restrict context) {
     char so_path[PATH_MAX];
     snprintf(so_path, PATH_MAX, "/data/adb/modules/%s/zygisk/" ARCH_STR ".so", name);
 
-    int lib_fd = open(so_path, O_RDONLY | O_CLOEXEC);  /* fix race condition by Joe */
+    int lib_fd = open(so_path, O_RDONLY | O_CLOEXEC);
     
     if (lib_fd == -1) {
       if (errno != ENOENT) {
@@ -122,7 +122,6 @@ static void load_modules(struct Context *restrict context) {
 
       close(lib_fd);
 
-      /* fix FD leak by Joe */
       for (size_t i = 0; i < context->len; i++) {
         free(context->modules[i].name);
         
