@@ -136,6 +136,7 @@ struct maps_info *parse_maps_safe(const char *pid) {
     return NULL;                                             \
   } while (0)
 
+  
   int fd = read_fd(sockets[0]);
   if (fd < 0) {
     CLEANUP_SAFE_RETURN_NULL(false, false, "Failed to read file descriptor from socket");
