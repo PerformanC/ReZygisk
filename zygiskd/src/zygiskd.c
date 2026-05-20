@@ -92,8 +92,6 @@ static void load_modules(struct Context *restrict context) {
       continue;
     }
     
-    
-
     struct Module *tmp_modules = realloc(context->modules, (context->len + 1) * sizeof(struct Module));
     if (tmp_modules == NULL) {
       LOGE("Failed reallocating memory for modules.");
