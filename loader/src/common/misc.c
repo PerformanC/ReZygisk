@@ -136,21 +136,27 @@ struct maps_info *parse_maps_safe(const char *pid) {
     return NULL;                                             \
   } while (0)
 
-  int fd = read_fd(sockets[0]);
+  int fd = -1;
+  FILE *fp = NULL;
+  struct maps_info *info_array = NULL;
+  int free_ptr = 0;
+
+  fd = read_fd(sockets[0]);
   if (fd < 0) {
     CLEANUP_SAFE_RETURN_NULL(false, false, "Failed to read file descriptor from socket");
   }
 
-  FILE *fp = fdopen(fd, "r");
+  fp = fdopen(fd, "r");
   if (!fp) {
     CLEANUP_SAFE_RETURN_NULL(false, true, "Failed to open file descriptor as FILE");
   }
 
-  struct maps_info *info_array = calloc(1, sizeof(struct maps_info));
+  info_array = calloc(1, sizeof(struct maps_info));
   if (!info_array) {
     CLEANUP_SAFE_RETURN_NULL(true, false, "allocate memory");
   }
 
+  free_ptr = 1;
   size_t infos_capacity = 2;
   info_array->maps = malloc(infos_capacity * sizeof(struct map_entry));
   if (!info_array->maps) {
