@@ -196,11 +196,12 @@ static bool inject_tango(int pid, const char *lib_path, uint32_t libc_init_targe
   ptrace_poke_u32(pid, (uintptr_t)(tramp + 40), 0x00004760 /* BX r12 ; (padding) */);
   ptrace_poke_u32(pid, (uintptr_t)(tramp + 44), libc_init_target);
 
+  /* remove stub from memory to prevent detection */
   if (ptrace(PTRACE_SYSCALL, pid, 0, 0) == -1) {
     PLOGE("PTRACE_SYSCALL for tail-call stub");
-
+    for (size_t i = 0; i < 4; i++)
+        ptrace_poke_u32(pid, (uintptr_t)(tramp + 32 + i * 4), 0);
     ok = true;
-
     goto tango_done;
   }
 
@@ -264,17 +265,34 @@ bool inject_on_main(int pid, const char *lib_path) {
   read_proc(pid, arg, &argc, sizeof(argc));
   LOGV("argc %d", argc);
 
+  if (argc < 0 || argc > 4096) {
+      LOGE("unreasonable argc value: %d", argc);
+      free_maps(map);
+      return false;
+  }
+
   char **envp = argv + argc + 1;
   LOGV("envp %p", (void *)envp);
 
   char **p = envp;
-  while (1) {
-    uintptr_t *buf;
-    read_proc(pid, (uintptr_t)p, &buf, sizeof(buf));
-
-    if (buf == NULL) break;
-
-    p++;
+  int scan_limit = 4096;
+  while (scan_limit-- > 0) {
+      uintptr_t *buf = NULL;
+      if (read_proc(pid, (uintptr_t)p, &buf, sizeof(buf)) != (ssize_t)sizeof(buf)) {
+          LOGE("read_proc failed during envp scan");
+          free_maps(map);
+          return false;
+      }
+      if (buf == NULL) {
+          break;
+      }
+      p++;
+  }
+           
+  if (scan_limit <= 0) {
+      LOGE("envp scan exceeded safety limit");
+      free_maps(map);
+      return false;
   }
 
   p++;
@@ -287,27 +305,33 @@ bool inject_on_main(int pid, const char *lib_path) {
   ElfW(auxv_t) *v = auxv;
   uintptr_t entry_addr = 0;
   uintptr_t addr_of_entry_addr = 0;
+  int auxv_limit = 64;
 
-  while (1) {
-    ElfW(auxv_t) buf;
+  while (auxv_limit-- > 0) {
+      ElfW(auxv_t) buf = { 0 };
+      if (read_proc(pid, (uintptr_t)v, &buf, sizeof(buf)) != (ssize_t)sizeof(buf)) {
+          LOGE("read_proc failed during auxv scan");
+          free_maps(map);
+          return false;
+      }
+      if (buf.a_type == AT_ENTRY) {
+          entry_addr = (uintptr_t)buf.a_un.a_val;
+          addr_of_entry_addr = (uintptr_t)v + offsetof(ElfW(auxv_t), a_un);
+          break;
+      }
 
-    read_proc(pid, (uintptr_t)v, &buf, sizeof(buf));
+      if (buf.a_type == AT_NULL) {
+                 break;
+      }
 
-    if (buf.a_type == AT_ENTRY) {
-      entry_addr = (uintptr_t)buf.a_un.a_val;
-      addr_of_entry_addr = (uintptr_t)v + offsetof(ElfW(auxv_t), a_un);
-
-      get_addr_mem_region(map, entry_addr, addr_mem_region, sizeof(addr_mem_region));
-      LOGV("entry address %" PRIxPTR " %s (entry=%" PRIxPTR ", entry_addr=%" PRIxPTR ")", entry_addr,
-            addr_mem_region, (uintptr_t)v, addr_of_entry_addr);
-
-      break;
+      v++;
     }
 
-    if (buf.a_type == AT_NULL) break;
-
-    v++;
-  }
+    if (auxv_limit <= 0) {
+        LOGE("auxv scan exceeded safety limit");
+        free_maps(map);
+        return false;
+    }
 
   if (entry_addr == 0) {
     LOGE("failed to get entry");
@@ -324,7 +348,14 @@ bool inject_on_main(int pid, const char *lib_path) {
             we set the last bit to the same as the entry address.
   */
   uintptr_t break_addr = (uintptr_t)((intptr_t)(-0x0F & ~1) | (intptr_t)((uintptr_t)entry_addr & 1));
-  if (!write_proc(pid, (uintptr_t)addr_of_entry_addr, &break_addr, sizeof(break_addr))) return false;
+  
+  if (write_proc(pid, (uintptr_t)addr_of_entry_addr, &break_addr, sizeof(break_addr)) != (ssize_t)sizeof(break_addr)) {
+      if (!ptrace_poke_u32(pid, (uintptr_t)addr_of_entry_addr, (uint32_t)break_addr)) {
+          PLOGE("failed to patch AT_ENTRY with break_addr");
+          free_maps(map);
+          return false;
+      }
+  }
 
   ptrace(PTRACE_CONT, pid, 0, 0);
 
@@ -343,7 +374,12 @@ bool inject_on_main(int pid, const char *lib_path) {
     LOGD("stopped at entry");
 
     /* INFO: Restore entry address */
-    if (!write_proc(pid, (uintptr_t) addr_of_entry_addr, &entry_addr, sizeof(entry_addr))) return false;
+    if (write_proc(pid, (uintptr_t)addr_of_entry_addr, &entry_addr, sizeof(entry_addr)) != (ssize_t)sizeof(entry_addr)) {
+        if (!ptrace_poke_u32(pid, (uintptr_t)addr_of_entry_addr, (uint32_t)entry_addr)) {
+            PLOGE("failed to restore AT_ENTRY");
+            return false;
+        }
+    }
 
     /* INFO: Backup registers */
     struct user_regs_struct backup;

@@ -120,46 +120,47 @@ struct maps_info *parse_maps_safe(const char *pid) {
 
   close(sockets[1]);
 
-  int fd = read_fd(sockets[0]);
+  #define CLEANUP_SAFE_RETURN_NULL(close_fp, close_fd, msg)  \
+  do {                                                       \
+    LOGE("%s", msg);                                         \
+    if (close_fp) {                                          \
+        fclose(fp);                                          \
+    } else if (close_fd) {                                   \
+        close(fd);                                           \
+    }                                                        \
+    if (free_ptr) {                                          \
+        free(info_array);                                    \
+    }                                                        \
+    close(sockets[0]);                                       \
+    waitpid(ppid, NULL, 0);                                  \
+    return NULL;                                             \
+  } while (0)
+
+  int fd = -1;
+  FILE *fp = NULL;
+  struct maps_info *info_array = NULL;
+  int free_ptr = 0;
+
+  fd = read_fd(sockets[0]);
   if (fd < 0) {
-    LOGE("Failed to read file descriptor from socket");
-
-    close(sockets[0]);
-
-    return NULL;
+    CLEANUP_SAFE_RETURN_NULL(false, false, "Failed to read file descriptor from socket");
   }
 
-  FILE *fp = fdopen(fd, "r");
+  fp = fdopen(fd, "r");
   if (!fp) {
-    LOGE("Failed to open file descriptor as FILE");
-
-    close(fd);
-    close(sockets[0]);
-
-    return NULL;
+    CLEANUP_SAFE_RETURN_NULL(false, true, "Failed to open file descriptor as FILE");
   }
 
-  struct maps_info *info_array = calloc(1, sizeof(struct maps_info));
+  info_array = calloc(1, sizeof(struct maps_info));
   if (!info_array) {
-    PLOGE("allocate memory");
-
-    close(fd);
-    close(sockets[0]);
-
-    return NULL;
+    CLEANUP_SAFE_RETURN_NULL(true, false, "allocate memory");
   }
 
+  free_ptr = 1;
   size_t infos_capacity = 2;
   info_array->maps = malloc(infos_capacity * sizeof(struct map_entry));
   if (!info_array->maps) {
-    PLOGE("allocate memory for maps");
-
-    free(info_array);
-
-    close(fd);
-    close(sockets[0]);
-
-    return NULL;
+    CLEANUP_SAFE_RETURN_NULL(true, false, "allocate memory for maps");
   }
   info_array->length = 0;
 
