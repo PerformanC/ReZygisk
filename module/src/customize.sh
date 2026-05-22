@@ -101,7 +101,7 @@ extract "$ZIPFILE" '.rezygisk.sh'      "$MODPATH"
 
 cp "$MODPATH/module.prop" "$MODPATH/module.prop.orig"
 mkdir -p /data/adb/service.d
-cat "$MODPATH/.rezygisk.sh" > /data/adb/service.d/.rezygisk.sh
+cp "$MODPATH/.rezygisk.sh" > /data/adb/service.d/.rezygisk.sh
 chmod +x /data/adb/service.d/.rezygisk.sh
 chmod +x "$MODPATH/uninstall.sh"
 
