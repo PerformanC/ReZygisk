@@ -7,7 +7,7 @@ DEBUG=@DEBUG@
 MODDIR=${0%/*}
 if [ ! -f /data/adb/service.d/.rezygisk.sh ]; then
   mkdir -p /data/adb/service.d
-  cat "$MODDIR/.rezygisk.sh" > /data/adb/service.d/.rezygisk.sh
+  cp "$MODDIR/.rezygisk.sh" > /data/adb/service.d/.rezygisk.sh
   chmod +x /data/adb/service.d/.rezygisk.sh
 fi
 
