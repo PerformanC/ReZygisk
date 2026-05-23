@@ -9,14 +9,17 @@ allow zygote zygote capability sys_chroot
 # INFO: To allow to setns on the Zygote's child mns
 allow zygote su dir search
 allow zygote su {lnk_file file} read
-# INFO: Same as above. KernelSU renamed su context to ksu
-allow zygote ksu dir search
-allow zygote ksu {lnk_file file} read
-
-allow zygote adb_data_file dir search
-allow zygote adb_data_file file *
-allow zygote proc file {read open}
-allow zygote nsfs file {read open}
+# Allow the remote zygote process to traverse and map ReZygisk's loader
+# library from /data/adb/modules/rezygisk. Some Android 16 builds do not
+# expose the ksu or nsfs policy types, so keep this static policy limited to
+# types that are present on Magisk Pixel builds.
+allow zygote adb_data_file dir { search read open getattr }
+allow zygote adb_data_file file { read open getattr execute map }
+allow zygote system_file dir { search read open getattr }
+allow zygote system_file file { read open getattr execute map }
+allow zygote system_lib_file dir { search read open getattr }
+allow zygote system_lib_file file { read open getattr execute map execute_no_trans execmod }
+allow zygote proc file { read open getattr }
 allow zygote zygote process execmem
 allow system_server system_server process execmem
 allow zygote tmpfs file *
