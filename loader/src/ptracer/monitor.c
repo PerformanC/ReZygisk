@@ -165,7 +165,6 @@ bool rezygiskd_listener_init() {
   socklen_t socklen = sizeof(sa_family_t) + sun_path_len;
   if (bind(monitor_sock_fd, (struct sockaddr *)&addr, socklen) == -1) {
     PLOGE("bind socket");
-    
     close(monitor_sock_fd);
     monitor_sock_fd = -1;
 
@@ -895,56 +894,39 @@ static bool update_status(const char *message) {
 
     fprintf(json, "  \"monitor\": {\n");
     fprintf(json, "    \"state\": \"%d\"", tracing_state);
-    if (monitor_stop_reason) {
-      fprintf(json, ",\n    \"reason\": \"%s\"", monitor_stop_reason);
-    } else {
-      fprintf(json, "\n");
-    }
+    if (monitor_stop_reason) { fprintf(json, ",\n    \"reason\": \"%s\"", monitor_stop_reason); }
+    else { fprintf(json, "\n"); }
 
-    if (status64.supported || status32.supported) {
-      fprintf(json, "  },\n");
-    } else {
-      fprintf(json, "  }\n");
-    }
+    if (status64.supported || status32.supported) { fprintf(json, "  },\n"); }
+    else { fprintf(json, "  }\n"); }
     
     if (status64.supported || status32.supported) {
       fprintf(json, "  \"rezygiskd\": {\n");
       if (status64.supported) {
         fprintf(json, "    \"64\": {\n");
         fprintf(json, "      \"state\": %d,\n", status64.daemon_running);
-        if (status64.daemon_error_info) {
-          fprintf(json, "      \"reason\": \"%s\",\n", status64.daemon_error_info);
-        }
-        
+        if (status64.daemon_error_info) { fprintf(json, "      \"reason\": \"%s\",\n", status64.daemon_error_info); }
         fprintf(json, "      \"modules\": [");
 
         if (environment_information64.modules) for (uint32_t i = 0; i < environment_information64.modules_len; i++) {
-          if (i > 0) {
-            fprintf(json, ", ");
-          }
+          if (i > 0) { fprintf(json, ", "); }
           fprintf(json, "\"%s\"", environment_information64.modules[i]);
         }
 
         fprintf(json, "]\n");
         fprintf(json, "    }");
-        if (status32.supported) {
-          fprintf(json, ",\n");
-        }
-        else {
-          fprintf(json, "\n");
-        }
+        if (status32.supported) { fprintf(json, ",\n"); }
+        else { printf(json, "\n"); }
       }
 
       if (status32.supported) {
         fprintf(json, "    \"32\": {\n");
         fprintf(json, "      \"state\": %d,\n", status32.daemon_running);
-        if (status32.daemon_error_info) {
-          fprintf(json, "      \"reason\": \"%s\",\n", status32.daemon_error_info);
-        }
+        if (status32.daemon_error_info) { fprintf(json, "      \"reason\": \"%s\",\n", status32.daemon_error_info); }
         fprintf(json, "      \"modules\": [");
 
         if (environment_information32.modules) for (uint32_t i = 0; i < environment_information32.modules_len; i++) {
-          if (i > 0) fprintf(json, ", ");
+          if (i > 0) { fprintf(json, ", "); }
           fprintf(json, "\"%s\"", environment_information32.modules[i]);
         }
 
@@ -957,16 +939,10 @@ static bool update_status(const char *message) {
       fprintf(json, "  \"zygote\": {\n");
       if (status64.supported) {
         fprintf(json, "    \"64\": %d", status64.zygote_injected);
-        if (status32.supported && status32.zygote_injected) {
-          fprintf(json, ",\n");
-        }
-        else {
-          fprintf(json, "\n");
-        }
+        if (status32.supported && status32.zygote_injected) { fprintf(json, ",\n"); }
+        else { fprintf(json, "\n"); }
       }
-      if (status32.supported && status32.zygote_injected) {
-        fprintf(json, "    \"32\": %d\n", status32.zygote_injected);
-      }
+      if (status32.supported && status32.zygote_injected) { fprintf(json, "    \"32\": %d\n", status32.zygote_injected); }
       fprintf(json, "  }\n");
     }
 
@@ -974,9 +950,7 @@ static bool update_status(const char *message) {
 
     fclose(json);
   } else {
-    if (remove("/data/adb/rezygisk/state.json") == -1) {
-      PLOGE("failed to remove state.json");
-    }
+    if (remove("/data/adb/rezygisk/state.json") == -1) { PLOGE("failed to remove state.json"); }
   }
 
   LOGI("status updated: %s", status_text);
@@ -1003,7 +977,6 @@ static bool prepare_environment() {
 
       size_t post_rem = sizeof(post_section) - strlen(post_section) - 1;
       strncat(post_section, line + strlen("description="), post_rem);
-      
       after_description = true;
 
       continue;
