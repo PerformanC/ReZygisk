@@ -897,14 +897,16 @@ static bool update_status(const char *message) {
     fprintf(json, "    \"state\": \"%d\"", tracing_state);
     if (monitor_stop_reason) {
       fprintf(json, ",\n    \"reason\": \"%s\"", monitor_stop_reason);
+    } else {
+      fprintf(json, "\n");
     }
-    fprintf(json, "\n");
 
-    if (status64.supported || status32.supported)
+    if (status64.supported || status32.supported) {
       fprintf(json, "  },\n");
-    else
+    } else {
       fprintf(json, "  }\n");
-
+    }
+    
     if (status64.supported || status32.supported) {
       fprintf(json, "  \"rezygiskd\": {\n");
       if (status64.supported) {
