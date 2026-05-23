@@ -110,9 +110,7 @@ bool monitor_events_unregister_event(int fd) {
   return true;
 }
 
-void monitor_events_stop() {
-  monitor_events_running = false;
-}
+void monitor_events_stop() { monitor_events_running = false; }
 
 void monitor_events_loop() {
   struct epoll_event events[2];
@@ -137,11 +135,11 @@ void monitor_events_loop() {
 
       ((monitor_event_callback_t)events[i].data.ptr)();
 
-      if (!monitor_events_running) break;
+      if (!monitor_events_running) { break; }
     }
   }
 
-  if (monitor_epoll_fd >= 0) close(monitor_epoll_fd);
+  if (monitor_epoll_fd >= 0) { close(monitor_epoll_fd); }
   monitor_epoll_fd = -1;
 }
 
@@ -179,7 +177,7 @@ void rezygiskd_listener_callback() {
     uint8_t cmd;
     ssize_t nread = TEMP_FAILURE_RETRY(read(monitor_sock_fd, &cmd, sizeof(cmd)));
     if (nread == -1) {
-      if (errno == EINTR || errno == EWOULDBLOCK) break;
+      if (errno == EINTR || errno == EWOULDBLOCK) { break; }
 
       PLOGE("read socket");
 
@@ -398,30 +396,28 @@ void rezygiskd_listener_callback() {
 }
 
 void rezygiskd_listener_stop() {
-  if (monitor_sock_fd >= 0) close(monitor_sock_fd);
+  if (monitor_sock_fd >= 0) { close(monitor_sock_fd); }
   monitor_sock_fd = -1;
 }
 
 #define MAX_RETRY_COUNT 5
 
-#define CREATE_ZYGOTE_START_COUNTER(abi)             \
-  struct timespec last_zygote##abi = {               \
-    .tv_sec = 0,                                     \
-    .tv_nsec = 0                                     \
-  };                                                 \
-                                                     \
-  int count_zygote ## abi = 0;                       \
-  bool should_stop_inject ## abi() {                 \
-    struct timespec now = {};                        \
-    clock_gettime(CLOCK_MONOTONIC, &now);            \
-    if (now.tv_sec - last_zygote ## abi.tv_sec < 30) \
-      count_zygote ## abi++;                         \
-    else                                             \
-      count_zygote ## abi = 0;                       \
-                                                     \
-    last_zygote##abi = now;                          \
-                                                     \
-    return count_zygote##abi >= MAX_RETRY_COUNT;     \
+#define CREATE_ZYGOTE_START_COUNTER(abi)                                        \
+  struct timespec last_zygote##abi = {                                          \
+    .tv_sec = 0,                                                                \
+    .tv_nsec = 0                                                                \
+  };                                                                            \
+                                                                                \
+  int count_zygote ## abi = 0;                                                  \
+  bool should_stop_inject ## abi() {                                            \
+    struct timespec now = {};                                                   \
+    clock_gettime(CLOCK_MONOTONIC, &now);                                       \
+    if (now.tv_sec - last_zygote ## abi.tv_sec < 30) { count_zygote ## abi++; } \
+    else { count_zygote ## abi = 0; }                                           \
+                                                                                \
+    last_zygote##abi = now;                                                     \
+                                                                                \
+    return count_zygote##abi >= MAX_RETRY_COUNT;                                \
   }
 
 CREATE_ZYGOTE_START_COUNTER(64)
@@ -590,7 +586,7 @@ void sigchld_listener_callback() {
   while (1) {
     ssize_t s = read(sigchld_signal_fd, &sigchld_fdsi, sizeof(sigchld_fdsi));
     if (s == -1) {
-      if (errno == EAGAIN) break;
+      if (errno == EAGAIN) { break; }
 
       PLOGE("read signalfd");
 
@@ -612,7 +608,7 @@ void sigchld_listener_callback() {
     int pid;
     while ((pid = waitpid(-1, &sigchld_status, __WALL | WNOHANG)) != 0) {
       if (pid == -1) {
-        if (tracing_state == STOPPED && errno == ECHILD) break;
+        if (tracing_state == STOPPED && errno == ECHILD) { break; }
         PLOGE("waitpid");
       }
 
@@ -624,7 +620,7 @@ void sigchld_listener_callback() {
 
           LOGV("forked %ld", child_pid);
         } else if (STOPPED_WITH(SIGTRAP, PTRACE_EVENT_STOP) && tracing_state == STOPPING) {
-          if (ptrace(PTRACE_DETACH, 1, 0, 0) == -1) PLOGE("failed to detach init");
+          if (ptrace(PTRACE_DETACH, 1, 0, 0) == -1) { PLOGE("failed to detach init"); }
 
           tracing_state = STOPPED;
 
@@ -657,7 +653,7 @@ void sigchld_listener_callback() {
 
       pid_t state = 0;
       for (size_t i = 0; i < sigchld_process_count; i++) {
-        if (sigchld_process[i] != pid) continue;
+        if (sigchld_process[i] != pid) { continue; }
 
         state = sigchld_process[i];
 
@@ -668,7 +664,7 @@ void sigchld_listener_callback() {
         LOGV("new process %d attached", pid);
 
         for (size_t i = 0; i < sigchld_process_count; i++) {
-          if (sigchld_process[i] != 0) continue;
+          if (sigchld_process[i] != 0) { continue; }
 
           sigchld_process[i] = pid;
 
@@ -755,17 +751,12 @@ void sigchld_listener_callback() {
 
                   /* INFO: Only restart companions if it's not the first time */
                   if ((strcmp(program, APP_PROCESS_64) == 0 && count_zygote64 > 1) || ((strcmp(program, APP_PROCESS_32) == 0 || is_tango) && count_zygote32 > 1)) {
-                    if (is_tango) {
-                      execl(tracer, basename(tracer), "trace", pid_str, "--restart", "--tango", NULL);
-                    } else {
-                      execl(tracer, basename(tracer), "trace", pid_str, "--restart", NULL);
-                    }
-                  } else {
-                    if (is_tango) {
-                      execl(tracer, basename(tracer), "trace", pid_str, "--tango", NULL);
-                    } else {
-                      execl(tracer, basename(tracer), "trace", pid_str, NULL);
-                    }
+                    if (is_tango) { execl(tracer, basename(tracer), "trace", pid_str, "--restart", "--tango", NULL); }
+                    else { execl(tracer, basename(tracer), "trace", pid_str, "--restart", NULL); }
+                  }
+                  else {
+                    if (is_tango) { execl(tracer, basename(tracer), "trace", pid_str, "--tango", NULL); }
+                    else { execl(tracer, basename(tracer), "trace", pid_str, NULL); }
                   }
 
                   PLOGE("failed to exec, kill");
@@ -788,7 +779,7 @@ void sigchld_listener_callback() {
         }
 
         for (size_t i = 0; i < sigchld_process_count; i++) {
-          if (sigchld_process[i] != pid) continue;
+          if (sigchld_process[i] != pid) { continue; }
 
           sigchld_process[i] = 0;
 
@@ -806,10 +797,10 @@ void sigchld_listener_callback() {
 }
 
 void sigchld_listener_stop() {
-  if (sigchld_signal_fd >= 0) close(sigchld_signal_fd);
+  if (sigchld_signal_fd >= 0) { close(sigchld_signal_fd); }
   sigchld_signal_fd = -1;
 
-  if (sigchld_process != NULL) free(sigchld_process);
+  if (sigchld_process != NULL) { free(sigchld_process); }
   sigchld_process = NULL;
   sigchld_process_count = 0;
 }
@@ -817,27 +808,26 @@ void sigchld_listener_stop() {
 static char pre_section[1024];
 static char post_section[1024];
 
-#define WRITE_STATUS_ABI(suffix)                                                     \
-  if (status ## suffix.supported) {                                                  \
-    strcat(status_text, ", ReZygisk " # suffix "-bit: ");                            \
-                                                                                     \
-    if (tracing_state != TRACING) strcat(status_text, "❌");                         \
-    else if (status ## suffix.zygote_injected && status ## suffix.daemon_running)    \
-      strcat(status_text, "✅");                                                     \
-    else strcat(status_text, "⚠️");                                                  \
-                                                                                     \
-    if (!status ## suffix.daemon_running) {                                          \
-      if (status ## suffix.daemon_error_info) {                                      \
-        size_t rem = sizeof(status_text) - strlen(status_text) - 1;                  \
-        strncat(status_text, "(ReZygiskd: ", rem);                                   \
-        rem = sizeof(status_text) - strlen(status_text) - 1;                         \
-        strncat(status_text, status ## suffix.daemon_error_info, rem);               \
-        rem = sizeof(status_text) - strlen(status_text) - 1;                         \
-        strncat(status_text, ")", rem);                                              \
-      } else {                                                                       \
-        strcat(status_text, "(ReZygiskd: not running)");                             \
-      }                                                                              \
-    }                                                                                \
+#define WRITE_STATUS_ABI(suffix)                                                                                 \
+  if (status ## suffix.supported) {                                                                              \
+    strcat(status_text, ", ReZygisk " # suffix "-bit: ");                                                        \
+                                                                                                                 \
+    if (tracing_state != TRACING) { strcat(status_text, "❌"); }                                                 \
+    else if (status ## suffix.zygote_injected && status ## suffix.daemon_running) { strcat(status_text, "✅"); } \
+    else { strcat(status_text, "⚠️"); }                                                                          \
+                                                                                                                 \
+    if (!status ## suffix.daemon_running) {                                                                      \
+      if (status ## suffix.daemon_error_info) {                                                                  \
+        size_t rem = sizeof(status_text) - strlen(status_text) - 1;                                              \
+        strncat(status_text, "(ReZygiskd: ", rem);                                                               \
+        rem = sizeof(status_text) - strlen(status_text) - 1;                                                     \
+        strncat(status_text, status ## suffix.daemon_error_info, rem);                                           \
+        rem = sizeof(status_text) - strlen(status_text) - 1;                                                     \
+        strncat(status_text, ")", rem);                                                                          \
+      } else {                                                                                                   \
+        strcat(status_text, "(ReZygiskd: not running)");                                                         \
+      }                                                                                                          \
+    }                                                                                                            \
   }
 
 static bool update_status(const char *message) {
@@ -982,8 +972,8 @@ static bool prepare_environment() {
       continue;
     }
 
-    if (after_description) strcat(post_section, line);
-    else strcat(pre_section, line);
+    if (after_description) { strcat(post_section, line); }
+    else { strcat(pre_section, line); }
   }
 
   fclose(orig_prop);
@@ -994,9 +984,7 @@ static bool prepare_environment() {
 void init_monitor() {
   LOGI("ReZygisk %s", ZKSU_VERSION);
 
-  if (!prepare_environment()) exit(1);
-
-  if (!claim_init_tracer()) exit(1);
+  if (!prepare_environment() || !claim_init_tracer()) { exit(1); }
 
   monitor_events_init();
 
@@ -1028,12 +1016,12 @@ void init_monitor() {
   rezygiskd_listener_stop();
   sigchld_listener_stop();
 
-  if (status64.daemon_info) free(status64.daemon_info);
-  if (status64.daemon_error_info) free(status64.daemon_error_info);
-  if (status32.daemon_info) free(status32.daemon_info);
-  if (status32.daemon_error_info) free(status32.daemon_error_info);
+  if (status64.daemon_info) { free(status64.daemon_info); }
+  if (status64.daemon_error_info) { free(status64.daemon_error_info); }
+  if (status32.daemon_info) { free(status32.daemon_info); }
+  if (status32.daemon_error_info) { free(status32.daemon_error_info); }
 
-  if (environment_information64.root_impl) free((void *)environment_information64.root_impl);
+  if (environment_information64.root_impl) { free((void *)environment_information64.root_impl); }
   if (environment_information64.modules) {
     for (uint32_t i = 0; i < environment_information64.modules_len; i++) {
       free((void *)environment_information64.modules[i]);
@@ -1041,7 +1029,7 @@ void init_monitor() {
     free((void *)environment_information64.modules);
   }
 
-  if (environment_information32.root_impl) free((void *)environment_information32.root_impl);
+  if (environment_information32.root_impl) { free((void *)environment_information32.root_impl); }
   if (environment_information32.modules) {
     for (uint32_t i = 0; i < environment_information32.modules_len; i++) {
       free((void *)environment_information32.modules[i]);
@@ -1054,7 +1042,7 @@ void init_monitor() {
 
 int send_control_command(enum rezygiskd_command cmd) {
   int sockfd = socket(PF_UNIX, SOCK_DGRAM | SOCK_CLOEXEC, 0);
-  if (sockfd == -1) return -1;
+  if (sockfd == -1) { return -1; }
 
   struct sockaddr_un addr = {
     .sun_family = AF_UNIX,
