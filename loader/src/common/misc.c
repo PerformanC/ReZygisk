@@ -125,6 +125,7 @@ struct maps_info *parse_maps_safe(const char *pid) {
     LOGE("Failed to read file descriptor from socket");
 
     close(sockets[0]);
+    waitpid(ppid, NULL, 0);
 
     return NULL;
   }
@@ -135,6 +136,7 @@ struct maps_info *parse_maps_safe(const char *pid) {
 
     close(fd);
     close(sockets[0]);
+    waitpid(ppid, NULL, 0);
 
     return NULL;
   }
@@ -143,8 +145,9 @@ struct maps_info *parse_maps_safe(const char *pid) {
   if (!info_array) {
     PLOGE("allocate memory");
 
-    close(fd);
+    fclose(fp);
     close(sockets[0]);
+    waitpid(ppid, NULL, 0);
 
     return NULL;
   }
@@ -156,8 +159,9 @@ struct maps_info *parse_maps_safe(const char *pid) {
 
     free(info_array);
 
-    close(fd);
+    fclose(fp);
     close(sockets[0]);
+    waitpid(ppid, NULL, 0);
 
     return NULL;
   }
