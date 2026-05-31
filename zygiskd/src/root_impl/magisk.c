@@ -1,5 +1,6 @@
 #include <stdlib.h>
 #include <string.h>
+#include <ctype.h>
 
 #include <errno.h>
 #include <unistd.h>
@@ -30,7 +31,7 @@ void magisk_get_existence(struct root_impl_state *state) {
   for (size_t i = 0; i < sizeof(magisk_files) / sizeof(magisk_files[0]); i++) {
     if (access(magisk_files[i], F_OK) != 0) continue;
 
-    strcpy(path_to_magisk, magisk_files[i]);
+    snprintf(path_to_magisk, sizeof(path_to_magisk), "%s", magisk_files[i]);
 
     break;
   }
@@ -73,6 +74,11 @@ bool magisk_uid_granted_root(uid_t uid) {
 }
 
 bool magisk_uid_should_umount(const char *const process) {
+  /* INFO: Validate process name to prevent SQL injection */
+  for (const char *p = process; *p != '\0'; p++) {
+    if (!isalnum((unsigned char)*p) && *p != '.' && *p != '_' && *p != ':' && *p != '-') return false;
+  }
+
   /* INFO: PROCESS_NAME_MAX_LEN already has a +1 for NULL */
   char sqlite_cmd[59 + PROCESS_NAME_MAX_LEN];
   /* INFO: Find if process string starts with any data in "process" column */
