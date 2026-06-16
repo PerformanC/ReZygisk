@@ -17,7 +17,11 @@
 
 struct Module {
   char *name;
-  int lib_fd;
+  /* INFO: Library loaded into the companion process. It points to the
+            dedicated companion library (zygisk/companion/<arch>.so) when it
+            exists, otherwise it falls back to the combined module library
+            (zygisk/<arch>.so). */
+  int companion_lib_fd;
   int companion;
 };
 
@@ -76,23 +80,36 @@ static void load_modules(struct Context *restrict context) {
 
     if (access(disabled, F_OK) == 0) continue;
 
-    int lib_fd = open(so_path, O_RDONLY | O_CLOEXEC);
-    if (lib_fd == -1) {
+    /* INFO: A module may ship a dedicated companion library at
+              zygisk/companion/<arch>.so so that the code injected into apps
+              (zygisk/<arch>.so) and the code loaded into the companion process
+              stay separate. When that file is absent, the combined module
+              library is used for the companion as well (legacy behaviour). */
+    char companion_so_path[PATH_MAX];
+    snprintf(companion_so_path, PATH_MAX, "/data/adb/modules/%s/zygisk/companion/" ARCH_STR ".so", name);
+
+    const char *companion_lib_path = access(companion_so_path, R_OK) == 0 ? companion_so_path : so_path;
+
+    int companion_lib_fd = open(companion_lib_path, O_RDONLY | O_CLOEXEC);
+    if (companion_lib_fd == -1) {
       LOGE("Failed loading module \"%s\"", name);
 
       continue;
     }
 
+    if (companion_lib_path == companion_so_path)
+      LOGI("Module \"%s\" ships a dedicated companion library", name);
+
     struct Module *tmp_modules = realloc(context->modules, (context->len + 1) * sizeof(struct Module));
     if (tmp_modules == NULL) {
       LOGE("Failed reallocating memory for modules.");
 
-      close(lib_fd);
+      close(companion_lib_fd);
 
       for (size_t i = 0; i < context->len; i++) {
         free(context->modules[i].name);
         if (context->modules[i].companion >= 0) close(context->modules[i].companion);
-        if (context->modules[i].lib_fd >= 0) close(context->modules[i].lib_fd);
+        if (context->modules[i].companion_lib_fd >= 0) close(context->modules[i].companion_lib_fd);
       }
 
       free(context->modules);
@@ -109,12 +126,12 @@ static void load_modules(struct Context *restrict context) {
     if (context->modules[context->len].name == NULL) {
       LOGE("Failed to strdup for the module \"%s\": %s", name, strerror(errno));
 
-      close(lib_fd);
+      close(companion_lib_fd);
 
       return;
     }
 
-    context->modules[context->len].lib_fd = lib_fd;
+    context->modules[context->len].companion_lib_fd = companion_lib_fd;
     context->modules[context->len].companion = -1;
     context->len++;
   }
@@ -126,7 +143,7 @@ static void free_modules(struct Context *restrict context) {
   for (size_t i = 0; i < context->len; i++) {
     free(context->modules[i].name);
     if (context->modules[i].companion >= 0) close(context->modules[i].companion);
-    if (context->modules[i].lib_fd >= 0) close(context->modules[i].lib_fd);
+    if (context->modules[i].companion_lib_fd >= 0) close(context->modules[i].companion_lib_fd);
   }
 
   free(context->modules);
@@ -507,7 +524,7 @@ void zygiskd_start(char *restrict argv[]) {
         }
 
         if (module->companion <= -1) {
-          module->companion = spawn_companion(argv, module->name, module->lib_fd);
+          module->companion = spawn_companion(argv, module->name, module->companion_lib_fd);
 
           if (module->companion >= 0) {
             LOGI(" - Spawned companion for \"%s\": %d", module->name, module->companion);
@@ -633,9 +650,9 @@ void zygiskd_start(char *restrict argv[]) {
         free(module->name);
         module->name = NULL;
 
-        if (module->lib_fd >= 0) {
-          close(module->lib_fd);
-          module->lib_fd = -1;
+        if (module->companion_lib_fd >= 0) {
+          close(module->companion_lib_fd);
+          module->companion_lib_fd = -1;
         }
 
         memmove(&context.modules[index], &context.modules[index + 1], (context.len - index - 1) * sizeof(struct Module));
