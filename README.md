@@ -53,6 +53,15 @@ After flashing, check the installation logs to ensure there are no errors, and i
 
 After rebooting, you can verify if ReZygisk is working properly by checking the module description in the `Modules` section of your root manager. The description should indicate that the necessary daemons are running. For example, if your environment supports both 64-bit and 32-bit, it should look similar to this: `[Monitor: ✅, ReZygisk 64-bit: ✅, ReZygisk 32-bit: ✅] Standalone implementation of Zygisk.`
 
+### KernelSU LKM late-load (jailbreak mode)
+
+On KernelSU setups where the kernel module is loaded after boot (`ksud late-load`, sometimes called jailbreak mode), `post-fs-data.sh` is **not** executed. ReZygisk ships a `late-load.sh` script for this path: it bootstraps the ptrace monitor via `post-fs-data.sh` when needed, then soft-reboots zygote so injection applies to new processes.
+
+This script runs automatically when you trigger late-load from the KernelSU manager. No manual setup is required after flashing ReZygisk.
+
+> [!NOTE]
+> The zygote restart causes a brief System UI reload (similar to a soft reboot). Apps already running before late-load must be restarted to receive Zygisk injection.
+
 ## Translation
 
 There are currently two different ways to contribute translations for ReZygisk:

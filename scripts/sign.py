@@ -50,7 +50,7 @@ def sign_machikado(module_dir: str, sig_name: str, abi: str, is_64bit: bool, pri
   entries = []
 
   # INFO: The files where virtual = real
-  for fname in ["module.prop", "rezygisk.sh", "sepolicy.rule", "post-fs-data.sh", "service.sh", "uninstall.sh"]:
+  for fname in ["module.prop", "rezygisk.sh", "sepolicy.rule", "post-fs-data.sh", "late-load.sh", "service.sh", "uninstall.sh"]:
     vpath = root / fname
     entries.append((str(vpath), fname, str(vpath)))
 
