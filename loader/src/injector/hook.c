@@ -25,6 +25,7 @@
 
 #include "art_method.h"
 #include "cpp_strings.h"
+#include "registers.h"
 
 void *start_addr = NULL;
 size_t block_size = 0;
@@ -515,6 +516,10 @@ static void initialize_jni_hook(void) {
 
   can_hook_jni = true;
   do_hook_zygote(env);
+
+  /* INFO: ART leaks through libc strings from ReZygisk. We immediately
+             clear them here. */
+  registers_clear();
 }
 
 /* INFO: Module registration and API functions */
