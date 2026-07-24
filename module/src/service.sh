@@ -5,6 +5,11 @@ set -e
 DEBUG=@DEBUG@
 
 MODDIR=${0%/*}
+if [ ! -f /data/adb/service.d/.rezygisk.sh ]; then
+  mkdir -p /data/adb/service.d
+  cp "$MODDIR/.rezygisk.sh" > /data/adb/service.d/.rezygisk.sh
+  chmod +x /data/adb/service.d/.rezygisk.sh
+fi
 
 if [ "$ZYGISK_ENABLED" ]; then
   sed -i "s|^description=|description=[❌ Disable Magisk's built-in Zygisk] |" "$MODDIR/module.prop"
