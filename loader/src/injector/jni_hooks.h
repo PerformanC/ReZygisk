@@ -189,7 +189,7 @@ __attribute__((no_stack_protector)) static jint nativeForkAndSpecialize_graphene
   rz_cleanup(&ctx);
   return ctx.pid;
 }
-static JNINativeMethod nativeForkAndSpecialize_methods[12] = {
+static JNINativeMethod nativeForkAndSpecialize_methods[] = {
   {
     "nativeForkAndSpecialize",
     "(II[II[[IILjava/lang/String;Ljava/lang/String;[ILjava/lang/String;Ljava/lang/String;)I",
@@ -251,7 +251,6 @@ static JNINativeMethod nativeForkAndSpecialize_methods[12] = {
     (void *) &nativeForkAndSpecialize_grapheneos_u
   },
 };
-static const int nativeForkAndSpecialize_methods_count = 12;
 
 static void *nativeSpecializeAppProcess_orig = NULL;
 typedef void (*nativeSpecializeAppProcess_fn)(JNIEnv *, jclass, ...);
@@ -345,7 +344,7 @@ __attribute__((no_stack_protector)) static void nativeSpecializeAppProcess_graph
   rz_nativeSpecializeAppProcess_post(&ctx);
   rz_cleanup(&ctx);
 }
-static JNINativeMethod nativeSpecializeAppProcess_methods[6] = {
+static JNINativeMethod nativeSpecializeAppProcess_methods[] = {
   {
     "nativeSpecializeAppProcess",
     "(II[II[[IILjava/lang/String;Ljava/lang/String;ZLjava/lang/String;Ljava/lang/String;)V",
@@ -377,7 +376,6 @@ static JNINativeMethod nativeSpecializeAppProcess_methods[6] = {
     (void *) &nativeSpecializeAppProcess_grapheneos_u
   },
 };
-static const int nativeSpecializeAppProcess_methods_count = 6;
 
 static void *nativeForkSystemServer_orig = NULL;
 typedef jint (*nativeForkSystemServer_fn)(JNIEnv *, jclass, ...);
@@ -405,7 +403,7 @@ __attribute__((no_stack_protector)) static jint nativeForkSystemServer_samsung_q
   rz_cleanup(&ctx);
   return ctx.pid;
 }
-static JNINativeMethod nativeForkSystemServer_methods[2] = {
+static JNINativeMethod nativeForkSystemServer_methods[] = {
   {
     "nativeForkSystemServer",
     "(II[II[[IJJ)I",
@@ -417,15 +415,16 @@ static JNINativeMethod nativeForkSystemServer_methods[2] = {
     (void *) &nativeForkSystemServer_samsung_q
   },
 };
-static const int nativeForkSystemServer_methods_count = 2;
 
 static void do_hook_zygote(JNIEnv *env) {
+  const char *clz = "com/android/internal/os/Zygote";
+
   JNINativeMethod hooks[3];
   int hooks_count = 0;
 
-  const char *clz = "com/android/internal/os/Zygote";
-  hook_jni_methods(env, clz, nativeForkAndSpecialize_methods, nativeForkAndSpecialize_methods_count);
-  for (int i = 0; i < nativeForkAndSpecialize_methods_count; i++) {
+  int fork_specialize_methods_count = sizeof(nativeForkAndSpecialize_methods) / sizeof(nativeForkAndSpecialize_methods[0]);
+  hook_jni_methods(env, clz, nativeForkAndSpecialize_methods, fork_specialize_methods_count);
+  for (int i = 0; i < fork_specialize_methods_count; i++) {
     if (!nativeForkAndSpecialize_methods[i].fnPtr) continue;
 
     nativeForkAndSpecialize_orig = nativeForkAndSpecialize_methods[i].fnPtr;
@@ -434,8 +433,9 @@ static void do_hook_zygote(JNIEnv *env) {
     break;
   }
 
-  hook_jni_methods(env, clz, nativeSpecializeAppProcess_methods, nativeSpecializeAppProcess_methods_count);
-  for (int i = 0; i < nativeSpecializeAppProcess_methods_count; i++) {
+  int specialize_methods_count = sizeof(nativeSpecializeAppProcess_methods) / sizeof(nativeSpecializeAppProcess_methods[0]);
+  hook_jni_methods(env, clz, nativeSpecializeAppProcess_methods, specialize_methods_count);
+  for (int i = 0; i < specialize_methods_count; i++) {
     if (!nativeSpecializeAppProcess_methods[i].fnPtr) continue;
 
     nativeSpecializeAppProcess_orig = nativeSpecializeAppProcess_methods[i].fnPtr;
@@ -444,8 +444,9 @@ static void do_hook_zygote(JNIEnv *env) {
     break;
   }
 
-  hook_jni_methods(env, clz, nativeForkSystemServer_methods, nativeForkSystemServer_methods_count);
-  for (int i = 0; i < nativeForkSystemServer_methods_count; i++) {
+  int server_methods_count = sizeof(nativeForkSystemServer_methods) / sizeof(nativeForkSystemServer_methods[0]);
+  hook_jni_methods(env, clz, nativeForkSystemServer_methods, server_methods_count);
+  for (int i = 0; i < server_methods_count; i++) {
     if (!nativeForkSystemServer_methods[i].fnPtr) continue;
 
     nativeForkSystemServer_orig = nativeForkSystemServer_methods[i].fnPtr;

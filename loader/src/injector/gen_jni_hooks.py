@@ -252,8 +252,7 @@ def gen_jni_def(clz, methods):
             decl += ind(1) + f'return {m.ret.value};'
         decl += ind(0) + '}'
 
-    num_methods = len(methods)
-    decl += ind(0) + f'static JNINativeMethod {m.base_name()}_methods[{num_methods}] = {{'
+    decl += ind(0) + f'static JNINativeMethod {m.base_name()}_methods[] = {{'
     for m in methods:
         decl += ind(1) + '{'
         decl += ind(2) + f'"{m.base_name()}",'
@@ -261,7 +260,6 @@ def gen_jni_def(clz, methods):
         decl += ind(2) + f'(void *) &{m.name}'
         decl += ind(1) + '},'
     decl += ind(0) + '};'
-    decl += ind(0) + f'static const int {m.base_name()}_methods_count = {num_methods};'
     decl = ind(0) + f'static void *{m.base_name()}_orig = NULL;' + decl
     decl += ind(0)
 
@@ -287,12 +285,14 @@ with open('jni_hooks.h', 'w') as f:
 
     f.write("""
 static void do_hook_zygote(JNIEnv *env) {
+  const char *clz = "com/android/internal/os/Zygote";
+
   JNINativeMethod hooks[3];
   int hooks_count = 0;
 
-  const char *clz = "com/android/internal/os/Zygote";
-  hook_jni_methods(env, clz, nativeForkAndSpecialize_methods, nativeForkAndSpecialize_methods_count);
-  for (int i = 0; i < nativeForkAndSpecialize_methods_count; i++) {
+  int fork_specialize_methods_count = sizeof(nativeForkAndSpecialize_methods) / sizeof(nativeForkAndSpecialize_methods[0]);
+  hook_jni_methods(env, clz, nativeForkAndSpecialize_methods, fork_specialize_methods_count);
+  for (int i = 0; i < fork_specialize_methods_count; i++) {
     if (!nativeForkAndSpecialize_methods[i].fnPtr) continue;
 
     nativeForkAndSpecialize_orig = nativeForkAndSpecialize_methods[i].fnPtr;
@@ -301,8 +301,9 @@ static void do_hook_zygote(JNIEnv *env) {
     break;
   }
 
-  hook_jni_methods(env, clz, nativeSpecializeAppProcess_methods, nativeSpecializeAppProcess_methods_count);
-  for (int i = 0; i < nativeSpecializeAppProcess_methods_count; i++) {
+  int specialize_methods_count = sizeof(nativeSpecializeAppProcess_methods) / sizeof(nativeSpecializeAppProcess_methods[0]);
+  hook_jni_methods(env, clz, nativeSpecializeAppProcess_methods, specialize_methods_count);
+  for (int i = 0; i < specialize_methods_count; i++) {
     if (!nativeSpecializeAppProcess_methods[i].fnPtr) continue;
 
     nativeSpecializeAppProcess_orig = nativeSpecializeAppProcess_methods[i].fnPtr;
@@ -311,8 +312,9 @@ static void do_hook_zygote(JNIEnv *env) {
     break;
   }
 
-  hook_jni_methods(env, clz, nativeForkSystemServer_methods, nativeForkSystemServer_methods_count);
-  for (int i = 0; i < nativeForkSystemServer_methods_count; i++) {
+  int server_methods_count = sizeof(nativeForkSystemServer_methods) / sizeof(nativeForkSystemServer_methods[0]);
+  hook_jni_methods(env, clz, nativeForkSystemServer_methods, server_methods_count);
+  for (int i = 0; i < server_methods_count; i++) {
     if (!nativeForkSystemServer_methods[i].fnPtr) continue;
 
     nativeForkSystemServer_orig = nativeForkSystemServer_methods[i].fnPtr;
