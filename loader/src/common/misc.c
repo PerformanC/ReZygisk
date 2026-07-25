@@ -143,6 +143,8 @@ struct maps_info *parse_maps_safe(const char *pid) {
   if (!info_array) {
     PLOGE("allocate memory");
 
+    fclose(fp);
+
     close(fd);
     close(sockets[0]);
 
