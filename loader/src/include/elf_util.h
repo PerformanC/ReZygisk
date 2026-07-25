@@ -10,12 +10,6 @@ typedef void (*linker_simple_func_t)(void);
 typedef void (*linker_ctor_function_t)(int, char **, char **);
 typedef void (*linker_dtor_function_t)(void);
 
-
-struct symtabs {
-  char *name;
-  ElfW(Sym) *sym;
-};
-
 typedef struct {
   char *elf;
   void *base;
