@@ -7,7 +7,6 @@
 
 #include "magisk.h"
 
-#include "../constants.h"
 #include "../utils.h"
 #include "common.h"
 

@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <signal.h>
+#include <inttypes.h>
 #include <sched.h>
 #include <sys/mman.h>
 #include <sys/socket.h>

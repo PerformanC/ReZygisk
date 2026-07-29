@@ -4,7 +4,6 @@
 #include <string.h>
 #include <errno.h>
 
-#include <ctype.h>
 #include <inttypes.h>
 #include <linux/limits.h>
 
@@ -14,7 +13,6 @@
 #include <unistd.h>
 #include <sys/mman.h>
 #include <sys/ptrace.h>
-#include <sys/sysmacros.h>
 #include <sys/uio.h>
 #include <sys/wait.h>
 #include <sys/stat.h>

@@ -3,10 +3,8 @@
 #include <time.h>
 #include <errno.h>
 
-#include <fcntl.h>
 #include <unistd.h>
 #include <sys/epoll.h>
-#include <sys/mount.h>
 #include <sys/signalfd.h>
 #include <sys/socket.h>
 #include <sys/un.h>
