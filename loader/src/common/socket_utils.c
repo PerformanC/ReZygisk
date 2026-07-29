@@ -9,10 +9,12 @@
 
 #include "socket_utils.h"
 
+/* TODO: Perhaps merge the write and read functions?
+           Their signature and a single function changes. */
 ssize_t write_loop(int fd, const void *buf, size_t count) {
-  ssize_t written = 0;
-  while (written < (ssize_t)count) {
-    ssize_t ret = write(fd, (const char *)buf + written, count - written);
+  size_t written = 0;
+  while (written < count) {
+    ssize_t ret = TEMP_FAILURE_RETRY(write(fd, (const char *)buf + written, count - written));
     if (ret == -1) {
       if (errno == EAGAIN) {
         LOGW("Got EAGAIN while writing to fd %d, retrying...\n", fd);
@@ -22,41 +24,29 @@ ssize_t write_loop(int fd, const void *buf, size_t count) {
 
         continue;
       }
-
-      if (errno == EINTR) continue;
 
       PLOGE("write");
 
       return -1;
     }
 
-    if (ret == 0) {
-      LOGE("write: 0 bytes written");
-
-      return -1;
-    }
+    if (ret == 0) return written;
 
     written += ret;
   }
 
-  return written;
+  return (ssize_t)written;
 }
 
-ssize_t read_loop_offset(int fd, void *buf, size_t count, off_t off) {
-  if (off < 0) {
-    LOGE("read_loop_offset: negative offset: %lld", (long long)off);
-
-    return -1;
-  }
-
-  ssize_t read_bytes = 0;
-  while (read_bytes < (ssize_t)count) {
-    size_t remaining = count - (size_t)read_bytes;
-    char *dst = (char *)buf + read_bytes;
-    ssize_t ret = pread(fd, dst, remaining, off + read_bytes);
+ssize_t read_loop_offset(int fd, void *buf, size_t count, off_t offset) {
+  size_t read_bytes = 0;
+  while (read_bytes < count) {
+    ssize_t ret;
+    if (offset == 0) ret = TEMP_FAILURE_RETRY(read(fd, (char *)buf + read_bytes, count - read_bytes));
+    else ret = TEMP_FAILURE_RETRY(pread(fd, (char *)buf + read_bytes, count - read_bytes, offset + read_bytes));
     if (ret == -1) {
       if (errno == EAGAIN) {
-        LOGW("Got EAGAIN while writing to fd %d, retrying...\n", fd);
+        LOGW("Got EAGAIN while reading from fd %d, retrying...\n", fd);
 
         /* INFO: Sleep for 1ms*/
         usleep(1000);
@@ -64,49 +54,21 @@ ssize_t read_loop_offset(int fd, void *buf, size_t count, off_t off) {
         continue;
       }
 
-      if (errno == EINTR) continue;
-
       PLOGE("read");
 
       return -1;
     }
 
-    if (ret == 0) {
-      LOGE("read: 0 bytes read");
-
-      return -1;
-    }
+    if (ret == 0) return read_bytes;
 
     read_bytes += ret;
   }
 
-  return read_bytes;
+  return (ssize_t)read_bytes;
 }
 
 ssize_t read_loop(int fd, void *buf, size_t count) {
-  ssize_t read_bytes = 0;
-  while (read_bytes < (ssize_t)count) {
-    size_t remaining = count - (size_t)read_bytes;
-    char *dst = (char *)buf + read_bytes;
-    ssize_t ret = read(fd, dst, remaining);
-    if (ret == -1) {
-      if (errno == EINTR || errno == EAGAIN) continue;
-
-      PLOGE("read");
-
-      return -1;
-    }
-
-    if (ret == 0) {
-      LOGE("read: 0 bytes read");
-
-      return -1;
-    }
-
-    read_bytes += ret;
-  }
-
-  return read_bytes;
+  return read_loop_offset(fd, buf, count, 0);
 }
 
 ssize_t write_fd(int fd, int sendfd) {
@@ -134,7 +96,7 @@ ssize_t write_fd(int fd, int sendfd) {
 
   ssize_t ret = sendmsg(fd, &msg, 0);
   if (ret == -1) {
-    LOGE("sendmsg: %s\n", strerror(errno));
+    PLOGE("sendmsg");
 
     return -1;
   }
@@ -178,7 +140,7 @@ int read_fd(int fd) {
   }
 
   if (sendfd == -1) {
-    LOGE("Failed to receive fd: No valid fd found in ancillary data.");
+    LOGE("Failed to receive fd in read_fd: No valid fd found in control message");
 
     return -1;
   }

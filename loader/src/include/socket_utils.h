@@ -7,7 +7,7 @@
 
 ssize_t write_loop(int fd, const void *buf, size_t count);
 
-ssize_t read_loop_offset(int fd, void *buf, size_t len, off_t off);
+ssize_t read_loop_offset(int fd, void *buf, size_t len, off_t offset);
 
 ssize_t read_loop(int fd, void *buf, size_t len);
 
