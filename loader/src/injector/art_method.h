@@ -10,8 +10,6 @@
 #include "logging.h"
 
 static jfieldID art_method_field = NULL;
-static size_t art_method_size = 0;
-static size_t entry_point_offset = 0;
 static size_t data_offset = 0;
 
 static inline void *amethod_from_reflected_method(JNIEnv *env, jobject method);
@@ -84,7 +82,7 @@ static inline bool amethod_init(JNIEnv *env) {
   (*env)->DeleteLocalRef(env, constructors);
   if (clazz) (*env)->DeleteLocalRef(env, clazz);
 
-  art_method_size = second - first;
+  size_t art_method_size = second - first;
   LOGD("ArtMethod size: %zu", art_method_size);
   if ((4 * 9 + 3 * sizeof(void *)) < art_method_size) {
     LOGE("ArtMethod size exceeds maximum assume. There may be something wrong.");
@@ -92,7 +90,7 @@ static inline bool amethod_init(JNIEnv *env) {
     return false;
   }
 
-  entry_point_offset = art_method_size - sizeof(void *);
+  size_t entry_point_offset = art_method_size - sizeof(void *);
   data_offset = entry_point_offset - sizeof(void *);
   LOGD("ArtMethod entrypoint offset: %zu", entry_point_offset);
   LOGD("ArtMethod data offset: %zu", data_offset);
