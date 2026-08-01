@@ -98,16 +98,6 @@ bool monitor_events_register_event(monitor_event_callback_t event_cb, int fd, ui
   return true;
 }
 
-bool monitor_events_unregister_event(int fd) {
-  if (epoll_ctl(monitor_epoll_fd, EPOLL_CTL_DEL, fd, NULL) == -1) {
-    PLOGE("epoll_ctl");
-
-    return false;
-  }
-
-  return true;
-}
-
 void monitor_events_stop() {
   monitor_events_running = false;
 }
@@ -594,13 +584,13 @@ void sigchld_listener_callback() {
     }
 
     if (s != sizeof(sigchld_fdsi)) {
-      LOGW("read %zu != %zu", s, sizeof(sigchld_fdsi));
+      LOGE("read %zu != %zu", s, sizeof(sigchld_fdsi));
 
       continue;
     }
 
     if (sigchld_fdsi.ssi_signo != SIGCHLD) {
-      LOGW("no sigchld received");
+      LOGE("No sigchld received");
 
       continue;
     }
@@ -618,13 +608,13 @@ void sigchld_listener_callback() {
 
           ptrace(PTRACE_GETEVENTMSG, pid, 0, &child_pid);
 
-          LOGV("forked %ld", child_pid);
+          LOGV("Forked %ld", child_pid);
         } else if (STOPPED_WITH(SIGTRAP, PTRACE_EVENT_STOP) && tracing_state == STOPPING) {
           if (ptrace(PTRACE_DETACH, 1, 0, 0) == -1) PLOGE("failed to detach init");
 
           tracing_state = STOPPED;
 
-          LOGI("stop tracing init");
+          LOGI("Stopped tracing init");
 
           continue;
         }
@@ -632,13 +622,13 @@ void sigchld_listener_callback() {
         if (WIFSTOPPED(sigchld_status)) {
           if (WPTEVENT(sigchld_status) == 0) {
             if (WSTOPSIG(sigchld_status) != SIGSTOP && WSTOPSIG(sigchld_status) != SIGTSTP && WSTOPSIG(sigchld_status) != SIGTTIN && WSTOPSIG(sigchld_status) != SIGTTOU) {
-              LOGW("inject signal sent to init: %s %d", sigabbrev_np(WSTOPSIG(sigchld_status)), WSTOPSIG(sigchld_status));
+              LOGW("Injecting signal sent to init: %s %d", sigabbrev_np(WSTOPSIG(sigchld_status)), WSTOPSIG(sigchld_status));
 
               ptrace(PTRACE_CONT, pid, 0, WSTOPSIG(sigchld_status));
 
               continue;
             } else {
-              LOGW("suppress stopping signal sent to init: %s %d", sigabbrev_np(WSTOPSIG(sigchld_status)), WSTOPSIG(sigchld_status));
+              LOGW("Suppressing stop signal sent to init: %s %d", sigabbrev_np(WSTOPSIG(sigchld_status)), WSTOPSIG(sigchld_status));
             }
           }
 
@@ -661,7 +651,7 @@ void sigchld_listener_callback() {
       }
 
       if (state == 0) {
-        LOGV("new process %d attached", pid);
+        LOGV("New process %d attached", pid);
 
         for (size_t i = 0; i < sigchld_process_count; i++) {
           if (sigchld_process[i] != 0) continue;
@@ -704,7 +694,7 @@ void sigchld_listener_callback() {
 
           do {
             if (tracing_state != TRACING) {
-              LOGW("stop injecting %d because not tracing", pid);
+              LOGD("Stopped injecting %d because status is not set to tracing", pid);
 
               break;
             }
@@ -714,30 +704,20 @@ void sigchld_listener_callback() {
             PRE_INJECT_TANGO
 
             if (tracer != NULL) {
-              LOGI("handoff tracer: pid=%d program=%s tracer=%s tango=%s", pid, program, tracer, is_tango ? "yes" : "no");
+              LOGD("Stopping %d (program: %s, tracer: %s, tango: %s)", pid, program, tracer, is_tango ? "yes" : "no");
 
-              if (is_tango) {
-                /* INFO: Stopping tango during init causes an unrecoverable SIGSEGV on resume. */
-                /* TODO: Can this be improved? Can we make an injection without time being a factor? */
-                LOGD("tango deferred: detaching %d without stop", pid);
+              kill(pid, SIGSTOP);
+              ptrace(PTRACE_CONT, pid, 0, 0);
+              waitpid(pid, &sigchld_status, __WALL);
 
-                ptrace(PTRACE_DETACH, pid, 0, 0);
-              } else {
-                LOGD("stopping %d", pid);
+              if (!STOPPED_WITH(SIGSTOP, 0)) {
+                LOGE("Failed to stop process %d", pid);
 
-                kill(pid, SIGSTOP);
-                ptrace(PTRACE_CONT, pid, 0, 0);
-                waitpid(pid, &sigchld_status, __WALL);
-
-                if (!STOPPED_WITH(SIGSTOP, 0)) {
-                  LOGW("handoff: pid %d did not stop as expected", pid);
-
-                  break;
-                }
-
-                LOGD("detaching %d", pid);
-                ptrace(PTRACE_DETACH, pid, 0, SIGSTOP);
+                break;
               }
+
+              LOGD("Detaching %d", pid);
+              ptrace(PTRACE_DETACH, pid, 0, SIGSTOP);
 
               {
                 sigchld_status = 0;
@@ -764,12 +744,12 @@ void sigchld_listener_callback() {
                     }
                   }
 
-                  PLOGE("failed to exec, kill");
+                  PLOGE("exec");
 
                   kill(pid, SIGKILL);
                   exit(1);
                 } else if (p == -1) {
-                  PLOGE("failed to fork, kill");
+                  PLOGE("fork");
 
                   kill(pid, SIGKILL);
                 }

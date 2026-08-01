@@ -46,8 +46,6 @@ bool get_regs(int pid, struct user_regs_struct *regs);
 
 bool set_regs(int pid, struct user_regs_struct *regs);
 
-void get_addr_mem_region(struct maps_info *map, uintptr_t addr, char *buf, size_t buf_size);
-
 const char *position_after(const char *str, const char needle);
 
 void *find_module_return_addr(struct maps_info *map, const char *suffix);
@@ -64,24 +62,9 @@ int fork_dont_care();
 
 uintptr_t find_syscall_gadget(int pid, struct maps_info *remote_map);
 
-bool wait_for_event_stop(int pid);
+bool wait_linker_ready(int pid, uintptr_t *out_libc_init_resolved, uintptr_t *out_libc_init_got_slot);
 
-#ifdef __arm__
-  /* INFO: Tango-specific linker watch state */
-  struct tango_linker_watch {
-    uint32_t libc_init_got_slot;
-    uint32_t libc_init_initial;
-    uint32_t libc_init_resolved;
-  };
-
-  bool tango_wait_linker_ready(int pid, struct tango_linker_watch *watch);
-
-  uint32_t find_tramp_padding(int pid, uint32_t rx_start, uint32_t rx_end, size_t needed);
-
-  bool ptrace_poke_u32(pid_t pid, uintptr_t addr, uint32_t value);
-
-  uintptr_t find_arm32_ret_gadget(int pid, struct maps_info *remote_map);
-#endif
+bool ptrace_poke_uintptr(pid_t pid, uintptr_t addr, uintptr_t value);
 
 bool wait_for_ptrace_syscall_stop(int pid, int *status);
 

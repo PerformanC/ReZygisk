@@ -117,24 +117,6 @@ bool set_regs(int pid, struct user_regs_struct *regs) {
   return true;
 }
 
-void get_addr_mem_region(struct maps_info *info, uintptr_t addr, char *buf, size_t buf_size) {
-  for (size_t i = 0; i < info->length; i++) {
-    const struct map_entry  *m = &info->maps[i];
-    if (m->start <= addr && m->end > addr) {
-      const char *path = m->path ? m->path : "<anonymous>";
-      snprintf(buf, buf_size, "%s %s%s%s",
-               path,
-               m->perms & PROT_READ ? "r" : "-",
-               m->perms & PROT_WRITE ? "w" : "-",
-               m->perms & PROT_EXEC ? "x" : "-");
-
-      return;
-    }
-  }
-
-  snprintf(buf, buf_size, "<unknown>");
-}
-
 /* INFO: strrchr but without modifying the string */
 const char *position_after(const char *str, const char needle) {
   const char *positioned = strrchr(str, needle);
@@ -445,338 +427,334 @@ uintptr_t find_syscall_gadget(int pid, struct maps_info *remote_map) {
   return 0;
 }
 
-bool wait_for_event_stop(int pid) {
+#if defined(__aarch64__)
+  #define TARGET_JUMP_SLOT R_AARCH64_JUMP_SLOT
+#elif defined(__arm__)
+  #define TARGET_JUMP_SLOT R_ARM_JUMP_SLOT
+#elif defined(__x86_64__)
+  #define TARGET_JUMP_SLOT R_X86_64_JUMP_SLOT
+#elif defined(__i386__)
+  #define TARGET_JUMP_SLOT R_386_JMP_SLOT
+#endif
+
+#if defined(__LP64__)
+  #define ELFW_R_TYPE(info) ELF64_R_TYPE(info)
+  #define ELFW_R_SYM(info)  ELF64_R_SYM(info)
+  #define EXPECTED_ELFCLASS ELFCLASS64
+#else
+  #define ELFW_R_TYPE(info) ELF32_R_TYPE(info)
+  #define ELFW_R_SYM(info)  ELF32_R_SYM(info)
+  #define EXPECTED_ELFCLASS ELFCLASS32
+#endif
+
+static bool elf_vaddr_to_off(const ElfW(Phdr) *phdr, int phnum, ElfW(Addr) vaddr, off_t *out_off) {
+  for (int i = 0; i < phnum; i++) {
+    if (phdr[i].p_type != PT_LOAD) continue;
+
+    ElfW(Addr) seg_start = phdr[i].p_vaddr;
+    ElfW(Addr) seg_end = phdr[i].p_vaddr + phdr[i].p_filesz;
+    if (vaddr < seg_start || vaddr >= seg_end) continue;
+
+    *out_off = (off_t)phdr[i].p_offset + (off_t)(vaddr - seg_start);
+
+    return true;
+  }
+
+  return false;
+}
+
+bool find_jump_slot_got_offset(const char *elf_path, const char *symbol, uintptr_t *out_bias, uintptr_t *out_got_off) {
+  int fd = open(elf_path, O_RDONLY | O_CLOEXEC);
+  if (fd < 0) {
+    PLOGE("open ELF %s", elf_path);
+
+    return false;
+  }
+
+  struct stat st;
+  if (fstat(fd, &st) != 0 || st.st_size < (off_t)sizeof(ElfW(Ehdr))) {
+    LOGE("Failed to stat ELF %s", elf_path);
+
+    close(fd);
+
+    return false;
+  }
+
+  ElfW(Ehdr) eh;
+  if (pread(fd, &eh, sizeof(eh), 0) != (ssize_t)sizeof(eh)) {
+    LOGE("Failed to read ELF header");
+
+    close(fd);
+
+    return false;
+  }
+
+  if (memcmp(eh.e_ident, ELFMAG, SELFMAG) != 0 || eh.e_ident[EI_CLASS] != EXPECTED_ELFCLASS || eh.e_phnum == 0) {
+    LOGE("Invalid ELF header in %s", elf_path);
+
+    close(fd);
+
+    return false;
+  }
+
+  ElfW(Phdr) *phdr = calloc(eh.e_phnum, sizeof(ElfW(Phdr)));
+  if (!phdr) {
+    LOGE("Failed to allocate memory for program headers");
+
+    close(fd);
+
+    return false;
+  }
+
+  if (pread(fd, phdr, sizeof(ElfW(Phdr)) * eh.e_phnum, eh.e_phoff) != (ssize_t)(sizeof(ElfW(Phdr)) * eh.e_phnum)) {
+    LOGE("Failed to read program headers");
+
+    free(phdr);
+
+    close(fd);
+
+    return false;
+  }
+
+  ElfW(Addr) min_vaddr = (ElfW(Addr))-1;
+  ElfW(Addr) dyn_vaddr = 0;
+  ElfW(Word) dyn_size = 0;
+  for (int i = 0; i < eh.e_phnum; i++) {
+    if (phdr[i].p_type == PT_LOAD && phdr[i].p_vaddr < min_vaddr) min_vaddr = phdr[i].p_vaddr;
+    if (phdr[i].p_type == PT_DYNAMIC) {
+      dyn_vaddr = phdr[i].p_vaddr;
+      dyn_size = phdr[i].p_filesz;
+    }
+  }
+
+  if (!dyn_vaddr || !dyn_size || min_vaddr == (ElfW(Addr))-1) {
+    LOGE("Failed to find dynamic section or PT_LOAD segments in %s", elf_path);
+
+    free(phdr);
+
+    close(fd);
+
+    return false;
+  }
+
+  off_t dyn_off = 0;
+  if (!elf_vaddr_to_off(phdr, eh.e_phnum, dyn_vaddr, &dyn_off)) {
+    LOGE("Failed to convert dynamic section virtual address to file offset in %s", elf_path);
+
+    free(phdr);
+
+    close(fd);
+
+    return false;
+  }
+
+  size_t dyn_count = dyn_size / sizeof(ElfW(Dyn));
+  ElfW(Dyn) *dyn = calloc(dyn_count, sizeof(ElfW(Dyn)));
+  if (!dyn) {
+    LOGE("Failed to allocate memory for dynamic section in %s", elf_path);
+
+    free(phdr);
+
+    close(fd);
+
+    return false;
+  }
+
+  if (pread(fd, dyn, dyn_count * sizeof(ElfW(Dyn)), dyn_off) != (ssize_t)(dyn_count * sizeof(ElfW(Dyn)))) {
+    LOGE("Failed to read dynamic section in %s", elf_path);
+
+    free(dyn);
+    free(phdr);
+
+    close(fd);
+
+    return false;
+  }
+
+  ElfW(Addr) jmprel = 0, symtab = 0, strtab = 0;
+  ElfW(Word) pltrelsz = 0, pltrel = 0;
+  for (size_t i = 0; i < dyn_count; i++) {
+    switch (dyn[i].d_tag) {
+      case DT_JMPREL: jmprel = dyn[i].d_un.d_ptr; break;
+      case DT_PLTRELSZ: pltrelsz = dyn[i].d_un.d_val; break;
+      case DT_PLTREL: pltrel = dyn[i].d_un.d_val; break;
+      case DT_SYMTAB: symtab = dyn[i].d_un.d_ptr; break;
+      case DT_STRTAB: strtab = dyn[i].d_un.d_ptr; break;
+      default: break;
+    }
+  }
+
+  if (!jmprel || !pltrelsz || !symtab || !strtab || !(pltrel == DT_REL || pltrel == DT_RELA)) {
+    LOGE("Failed to find necessary dynamic entries in %s", elf_path);
+
+    free(dyn);
+    free(phdr);
+
+    close(fd);
+
+    return false;
+  }
+
+  off_t rel_off = 0, sym_off = 0, str_off = 0;
+  if (!elf_vaddr_to_off(phdr, eh.e_phnum, jmprel, &rel_off) ||
+      !elf_vaddr_to_off(phdr, eh.e_phnum, symtab, &sym_off) ||
+      !elf_vaddr_to_off(phdr, eh.e_phnum, strtab, &str_off)) {
+    LOGE("Failed to convert virtual addresses to file offsets in %s", elf_path);
+
+    free(dyn);
+    free(phdr);
+
+    close(fd);
+
+    return false;
+  }
+
+  bool found = false;
+  size_t entsz = (pltrel == DT_REL) ? sizeof(ElfW(Rel)) : sizeof(ElfW(Rela));
+  size_t count = pltrelsz / entsz;
+  for (size_t i = 0; i < count; i++) {
+    ElfW(Addr) r_offset = 0;
+    ElfW(Word) r_info_type = 0;
+    ElfW(Word) sym_index = 0;
+
+    if (pltrel == DT_REL) {
+      ElfW(Rel) rel;
+      if (pread(fd, &rel, sizeof(rel), rel_off + (off_t)(i * sizeof(rel))) != (ssize_t)sizeof(rel)) {
+        LOGE("Failed to read relocation entry at index %zu in %s", i, elf_path);
+
+        break;
+      }
+
+      r_offset = rel.r_offset;
+      r_info_type = ELFW_R_TYPE(rel.r_info);
+      sym_index = ELFW_R_SYM(rel.r_info);
+    } else {
+      ElfW(Rela) rela;
+      if (pread(fd, &rela, sizeof(rela), rel_off + (off_t)(i * sizeof(rela))) != (ssize_t)sizeof(rela)) {
+        LOGE("Failed to read relocation entry at index %zu in %s", i, elf_path);
+
+        break;
+      }
+
+      r_offset = rela.r_offset;
+      r_info_type = ELFW_R_TYPE(rela.r_info);
+      sym_index = ELFW_R_SYM(rela.r_info);
+    }
+
+    if (r_info_type != TARGET_JUMP_SLOT) continue;
+
+    ElfW(Sym) sym;
+    if (pread(fd, &sym, sizeof(sym), sym_off + (off_t)(sym_index * sizeof(sym))) != (ssize_t)sizeof(sym)) {
+      LOGE("Failed to read symbol at index %zu in %s", (size_t)sym_index, elf_path);
+
+      break;
+    }
+
+    if (sym.st_name == 0) continue;
+
+    char name[128] = { 0 };
+    if (pread(fd, name, sizeof(name) - 1, str_off + (off_t)sym.st_name) <= 0) {
+      LOGE("Failed to read symbol name at index %zu in %s", (size_t)sym_index, elf_path);
+
+      break;
+    }
+
+    if (strcmp(name, symbol) != 0) continue;
+
+    *out_bias = (uintptr_t)min_vaddr;
+    *out_got_off = (uintptr_t)r_offset;
+
+    found = true;
+
+    break;
+  }
+
+  free(dyn);
+  free(phdr);
+
+  close(fd);
+
+  return found;
+}
+
+bool wait_linker_ready(int pid, uintptr_t *out_libc_init_resolved, uintptr_t *out_libc_init_got_slot) {
+  char pid_str[11];
+  snprintf(pid_str, sizeof(pid_str), "%d", pid);
+
+  struct maps_info *remote_map = parse_maps(pid_str);
+  if (!remote_map) {
+    LOGE("Failed to parse remote maps for pid %d", pid);
+
+    return false;
+  }
+
+  for (size_t i = 0; i < remote_map->length; i++) {
+    const struct map_entry *m = &remote_map->maps[i];
+    if (!m->path || m->offset != 0 || !strstr(m->path, "app_process")) continue;
+
+    uintptr_t bias = 0, got_off = 0;
+    if (!find_jump_slot_got_offset(m->path, "__libc_init", &bias, &got_off)) {
+      LOGD("Failed to find __libc_init in JMPREL of '%s'", m->path);
+
+      free_maps(remote_map);
+
+      return false;
+    }
+
+    *out_libc_init_got_slot = ((uintptr_t)m->start - bias) + got_off;
+  }
+
+  free_maps(remote_map);
+
+  uintptr_t initial_value = 0;
+  if (read_proc(pid, *out_libc_init_got_slot, &initial_value, sizeof(initial_value)) != sizeof(initial_value)) {
+    LOGE("Failed to read initial value of __libc_init GOT slot at 0x%" PRIxPTR, *out_libc_init_got_slot);
+
+    return false;
+  }
+
+  /* INFO: Loop till linker changes the value (resolves the symbol) */
   while (1) {
-    int status;
-    wait_for_trace(pid, &status, __WALL);
+    uintptr_t current_value = 0;
+    if (read_proc(pid, *out_libc_init_got_slot, &current_value, sizeof(current_value)) != sizeof(current_value)) {
+      LOGE("Failed to read current value of __libc_init GOT slot at 0x%" PRIxPTR, *out_libc_init_got_slot);
 
-    if (WIFSTOPPED(status) && WSTOPSIG(status) == SIGTRAP && (status >> 16) == PTRACE_EVENT_STOP)
+      return false;
+    }
+
+    /* INFO: If value changed, linker has resolved the symbol */
+    if (current_value != initial_value) {
+      *out_libc_init_resolved = current_value;
+
+      LOGI("Resolved __libc_init (0x%" PRIxPTR " -> 0x%" PRIxPTR ", pid %d)", initial_value, current_value, pid);
+
       return true;
+    }
 
-    if (!WIFSTOPPED(status)) return false;
+    /* INFO: Step to the next syscall */
+    if (ptrace(PTRACE_SYSCALL, pid, 0, 0) == -1) {
+      PLOGE("ptrace PTRACE_SYSCALL");
 
-    if (ptrace(PTRACE_CONT, pid, 0, (status >> 16) ? 0 : WSTOPSIG(status)) == -1) {
-      PLOGE("PTRACE_CONT while draining to EVENT_STOP");
+      return false;
+    }
+
+    int status = 0;
+    if (!wait_for_ptrace_syscall_stop(pid, &status)) {
+      LOGE("wait_for_ptrace_syscall_stop failed");
 
       return false;
     }
   }
 }
 
-#ifndef R_ARM_JUMP_SLOT
-  #define R_ARM_JUMP_SLOT 22
-#endif
-
-/* INFO: Only used for Tango, only for AArch64 */
-#ifdef __arm__
-  static bool elf32_vaddr_to_off(const Elf32_Phdr *phdr, int phnum, Elf32_Addr vaddr, off_t *out_off) {
-    for (int i = 0; i < phnum; i++) {
-      if (phdr[i].p_type != PT_LOAD) continue;
-
-      Elf32_Addr seg_start = phdr[i].p_vaddr;
-      Elf32_Addr seg_end = phdr[i].p_vaddr + phdr[i].p_filesz;
-      if (vaddr < seg_start || vaddr >= seg_end) continue;
-
-      *out_off = (off_t)phdr[i].p_offset + (off_t)(vaddr - seg_start);
-
-      return true;
-    }
-
-    return false;
-  }
-
-  static bool find_jump_slot_got_offset_elf32(const char *elf_path, const char *symbol, uint32_t *out_bias, uint32_t *out_got_off) {
-    int fd = open(elf_path, O_RDONLY | O_CLOEXEC);
-    if (fd < 0) {
-      PLOGE("open ELF32 %s", elf_path);
-
-      return false;
-    }
-
-    struct stat st;
-    if (fstat(fd, &st) != 0 || st.st_size < (off_t)sizeof(Elf32_Ehdr)) {
-      LOGE("Failed to stat ELF32 %s", elf_path);
-
-      close(fd);
-
-      return false;
-    }
-
-    Elf32_Ehdr eh;
-    if (pread(fd, &eh, sizeof(eh), 0) != (ssize_t)sizeof(eh)) {
-      LOGE("Failed to read ELF32 header");
-
-      close(fd);
-
-      return false;
-    }
-
-    if (memcmp(eh.e_ident, ELFMAG, SELFMAG) != 0 || eh.e_ident[EI_CLASS] != ELFCLASS32 || eh.e_phnum == 0) {
-      LOGE("Invalid ELF32 header in %s", elf_path);
-
-      close(fd);
-
-      return false;
-    }
-
-    Elf32_Phdr *phdr = calloc(eh.e_phnum, sizeof(Elf32_Phdr));
-    if (!phdr) {
-      LOGE("Failed to allocate memory for program headers");
-
-      close(fd);
-
-      return false;
-    }
-
-    if (pread(fd, phdr, sizeof(Elf32_Phdr) * eh.e_phnum, eh.e_phoff) != (ssize_t)(sizeof(Elf32_Phdr) * eh.e_phnum)) {
-      LOGE("Failed to read program headers");
-
-      free(phdr);
-      close(fd);
-
-      return false;
-    }
-
-    Elf32_Addr min_vaddr = UINT32_MAX;
-    Elf32_Addr dyn_vaddr = 0;
-    Elf32_Word dyn_size = 0;
-    for (int i = 0; i < eh.e_phnum; i++) {
-      if (phdr[i].p_type == PT_LOAD && phdr[i].p_vaddr < min_vaddr) min_vaddr = phdr[i].p_vaddr;
-      if (phdr[i].p_type == PT_DYNAMIC) {
-        dyn_vaddr = phdr[i].p_vaddr;
-        dyn_size = phdr[i].p_filesz;
-      }
-    }
-
-    if (!dyn_vaddr || !dyn_size || min_vaddr == UINT32_MAX) {
-      free(phdr);
-      close(fd);
-
-      return false;
-    }
-
-    off_t dyn_off = 0;
-    if (!elf32_vaddr_to_off(phdr, eh.e_phnum, dyn_vaddr, &dyn_off)) {
-      free(phdr);
-      close(fd);
-
-      return false;
-    }
-
-    size_t dyn_count = dyn_size / sizeof(Elf32_Dyn);
-    Elf32_Dyn *dyn = calloc(dyn_count, sizeof(Elf32_Dyn));
-    if (!dyn) {
-      free(phdr);
-      close(fd);
-
-      return false;
-    }
-
-    if (pread(fd, dyn, dyn_count * sizeof(Elf32_Dyn), dyn_off) != (ssize_t)(dyn_count * sizeof(Elf32_Dyn))) {
-      free(dyn);
-      free(phdr);
-      close(fd);
-
-      return false;
-    }
-
-    Elf32_Addr jmprel = 0, symtab = 0, strtab = 0;
-    Elf32_Word pltrelsz = 0, pltrel = 0;
-    for (size_t i = 0; i < dyn_count; i++) {
-      switch (dyn[i].d_tag) {
-        case DT_JMPREL: jmprel = dyn[i].d_un.d_ptr; break;
-        case DT_PLTRELSZ: pltrelsz = dyn[i].d_un.d_val; break;
-        case DT_PLTREL: pltrel = dyn[i].d_un.d_val; break;
-        case DT_SYMTAB: symtab = dyn[i].d_un.d_ptr; break;
-        case DT_STRTAB: strtab = dyn[i].d_un.d_ptr; break;
-        default: break;
-      }
-    }
-
-    if (!jmprel || !pltrelsz || !symtab || !strtab || !(pltrel == DT_REL || pltrel == DT_RELA)) {
-      LOGE("Failed to find necessary dynamic entries in %s", elf_path);
-
-      free(dyn);
-      free(phdr);
-      close(fd);
-
-      return false;
-    }
-
-    off_t rel_off = 0, sym_off = 0, str_off = 0;
-    if (!elf32_vaddr_to_off(phdr, eh.e_phnum, jmprel, &rel_off) ||
-        !elf32_vaddr_to_off(phdr, eh.e_phnum, symtab, &sym_off) ||
-        !elf32_vaddr_to_off(phdr, eh.e_phnum, strtab, &str_off)
-    ) {
-      LOGE("Failed to convert necessary virtual addresses to file offsets in %s", elf_path);
-
-      free(dyn);
-      free(phdr);
-      close(fd);
-
-      return false;
-    }
-
-    bool found = false;
-    size_t entsz = (pltrel == DT_REL) ? sizeof(Elf32_Rel) : sizeof(Elf32_Rela);
-    size_t count = pltrelsz / entsz;
-    for (size_t i = 0; i < count; i++) {
-      Elf32_Addr r_offset = 0;
-      Elf32_Word r_info = 0;
-
-      if (pltrel == DT_REL) {
-        Elf32_Rel rel;
-        if (pread(fd, &rel, sizeof(rel), rel_off + (off_t)(i * sizeof(rel))) != (ssize_t)sizeof(rel)) break;
-
-        r_offset = rel.r_offset;
-        r_info = rel.r_info;
-      } else {
-        Elf32_Rela rela;
-        if (pread(fd, &rela, sizeof(rela), rel_off + (off_t)(i * sizeof(rela))) != (ssize_t)sizeof(rela)) break;
-
-        r_offset = rela.r_offset;
-        r_info = rela.r_info;
-      }
-
-      if (ELF32_R_TYPE(r_info) != R_ARM_JUMP_SLOT) continue;
-      Elf32_Word sym_index = ELF32_R_SYM(r_info);
-
-      Elf32_Sym sym;
-      if (pread(fd, &sym, sizeof(sym), sym_off + (off_t)(sym_index * sizeof(sym))) != (ssize_t)sizeof(sym)) continue;
-      if (sym.st_name == 0) continue;
-
-      char name[128] = { 0 };
-      if (pread(fd, name, sizeof(name) - 1, str_off + (off_t)sym.st_name) <= 0) continue;
-      if (strcmp(name, symbol) != 0) continue;
-
-      *out_bias = min_vaddr;
-      *out_got_off = r_offset;
-      found = true;
-
-      break;
-    }
-
-    free(dyn);
-    free(phdr);
-    close(fd);
-
-    return found;
-  }
-
-  bool tango_wait_linker_ready(int pid, struct tango_linker_watch *watch) {
-    while (1) {
-      if (!watch->libc_init_got_slot) {
-        /* INFO: The character limit for a 32-bit integer is 10 */
-        char pid_str[10 + 1];
-        snprintf(pid_str, sizeof(pid_str), "%d", pid);
-
-        struct maps_info *remote_map = parse_maps(pid_str);
-        if (!remote_map) {
-          LOGE("Failed to parse remote maps for pid %d", pid);
-
-          return false;
-        }
-
-        memset(watch, 0, sizeof(*watch));
-        for (size_t i = 0; i < remote_map->length; i++) {
-          const struct map_entry  *m = &remote_map->maps[i];
-          if (!m->path || (uintptr_t)m->start >= 0x100000000ULL || m->offset != 0 || !strstr(m->path, "app_process32")) continue;
-
-          uint32_t bias = 0, got_off = 0;
-          if (!find_jump_slot_got_offset_elf32(m->path, "__libc_init", &bias, &got_off)) {
-            LOGD("Failed to find __libc_init in JMPREL of '%s'", m->path);
-
-            continue;
-          }
-
-          watch->libc_init_got_slot = ((uint32_t)(uintptr_t)m->start - bias) + got_off;
-
-          break;
-        }
-
-        if (watch->libc_init_got_slot && read_proc(pid, (uintptr_t)watch->libc_init_got_slot, &watch->libc_init_initial, 4) == 4) {
-          LOGI("Found __libc_init GOT@0x%x (initial=0x%x), waiting for linker", watch->libc_init_got_slot, watch->libc_init_initial);
-        } else if (watch->libc_init_got_slot) {
-          LOGD("Failed to read __libc_init GOT@0x%x", watch->libc_init_got_slot);
-          memset(watch, 0, sizeof(*watch));
-        }
-
-        free_maps(remote_map);
-      } else {
-        uint32_t got_current = 0;
-
-        if (read_proc(pid, (uintptr_t)watch->libc_init_got_slot, &got_current, 4) == 4 && got_current != 0 && got_current != watch->libc_init_initial) {
-          watch->libc_init_resolved = got_current;
-
-          LOGI("Resolved __libc_init (0x%x -> 0x%x, pid %d)", watch->libc_init_initial, got_current, pid);
-
-          return true;
-        }
-      }
-
-      if (ptrace(PTRACE_SYSCALL, pid, 0, 0) == -1) {
-        PLOGE("Failed to step syscall");
-        return false;
-      }
-
-      int status = 0;
-      if (!wait_for_ptrace_syscall_stop(pid, &status)) {
-        LOGE("Process %d died while waiting for injection point", pid);
-
-        return false;
-      }
-    }
-  }
-
-  uint32_t find_tramp_padding(int pid, uint32_t rx_start, uint32_t rx_end, size_t needed) {
-    uint32_t map_size = rx_end - rx_start;
-    int page_count = (int)(map_size / 0x1000);
-    if (page_count > 8) page_count = 8;
-
-    uint32_t scan_start = rx_end - (uint32_t)page_count * 0x1000;
-    uint32_t zero_run_end = rx_end;
-
-    for (int page = 0; page < page_count; page++) {
-      uint32_t page_addr = rx_end - (uint32_t)(page + 1) * 0x1000;
-      uint8_t buf[0x1000];
-      if (read_proc(pid, (uintptr_t)page_addr, buf, sizeof(buf)) != (ssize_t)sizeof(buf)) break;
-
-      for (int off = (int)sizeof(buf) - 1; off >= 0; off--) {
-        if (buf[off] == 0) continue;
-
-        uint32_t candidate = (page_addr + (uint32_t)(off + 1) + 3) & ~3u;
-        if (zero_run_end >= candidate && (size_t)(zero_run_end - candidate) >= needed) return candidate;
-
-        zero_run_end = page_addr + (uint32_t)off;
-      }
-    }
-
-    uint32_t candidate = (scan_start + 3) & ~3u;
-    if (zero_run_end >= candidate && (size_t)(zero_run_end - candidate) >= needed) return candidate;
-
-    LOGD("Failed to find %zu-byte trampoline padding in 0x%x-0x%x", needed, rx_start, rx_end);
-
-    return 0;
-  }
-
-  /* INFO: This allows to bypass RELRO memory protection */
-  bool ptrace_poke_u32(pid_t pid, uintptr_t addr, uint32_t value) {
-    uintptr_t word_mask = (uintptr_t)(sizeof(unsigned long) - 1);
-    uintptr_t aligned = addr & ~word_mask;
-    uintptr_t shift = (addr & word_mask) * 8;
-
+bool ptrace_poke_uintptr(pid_t pid, uintptr_t addr, uintptr_t value) {
+  uintptr_t word_size = sizeof(unsigned long);
+  uintptr_t word_mask = word_size - 1;
+  uintptr_t aligned = addr & ~word_mask;
+
+  if ((addr & word_mask) == 0) {
     errno = 0;
-    unsigned long data = (unsigned long)ptrace(PTRACE_PEEKDATA, pid, (void *)aligned, 0);
-    if (errno != 0) {
-      PLOGE("ptrace peekdata at 0x%" PRIxPTR, addr);
-
-      return false;
-    }
-
-    uint64_t lane_mask64 = (uint64_t)0xFFFFFFFFu << shift;
-    unsigned long masked = data & (unsigned long)~lane_mask64;
-    unsigned long patched = masked | (unsigned long)((uint64_t)value << shift);
-    if (ptrace(PTRACE_POKEDATA, pid, (void *)aligned, (void *)patched) == -1) {
+    if (ptrace(PTRACE_POKEDATA, pid, (void *)aligned, (void *)value) == -1 && errno != 0) {
       PLOGE("ptrace pokedata at 0x%" PRIxPTR, addr);
 
       return false;
@@ -785,46 +763,27 @@ bool wait_for_event_stop(int pid) {
     return true;
   }
 
-  uintptr_t find_arm32_ret_gadget(int pid, struct maps_info *remote_map) {
-    const uint16_t bx_lr = 0x4770;
+  /* Handle unaligned fallback if address is not word-aligned */
+  uintptr_t shift = (addr & word_mask) * 8;
+  errno = 0;
+  unsigned long data = (unsigned long)ptrace(PTRACE_PEEKDATA, pid, (void *)aligned, 0);
+  if (errno != 0) {
+    PLOGE("ptrace peekdata at 0x%" PRIxPTR, addr);
 
-    for (size_t i = 0; i < remote_map->length; i++) {
-      const struct map_entry  *m = &remote_map->maps[i];
-      if (!(m->perms & PROT_EXEC)) continue;
-      if ((uintptr_t)m->start >= 0x100000000ULL) continue;
-
-      size_t region_size = (uintptr_t)m->end - (uintptr_t)m->start;
-      if (region_size > 0x10000) region_size = 0x10000;
-
-      uint8_t *buf = malloc(region_size);
-      if (!buf) continue;
-
-      if (read_proc(pid, (uintptr_t)m->start, buf, region_size) != (ssize_t)region_size) {
-        free(buf);
-
-        continue;
-      }
-
-      for (size_t j = 0; j + 2 <= region_size; j += 2) {
-        if (memcmp(buf + j, &bx_lr, sizeof(bx_lr)) != 0) continue;
-
-        uintptr_t addr = (uintptr_t)m->start + j + 1;
-
-        free(buf);
-
-        LOGD("found arm32 ret gadget (BX LR) at 0x%" PRIxPTR " in %s",addr - 1, m->path ? m->path : "<anon>");
-
-        return addr;
-      }
-
-      free(buf);
-    }
-
-    LOGE("Failed to find arm32 ret gadget in 32-bit guest regions");
-
-    return 0;
+    return false;
   }
-#endif
+
+  unsigned long mask = ~(((unsigned long)~0ULL >> ((sizeof(unsigned long) - sizeof(uintptr_t)) * 8)) << shift);
+  unsigned long patched = (data & mask) | ((unsigned long)value << shift);
+
+  if (ptrace(PTRACE_POKEDATA, pid, (void *)aligned, (void *)patched) == -1) {
+    PLOGE("ptrace pokedata at 0x%" PRIxPTR, addr);
+
+    return false;
+  }
+
+  return true;
+}
 
 #ifdef __aarch64__
   #define AARCH64_PSTATE_BTYPE_MASK (3ull << 10)
@@ -1087,11 +1046,8 @@ void parse_status(int status, char *buf, size_t len) {
   } else if (WIFSIGNALED(status)) {
     snprintf(buf + strlen(buf), len - strlen(buf), "signaled with %s(%d)", sigabbrev_np(WTERMSIG(status)), WTERMSIG(status));
   } else if (WIFSTOPPED(status)) {
-    snprintf(buf + strlen(buf), len - strlen(buf), "stopped by ");
-
     int stop_sig = WSTOPSIG(status);
-    snprintf(buf + strlen(buf), len - strlen(buf), "signal=%s(%d),", sigabbrev_np(stop_sig), stop_sig);
-    snprintf(buf + strlen(buf), len - strlen(buf), "event=%s", parse_ptrace_event(status));
+    snprintf(buf + strlen(buf), len - strlen(buf), "stopped by signal %s (event: %s)", sigabbrev_np(stop_sig), parse_ptrace_event(status));
   } else {
     snprintf(buf + strlen(buf), len - strlen(buf), "unknown");
   }
