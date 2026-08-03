@@ -199,7 +199,7 @@ struct maps_info *parse_maps_safe(const char *pid) {
       infos_capacity *= 2;
       struct map_entry *tmp_maps = realloc(info_array->maps, infos_capacity * sizeof(struct map_entry));
       if (!tmp_maps) {
-        PLOGE("reallocate memory for maps");
+        PLOGE("reallocate (extend: %zu -> %zu) memory for maps", infos_capacity / 2, infos_capacity);
 
         goto cleanup_maps_and_path;
       }
@@ -250,10 +250,20 @@ struct maps_info *parse_maps_safe(const char *pid) {
 
   close(sockets[0]);
 
+  if (info_array->length == 0) {
+    LOGE("Failed to find any maps in %s", pid);
+
+    free(info_array);
+
+    waitpid(ppid, NULL, 0);
+
+    return NULL;
+  }
+
   /* INFO: Resize to the actual size */
   struct map_entry *tmp_maps = realloc(info_array->maps, info_array->length * sizeof(struct map_entry));
   if (!tmp_maps)
-    PLOGE("reallocate memory for maps");
+    PLOGE("reallocate (reduce: %zu -> %zu) memory for maps", infos_capacity, info_array->length);
 
   if (tmp_maps) info_array->maps = tmp_maps;
   /* INFO: This waitpid ensures that we only resume code execution once the child dies,
@@ -336,7 +346,7 @@ struct maps_info *parse_maps(const char *pid) {
       infos_capacity *= 2;
       struct map_entry *tmp_maps = realloc(info_array->maps, infos_capacity * sizeof(struct map_entry));
       if (!tmp_maps) {
-        PLOGE("reallocate memory for maps");
+        PLOGE("reallocate (extend: %zu -> %zu) memory for maps", infos_capacity / 2, infos_capacity);
 
         goto cleanup_maps_and_path;
       }
@@ -374,10 +384,18 @@ struct maps_info *parse_maps(const char *pid) {
 
   fclose(fp);
 
+  if (info_array->length == 0) {
+    LOGE("Failed to find any maps in %s", pid);
+
+    free(info_array);
+
+    return NULL;
+  }
+
   /* INFO: Resize to the actual size */
   struct map_entry *tmp_maps = realloc(info_array->maps, info_array->length * sizeof(struct map_entry));
   if (!tmp_maps)
-    PLOGE("reallocate memory for maps");
+    PLOGE("reallocate (reduce: %zu -> %zu) memory for maps", infos_capacity, info_array->length);
 
   if (tmp_maps) info_array->maps = tmp_maps;
 
