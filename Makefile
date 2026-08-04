@@ -89,6 +89,7 @@ $(MODULE_DONE): $(LOADER_DONE) $(ZYGISKD_DONE) $(MODULE_INPUTS)
 		    -e 's/@MIN_MAGISK_VERSION@/$(MIN_MAGISK_VERSION)/g'             \
 		    module/src/$$script > $(MODULE_OUT)/$$script;                   \
 	done
+	@cp module/src/late-load.sh $(MODULE_OUT)/
 
 	@echo "Copying binaries..."
 	@for arch in $(ARCHS); do                                                                                  \
