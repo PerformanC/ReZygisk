@@ -181,6 +181,12 @@ fas_u = ForkAndSpec('u', [uid, gid, gids, runtime_flags, rlimits, mount_external
     nice_name, fds_to_close, fds_to_ignore, is_child_zygote, instruction_set, app_data_dir, is_top_app,
     pkg_data_info_list, whitelisted_data_info_list, mount_data_dirs, mount_storage_dirs, mount_sysprop_overrides])
 
+# INFO: Android 17
+fas_c = ForkAndSpec('c', [uid, gid, Anon(jint), gids, runtime_flags, rlimits, mount_external,
+    se_info, nice_name, fds_to_close, fds_to_ignore, is_child_zygote, instruction_set, app_data_dir,
+    Anon(jboolean), is_top_app, pkg_data_info_list, whitelisted_data_info_list,
+    mount_data_dirs, mount_storage_dirs, mount_sysprop_overrides])
+
 fas_samsung_m = ForkAndSpec('samsung_m', [uid, gid, gids, runtime_flags, rlimits, mount_external,
     se_info, Anon(jint), Anon(jint), nice_name, fds_to_close, instruction_set, app_data_dir])
 
@@ -212,6 +218,12 @@ spec_r = SpecApp('r', [uid, gid, gids, runtime_flags, rlimits, mount_external, s
 spec_u = SpecApp('u', [uid, gid, gids, runtime_flags, rlimits, mount_external, se_info, nice_name,
     is_child_zygote, instruction_set, app_data_dir, is_top_app, pkg_data_info_list,
     whitelisted_data_info_list, mount_data_dirs, mount_storage_dirs, mount_sysprop_overrides])
+
+# INFO: Android 17
+spec_c = SpecApp('c', [uid, gid, Anon(jint), gids, runtime_flags, rlimits, mount_external,
+    se_info, nice_name, is_child_zygote, instruction_set, app_data_dir,
+    is_top_app, pkg_data_info_list, whitelisted_data_info_list,
+    mount_data_dirs, mount_storage_dirs, mount_sysprop_overrides])
 
 spec_samsung_q = SpecApp('samsung_q', [uid, gid, gids, runtime_flags, rlimits, mount_external,
     se_info, Anon(jint), Anon(jint), nice_name, is_child_zygote, instruction_set, app_data_dir])
@@ -274,10 +286,10 @@ with open('jni_hooks.h', 'w') as f:
 
     zygote = 'com/android/internal/os/Zygote'
 
-    methods = [fas_l, fas_o, fas_p, fas_q_alt, fas_r, fas_u, fas_samsung_m, fas_samsung_n, fas_samsung_o, fas_samsung_p, fas_samsung_b, fas_grapheneos_u]
+    methods = [fas_l, fas_o, fas_p, fas_q_alt, fas_r, fas_u, fas_c, fas_samsung_m, fas_samsung_n, fas_samsung_o, fas_samsung_p, fas_samsung_b, fas_grapheneos_u]
     f.write(gen_jni_def(zygote, methods))
 
-    methods = [spec_q, spec_q_alt, spec_r, spec_u, spec_samsung_q, spec_grapheneos_u]
+    methods = [spec_q, spec_q_alt, spec_r, spec_u, spec_c, spec_samsung_q, spec_grapheneos_u]
     f.write(gen_jni_def(zygote, methods))
 
     methods = [server_l, server_samsung_q]
