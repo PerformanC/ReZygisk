@@ -1,6 +1,6 @@
 # ReZygisk
 
-[English](../README.md) | [Español (Argentina)](/READMEs/README_es-AR.md) | [Bahasa Indonesia](/READMEs/README_id-ID.md) | [Português Brasileiro](/READMEs/README_pt-BR.md) | [Українська](/READMEs/README_uk-UA.md) | [Tiếng Việt](/READMEs/README_vi-VN.md)
+[English](../README.md)
 
 <div dir="rtl">
 
