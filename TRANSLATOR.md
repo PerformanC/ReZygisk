@@ -15,6 +15,7 @@
 - **uk_UA** by [@Kittyskj](https://github.com/Kittyskj) & [@thisdialynx](https://github.com/thisdialynx)
 - **vi_VN** by [@RainyXeon](https://github.com/RainyXeon)
 - **zh_CN** by [@Meltartica](https://github.com/Meltartica) & [@SheepChef](https://github.com/SheepChef) & [@so1ve](https://github.com/so1ve)
+- **fa_IR** by [@bardiakz](https://github.com/bardiakz)
 
 # Old Translators
 
