@@ -7,6 +7,7 @@
 #include <stdlib.h>
 #include <inttypes.h>
 #include <string.h>
+#include <stdio.h>
 
 #include <fcntl.h>
 #include <sys/mman.h>
@@ -18,6 +19,13 @@
 
 #undef SYS_mmap
 #define SYS_mmap LP_SELECT(__NR_mmap2, __NR_mmap)
+
+#ifndef SYS_memfd_create
+#define SYS_memfd_create __NR_memfd_create
+#endif
+#ifndef MFD_CLOEXEC
+#define MFD_CLOEXEC 0x0001U
+#endif
 
 #include "socket_utils.h"
 
@@ -746,20 +754,93 @@ bool remote_csoloader_load_and_resolve_entry(int pid, struct user_regs_struct *r
   regs->REG_SP = remote_path;
 
   long args[6];
-  args[0] = AT_FDCWD;
-  args[1] = (long)remote_path;
-  args[2] = O_RDONLY | O_CLOEXEC;
-  args[3] = 0;
 
-  long remote_fd = remote_syscall(pid, regs, syscall_gadget, SYS_openat, args, 4);
+  /* INFO: DEFEX on Samsung blocks app_process64 from open()ing
+             /data/adb/modules paths (remote openat returns -1). Use an
+             anonymous memfd instead: it has no filesystem path, so DEFEX
+             cannot flag it. The tracer (root) fills it through
+             /proc/<pid>/fd/<n>, which is not a protected path. */
+  args[0] = (long)remote_path; /* memfd name, cosmetic only */
+  args[1] = MFD_CLOEXEC;
+
+  long remote_fd = remote_syscall(pid, regs, syscall_gadget, SYS_memfd_create, args, 2);
   if (remote_fd < 0) {
-    LOGE("Failed to open remote file: %s (%ld)", lib_path, remote_fd);
+    LOGE("Failed to create remote memfd for %s (%ld)", lib_path, remote_fd);
 
     free(phdr);
     close(fd);
 
     return false;
   }
+
+  char memfd_proc_path[64];
+  snprintf(memfd_proc_path, sizeof(memfd_proc_path), "/proc/%d/fd/%ld", pid, remote_fd);
+
+  int memfd_writer = open(memfd_proc_path, O_WRONLY | O_CLOEXEC);
+  if (memfd_writer < 0) {
+    PLOGE("open %s", memfd_proc_path);
+
+    args[0] = remote_fd;
+    remote_syscall(pid, regs, syscall_gadget, SYS_close, args, 1);
+
+    free(phdr);
+    close(fd);
+
+    return false;
+  }
+
+  if (lseek(fd, 0, SEEK_SET) < 0) {
+    PLOGE("lseek %s", lib_path);
+
+    close(memfd_writer);
+
+    args[0] = remote_fd;
+    remote_syscall(pid, regs, syscall_gadget, SYS_close, args, 1);
+
+    free(phdr);
+    close(fd);
+
+    return false;
+  }
+
+  /* INFO: Copy the whole file into the memfd */
+  char copy_buf[8192];
+  ssize_t copy_n;
+  while ((copy_n = read(fd, copy_buf, sizeof(copy_buf))) > 0) {
+    ssize_t off = 0;
+    while (off < copy_n) {
+      ssize_t w = write(memfd_writer, copy_buf + off, (size_t)(copy_n - off));
+      if (w < 0) {
+        PLOGE("write %s", memfd_proc_path);
+
+        close(memfd_writer);
+
+        args[0] = remote_fd;
+        remote_syscall(pid, regs, syscall_gadget, SYS_close, args, 1);
+
+        free(phdr);
+        close(fd);
+
+        return false;
+      }
+      off += w;
+    }
+  }
+  if (copy_n < 0) {
+    PLOGE("read %s", lib_path);
+
+    close(memfd_writer);
+
+    args[0] = remote_fd;
+    remote_syscall(pid, regs, syscall_gadget, SYS_close, args, 1);
+
+    free(phdr);
+    close(fd);
+
+    return false;
+  }
+
+  close(memfd_writer);
 
   void *remote_path_zerod = calloc(1, ALIGN_UP(path_len, 16));
   if (!remote_path_zerod) {
