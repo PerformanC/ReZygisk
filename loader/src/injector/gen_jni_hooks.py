@@ -205,6 +205,12 @@ fas_samsung_b = ForkAndSpec('samsung_b', [uid, gid, gids, runtime_flags, rlimits
     Anon(jboolean), is_top_app, pkg_data_info_list, whitelisted_data_info_list,
     mount_data_dirs, mount_storage_dirs, mount_sysprop_overrides])
 
+# INFO: GrapheneOS Android 14-16
+fas_grapheneos_u = ForkAndSpec('grapheneos_u', [uid, gid, gids, runtime_flags, rlimits, mount_external,
+    se_info, nice_name, fds_to_close, fds_to_ignore, is_child_zygote, instruction_set, app_data_dir,
+    is_top_app, pkg_data_info_list, whitelisted_data_info_list, mount_data_dirs, mount_storage_dirs,
+    mount_sysprop_overrides, Anon(jlongArray)])
+
 # INFO: GrapheneOS Android 17
 fas_grapheneos_c = ForkAndSpec('grapheneos_c', [Anon(jlongArray), uid, gid, gids, runtime_flags,
     rlimits, mount_external, se_info, nice_name, fds_to_close, fds_to_ignore, is_child_zygote,
@@ -234,6 +240,12 @@ spec_c = SpecApp('c', [uid, Anon(jint), gid, gids, runtime_flags, rlimits, mount
 spec_samsung_q = SpecApp('samsung_q', [uid, gid, gids, runtime_flags, rlimits, mount_external,
     se_info, Anon(jint), Anon(jint), nice_name, is_child_zygote, instruction_set, app_data_dir])
 
+# INFO: GrapheneOS Android 14-16
+spec_grapheneos_u = SpecApp('grapheneos_u', [uid, gid, gids, runtime_flags, rlimits, mount_external,
+    se_info, nice_name, is_child_zygote, instruction_set, app_data_dir, is_top_app,
+    pkg_data_info_list, whitelisted_data_info_list, mount_data_dirs, mount_storage_dirs,
+    mount_sysprop_overrides, Anon(jlongArray)])
+
 # INFO: GrapheneOS Android 17
 spec_grapheneos_c = SpecApp('grapheneos_c', [Anon(jlongArray), uid, gid, gids, runtime_flags,
     rlimits, mount_external, se_info, nice_name, is_child_zygote, instruction_set, app_data_dir,
@@ -245,15 +257,6 @@ server_l = ForkServer('l', [uid, gid, gids, runtime_flags, rlimits,
 
 server_samsung_q = ForkServer('samsung_q', [uid, gid, gids, runtime_flags, Anon(jint), Anon(jint), rlimits,
     permitted_capabilities, effective_capabilities])
-
-# GrapheneOS Android 14 Support
-fas_grapheneos_u = ForkAndSpec('grapheneos_u', [uid, gid, gids, runtime_flags, rlimits, mount_external,
-    se_info, nice_name, fds_to_close, fds_to_ignore, is_child_zygote, instruction_set, app_data_dir,
-    is_top_app, pkg_data_info_list, whitelisted_data_info_list, mount_data_dirs, mount_storage_dirs, mount_sysprop_overrides, Anon(jlongArray)])
-
-spec_grapheneos_u = SpecApp('grapheneos_u', [uid, gid, gids, runtime_flags, rlimits, mount_external,
-    se_info, nice_name, is_child_zygote, instruction_set, app_data_dir, is_top_app, pkg_data_info_list,
-    whitelisted_data_info_list, mount_data_dirs, mount_storage_dirs, mount_sysprop_overrides, Anon(jlongArray)])
 
 hook_map = {}
 
