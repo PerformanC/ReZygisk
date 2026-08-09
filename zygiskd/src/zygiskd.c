@@ -26,6 +26,15 @@ struct Context {
   size_t len;
 };
 
+/* INFO: A control message is a single datagram: a one-byte action, a
+          length-prefixed field, and its variable-length payload. Packed so it
+          maps onto the wire layout without padding. */
+struct __attribute__((packed)) zygiskd_message {
+  uint8_t action;
+  uint32_t length;
+  char data[];
+};
+
 #define PATH_MODULES_DIR "/data/adb/modules"
 #define TMP_PATH "/data/adb/rezygisk"
 #define CONTROLLER_SOCKET TMP_PATH "/init_monitor"
@@ -280,21 +289,18 @@ void zygiskd_start(char *restrict argv[]) {
     LOGE("%s", msg);
 
     uint32_t msg_len = (uint32_t)strlen(msg);
-    size_t message_size = sizeof(uint8_t) + sizeof(msg_len) + msg_len;
+    size_t message_size = sizeof(struct zygiskd_message) + msg_len;
 
-    uint8_t *message = malloc(message_size);
+    struct zygiskd_message *message = malloc(message_size);
     if (message == NULL) {
       LOGE("malloc: %s", strerror(errno));
 
       exit(EXIT_FAILURE);
     }
 
-    size_t offset = 0;
-    message[offset] = DAEMON_SET_ERROR_INFO;
-    offset += sizeof(uint8_t);
-    memcpy(message + offset, &msg_len, sizeof(msg_len));
-    offset += sizeof(msg_len);
-    memcpy(message + offset, msg, msg_len);
+    message->action = DAEMON_SET_ERROR_INFO;
+    message->length = msg_len;
+    memcpy(message->data, msg, msg_len);
 
     unix_datagram_sendto(CONTROLLER_SOCKET, message, message_size);
 
@@ -310,34 +316,33 @@ void zygiskd_start(char *restrict argv[]) {
     uint32_t root_impl_len = (uint32_t)strlen(impl_name);
     uint32_t modules_len = (uint32_t)context.len;
 
-    size_t message_size = sizeof(uint8_t) + sizeof(root_impl_len) + root_impl_len + sizeof(modules_len);
+    size_t message_size = sizeof(struct zygiskd_message) + root_impl_len + sizeof(modules_len);
     for (size_t i = 0; i < context.len; i++) {
       message_size += sizeof(uint32_t) + strlen(context.modules[i].name);
     }
 
-    uint8_t *message = malloc(message_size);
+    struct zygiskd_message *message = malloc(message_size);
     if (message == NULL) {
       LOGE("malloc: %s", strerror(errno));
 
       exit(EXIT_FAILURE);
     }
 
+    message->action = DAEMON_SET_INFO;
+    message->length = root_impl_len;
+
     size_t offset = 0;
-    message[offset] = DAEMON_SET_INFO;
-    offset += sizeof(uint8_t);
-    memcpy(message + offset, &root_impl_len, sizeof(root_impl_len));
-    offset += sizeof(root_impl_len);
-    memcpy(message + offset, impl_name, root_impl_len);
+    memcpy(message->data + offset, impl_name, root_impl_len);
     offset += root_impl_len;
-    memcpy(message + offset, &modules_len, sizeof(modules_len));
+    memcpy(message->data + offset, &modules_len, sizeof(modules_len));
     offset += sizeof(modules_len);
 
     for (size_t i = 0; i < context.len; i++) {
       uint32_t module_name_len = (uint32_t)strlen(context.modules[i].name);
 
-      memcpy(message + offset, &module_name_len, sizeof(module_name_len));
+      memcpy(message->data + offset, &module_name_len, sizeof(module_name_len));
       offset += sizeof(module_name_len);
-      memcpy(message + offset, context.modules[i].name, module_name_len);
+      memcpy(message->data + offset, context.modules[i].name, module_name_len);
       offset += module_name_len;
     }
 
