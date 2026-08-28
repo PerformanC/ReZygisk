@@ -1,7 +1,6 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include <stdint.h>
-#include <string.h>
 
 #include <fcntl.h>
 #include <sys/auxv.h>
@@ -116,13 +115,6 @@ void ElfImg_destroy(ElfImg *img) {
   if (!img) return;
 
   if (img->symtabs_) {
-    size_t valid_symtabs_amount = calculate_valid_symtabs_amount(img);
-    if (valid_symtabs_amount > 0) {
-      for (size_t i = 0; i < valid_symtabs_amount; i++) {
-        free(img->symtabs_[i].name);
-      }
-    }
-
     free(img->symtabs_);
     img->symtabs_ = NULL;
   }
@@ -139,7 +131,6 @@ void ElfImg_destroy(ElfImg *img) {
 
   free(img);
 }
-
 
 ElfImg *ElfImg_create(const char *elf, void *base) {
   ElfImg *img = (ElfImg *)calloc(1, sizeof(ElfImg));
@@ -437,14 +428,14 @@ bool _load_symtabs(ElfImg *img) {
 
   if (!img->symtab_start || img->symstr_offset_for_symtab == 0 || img->symtab_count == 0) return false;
 
-  size_t valid_symtabs_amount = calculate_valid_symtabs_amount(img);
-  if (valid_symtabs_amount == 0) {
+  img->symtabs_count_ = calculate_valid_symtabs_amount(img);
+  if (img->symtabs_count_ == 0) {
     LOGW("No valid symbols (FUNC/OBJECT with size > 0) found in .symtab for %s", img->elf);
 
     return false;
   }
 
-  img->symtabs_ = (struct symtabs *)calloc(valid_symtabs_amount, sizeof(struct symtabs));
+  img->symtabs_ = calloc(img->symtabs_count_, sizeof(ElfW(Sym) *));
   if (!img->symtabs_) {
     LOGE("Failed to allocate memory for symtabs array");
 
@@ -470,24 +461,10 @@ bool _load_symtabs(ElfImg *img) {
         continue;
       }
 
-      img->symtabs_[current_valid_index].name = strdup(st_name);
-      if (!img->symtabs_[current_valid_index].name) {
-        LOGE("Failed to duplicate symbol name: %s", st_name);
-
-        for(size_t k = 0; k < current_valid_index; ++k) {
-          free(img->symtabs_[k].name);
-        }
-
-        free(img->symtabs_);
-        img->symtabs_ = NULL;
-
-        return false;
-      }
-
-      img->symtabs_[current_valid_index].sym = current_sym;
+      img->symtabs_[current_valid_index] = current_sym;
 
       current_valid_index++;
-      if (current_valid_index == valid_symtabs_amount) break;
+      if (current_valid_index == img->symtabs_count_) break;
     }
   }
 
@@ -598,24 +575,23 @@ ElfW(Addr) ElfLookup(ElfImg *restrict img, const char *restrict name, uint32_t h
 ElfW(Addr) LinearLookup(ElfImg *img, const char *restrict name, unsigned char *sym_type) {
   if (!_load_symtabs(img)) return 0;
 
-  size_t valid_symtabs_amount = calculate_valid_symtabs_amount(img);
-  if (valid_symtabs_amount == 0) {
+  if (img->symtabs_count_ == 0) {
     LOGW("No valid symbols (FUNC/OBJECT with size > 0) found in .symtab for %s", img->elf);
 
     return 0;
   }
 
-  for (size_t i = 0; i < valid_symtabs_amount; i++) {
-    if (!img->symtabs_[i].name || strcmp(name, img->symtabs_[i].name) != 0)
+  for (size_t i = 0; i < img->symtabs_count_; i++) {
+    ElfW(Sym) *sym = img->symtabs_[i];
+
+    const char *sym_name = offsetOf_char(img->header, img->symstr_offset_for_symtab) + sym->st_name;
+    if (sym->st_shndx == SHN_UNDEF || strcmp(name, sym_name) != 0)
       continue;
 
-    if (img->symtabs_[i].sym->st_shndx == SHN_UNDEF)
-      continue;
-
-    unsigned int type = ELF_ST_TYPE(img->symtabs_[i].sym->st_info);
+    unsigned int type = ELF_ST_TYPE(sym->st_info);
     if (sym_type) *sym_type = type;
 
-    return img->symtabs_[i].sym->st_value;
+    return sym->st_value;
   }
 
   return 0;
@@ -624,8 +600,7 @@ ElfW(Addr) LinearLookup(ElfImg *img, const char *restrict name, unsigned char *s
 ElfW(Addr) LinearLookupByPrefix(ElfImg *img, const char *prefix, unsigned char *sym_type) {
   if (!_load_symtabs(img)) return 0;
 
-  size_t valid_symtabs_amount = calculate_valid_symtabs_amount(img);
-  if (valid_symtabs_amount == 0) {
+  if (img->symtabs_count_ == 0) {
     LOGW("No valid symbols (FUNC/OBJECT with size > 0) found in .symtab for %s", img->elf);
 
     return 0;
@@ -634,20 +609,17 @@ ElfW(Addr) LinearLookupByPrefix(ElfImg *img, const char *prefix, unsigned char *
   size_t prefix_len = strlen(prefix);
   if (prefix_len == 0) return 0;
 
-  for (size_t i = 0; i < valid_symtabs_amount; i++) {
-    if (!img->symtabs_[i].name || strlen(img->symtabs_[i].name) < prefix_len)
+  for (size_t i = 0; i < img->symtabs_count_; i++) {
+    ElfW(Sym) *sym = img->symtabs_[i];
+
+    const char *name = offsetOf_char(img->header, img->symstr_offset_for_symtab) + sym->st_name;
+    if (sym->st_shndx == SHN_UNDEF || strncmp(name, prefix, prefix_len) != 0)
       continue;
 
-    if (strncmp(img->symtabs_[i].name, prefix, prefix_len) != 0)
-      continue;
-
-    if (img->symtabs_[i].sym->st_shndx == SHN_UNDEF)
-      continue;
-
-    unsigned int type = ELF_ST_TYPE(img->symtabs_[i].sym->st_info);
+    unsigned int type = ELF_ST_TYPE(sym->st_info);
     if (sym_type) *sym_type = type;
 
-    return img->symtabs_[i].sym->st_value;
+    return sym->st_value;
   }
 
   return 0;

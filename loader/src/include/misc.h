@@ -2,7 +2,7 @@
 #define MISC_H
 
 #include <stdbool.h>
-#include <inttypes.h>
+#include <stdint.h>
 
 #ifdef __LP64__
   #define LP_SELECT(lp32, lp64) lp64

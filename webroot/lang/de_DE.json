@@ -1,0 +1,86 @@
+{
+  "langName": "Deutsch (Deutschland)",
+  "pages": {
+    "home": {
+      "title": "Start",
+      "unknown": "Unbekannt",
+      "androidVersion": "Android Version",
+      "linuxKernelVersion": "Linux Kernel Version",
+      "status": {
+        "notWorking": "Funktioniert Nicht",
+        "ok": "Funktioniert",
+        "partially": "Funktioniert Teilweise"
+      },
+      "info": {
+        "version": "Version",
+        "root": "Root Implementierung",
+        "zygote": {
+          "injected": "Injiziert",
+          "notInjected": "Nicht Injiziert",
+          "unknown": "Unbekannt"
+        }
+      }
+    },
+    "actions": {
+      "title": "Aktionen",
+      "monitor": {
+        "title": "Monitor",
+        "status": {
+          "tracing": "Verfolge",
+          "stopping": "Stoppe",
+          "stopped": "Gestoppt",
+          "exiting": "Beende",
+          "unknown": "Unbekannt"
+        },
+        "button": {
+          "start": "Start",
+          "stop": "Stop",
+          "pause": "Pause"
+        }
+      }
+    },
+    "modules": {
+      "title": "Module",
+      "notAvaliable": "Keine Zygisk-Module hier ...",
+      "arch": "Architektur: "
+    },
+    "settings": {
+      "title": "Einstellungen",
+      "language": {
+        "title": "Sprache wechseln",
+        "description": "Wechsel zur ausgewählten Sprache."
+      },
+      "fullscreen": {
+        "title": "WebUI-Vollbildmodus deaktivieren",
+        "description": "Lässt die WebUI nicht den kompletten Bildschirm einnehmen"
+      },
+      "theme": {
+        "title": " WebUI Design",
+        "description": "Wähle dein Design für die WebUI"
+      },
+      "font": {
+        "title": "System Schriftart benutzen",
+        "description": "Benutze die System Schriftart, Achtung: möglicherweise inkompatibel mit FLIPFONT"
+      },
+      "moduleDevelopers": "Modul Entwickler*innen",
+      "WebUIDevelopers": "WebUI Entwickler*innen",
+      "orginalDevelopers": "Original Modul Entwickler*innen",
+      "moduleLicense": "Modul Lizenz"
+    },
+    "mini_settings_language": {
+      "title": "Sprache auswählen"
+    },
+    "mini_settings_theme": {
+      "title": "WebUI Design auswählen",
+      "theme": {
+        "dark": "Dunkles Design",
+        "light": "Helles Design",
+        "amoled": "Amoled Design",
+        "system_based": "System Design"
+      }
+    }
+  },
+  "globals": {
+    "unknown": "Unbekannt"
+  }
+}

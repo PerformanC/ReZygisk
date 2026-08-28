@@ -25,7 +25,7 @@ struct root_impl {
   uint8_t variant;
 };
 
-#define LONGEST_ROOT_IMPL_NAME sizeof("Magisk Official")
+#define LONGEST_ROOT_IMPL_NAME sizeof("KernelSU Next")
 
 void root_impls_setup(void);
 

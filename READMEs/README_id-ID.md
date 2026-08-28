@@ -2,7 +2,7 @@
 
 [English](../README.md)
 
-ReZygisk adalah turunan dari Zygisk Next, sebuah implementasi mandiri dari Zygisk, menyediakan dukungan API Zygisk untuk KernelSU, APatch, dan Magisk (Versi Resmi dan Kitsune).
+ReZygisk adalah turunan dari Zygisk Next, sebuah implementasi mandiri dari Zygisk, menyediakan dukungan API Zygisk untuk KernelSU, APatch, dan Magisk.
 
 Tujuannya adalah untuk memodernisasi dan menulis ulang kode sumber sepenuhnya dalam bahasa C, memungkinkan implementasi API Zygisk yang lebih efisien dan cepat dengan lisensi yang lebih permisif dan ramah terhadap FOSS (Free and Open Source Software).
 

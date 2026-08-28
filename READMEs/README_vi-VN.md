@@ -2,7 +2,7 @@
 
 [English](../README.md)
 
-ReZygisk làm một nhánh phát triển lấy từ ZygiskNext, một triển khai độc lập của Zygisk, cung cấp và hỗ trợ Zygisk API cho KernelSU, APatch và Magisk (chính thức và Kitsune).
+ReZygisk làm một nhánh phát triển lấy từ ZygiskNext, một triển khai độc lập của Zygisk, cung cấp và hỗ trợ Zygisk API cho KernelSU, APatch và Magisk.
 
 Toàn bộ mã nguồn đã được viết lại hoàn toàn bằng C, không chỉ giúp mã nguồn trở nên gọn gàng và dễ theo dõi hơn, mà còn tạo ra các file nhị phân nhẹ hơn và chạy nhanh hơn. Các linker tùy chỉnh cũng đã được giới thiệu nhằm “future-proof” ReZygisk trước các cơ chế phát hiện trong tương lai; trong điều kiện bình thường, hệ thống không sử dụng system linker, qua đó vô hiệu hóa mọi phương pháp phát hiện dựa trên linker.
 

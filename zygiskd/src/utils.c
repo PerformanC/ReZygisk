@@ -19,7 +19,6 @@
 
 #include "root_impl/common.h"
 #include "root_impl/kernelsu.h"
-#include "root_impl/magisk.h"
 
 #include "utils.h"
 
@@ -476,8 +475,7 @@ void stringify_root_impl_name(struct root_impl impl, char *restrict output) {
       break;
     }
     case Magisk: {
-      if (impl.variant == MOfficial) strcpy(output, "Magisk Official");
-      else strcpy(output, "Magisk Kitsune");
+      strcpy(output, "Magisk");
 
       break;
     }
@@ -853,42 +851,6 @@ int save_mns_fd(int pid, enum MountNamespaceState mns_state, struct root_impl im
     LOGE("waitpid: %s", strerror(errno));
 
     return -1;
-  }
-
-  if (impl.impl == Magisk && impl.variant == MKitsune && mns_state == Clean) {
-    LOGI("[Magisk] Magisk Kitsune detected, will skip cache first.");
-
-    /* INFO: MagiskSU of Kitsune has a special behavior: It is only mounted
-               once system boots, because of that, we can only cache once
-               that happens, or else it will clean the mounts, then later
-               get MagiskSU mounted, resulting in a mount leak.
-
-       SOURCES:
-        - https://github.com/1q23lyc45/KitsuneMagisk/blob/8562a0b2ad142d21566c1ea41690ad64108ca14c/native/src/core/bootstages.cpp#L359
-    */
-    char boot_completed[2];
-    get_property("sys.boot_completed", boot_completed);
-
-    if (boot_completed[0] == '1') {
-      LOGI("[Magisk] Appropriate mns found, caching clean namespace fd.");
-
-      clean_namespace_fd = ns_fd;
-    }
-
-    /* BUG: For the case where it hasn't booted yet, we will need to
-              keep creating mns that will be left behind, the issue is:
-              they are not close'd. This is a problem, because we will
-              have a leak of fds, although only from the period of booting.
-
-            When trying to close the ns_fd from the libzygisk.so, fdsan
-              will complain as it is owned by RandomAccessFile, and if
-              we close from ReZygiskd, system will refuse to boot for
-              some reason, even if we wait for setns in libzygisk.so,
-              and that issue is related to setns, as it only happens
-              with it.
-    */
-
-    return ns_fd;
   }
 
   if (mns_state == Clean) clean_namespace_fd = ns_fd;

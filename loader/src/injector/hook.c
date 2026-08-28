@@ -12,7 +12,6 @@
 #include <sys/mman.h>
 #include <sys/stat.h>
 #include <sys/types.h>
-#include <sys/sysmacros.h>
 
 #include <unistd.h>
 
@@ -25,6 +24,7 @@
 
 #include "art_method.h"
 #include "cpp_strings.h"
+#include "registers.h"
 
 void *start_addr = NULL;
 size_t block_size = 0;
@@ -515,6 +515,10 @@ static void initialize_jni_hook(void) {
 
   can_hook_jni = true;
   do_hook_zygote(env);
+
+  /* INFO: ART leaks through libc strings from ReZygisk. We immediately
+             clear them here. */
+  registers_clear();
 }
 
 /* INFO: Module registration and API functions */
@@ -1295,6 +1299,8 @@ static bool hook_register(const char *lib_name, const char *symbol, bool is_pref
 static bool hook_unregister(const char *lib_name, const char *symbol, bool is_prefix, void **backup) {
   if (!(is_prefix ? plti_remove_hook_by_prefix : plti_remove_hook)(&plti_ctx, lib_name, symbol, backup)) {
     LOGE("Failed to unregister plt_hook \"%s\" with PLTI", symbol);
+
+    should_unmap_zygisk = false;
 
     return false;
   }

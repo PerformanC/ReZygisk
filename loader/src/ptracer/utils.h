@@ -46,8 +46,6 @@ bool get_regs(int pid, struct user_regs_struct *regs);
 
 bool set_regs(int pid, struct user_regs_struct *regs);
 
-void get_addr_mem_region(struct maps_info *map, uintptr_t addr, char *buf, size_t buf_size);
-
 const char *position_after(const char *str, const char needle);
 
 void *find_module_return_addr(struct maps_info *map, const char *suffix);
@@ -60,35 +58,23 @@ void align_stack(struct user_regs_struct *regs, long preserve);
 
 uintptr_t remote_call(int pid, struct user_regs_struct *regs, uintptr_t func_addr, uintptr_t return_addr, long *args, size_t args_size);
 
-long remote_syscall(int pid, struct user_regs_struct *regs, uintptr_t syscall_gadget, long sysnr, long *args, size_t args_size);
+int fork_dont_care();
 
 uintptr_t find_syscall_gadget(int pid, struct maps_info *remote_map);
 
-/* INFO: Tango-specific linker watch state */
-struct tango_linker_watch {
-  uint32_t libc_init_got_slot;
-  uint32_t libc_init_initial;
-  uint32_t libc_init_resolved;
-};
+bool wait_linker_ready(int pid, uintptr_t *out_libc_init_resolved, uintptr_t *out_libc_init_got_slot);
 
-bool ptrace_poke_u32(pid_t pid, uintptr_t addr, uint32_t value);
-
-uintptr_t find_arm32_ret_gadget(int pid, struct maps_info *remote_map);
+bool ptrace_poke_uintptr(pid_t pid, uintptr_t addr, uintptr_t value);
 
 bool wait_for_ptrace_syscall_stop(int pid, int *status);
-bool wait_for_event_stop(int pid);
 
-bool tango_wait_linker_ready(int pid, struct tango_linker_watch *watch);
+long remote_syscall(int pid, struct user_regs_struct *regs, uintptr_t syscall_gadget, long sysnr, long *args, size_t args_size);
 
-uint32_t find_tramp_padding(int pid, uint32_t rx_start, uint32_t rx_end, size_t needed);
-
-int fork_dont_care();
+void tracee_skip_syscall(int pid);
 
 void wait_for_trace(int pid, int *status, int flags);
 
 void parse_status(int status, char *buf, size_t len);
-
-void tracee_skip_syscall(int pid);
 
 #define WPTEVENT(x) (x >> 16)
 

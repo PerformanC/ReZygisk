@@ -181,6 +181,12 @@ fas_u = ForkAndSpec('u', [uid, gid, gids, runtime_flags, rlimits, mount_external
     nice_name, fds_to_close, fds_to_ignore, is_child_zygote, instruction_set, app_data_dir, is_top_app,
     pkg_data_info_list, whitelisted_data_info_list, mount_data_dirs, mount_storage_dirs, mount_sysprop_overrides])
 
+# INFO: Android 17
+fas_c = ForkAndSpec('c', [uid, Anon(jint), gid, gids, runtime_flags, rlimits, mount_external,
+    se_info, nice_name, fds_to_close, fds_to_ignore, is_child_zygote, instruction_set, app_data_dir,
+    Anon(jboolean), is_top_app, pkg_data_info_list, whitelisted_data_info_list,
+    mount_data_dirs, mount_storage_dirs, mount_sysprop_overrides])
+
 fas_samsung_m = ForkAndSpec('samsung_m', [uid, gid, gids, runtime_flags, rlimits, mount_external,
     se_info, Anon(jint), Anon(jint), nice_name, fds_to_close, instruction_set, app_data_dir])
 
@@ -199,6 +205,18 @@ fas_samsung_b = ForkAndSpec('samsung_b', [uid, gid, gids, runtime_flags, rlimits
     Anon(jboolean), is_top_app, pkg_data_info_list, whitelisted_data_info_list,
     mount_data_dirs, mount_storage_dirs, mount_sysprop_overrides])
 
+# INFO: GrapheneOS Android 14-16
+fas_grapheneos_u = ForkAndSpec('grapheneos_u', [uid, gid, gids, runtime_flags, rlimits, mount_external,
+    se_info, nice_name, fds_to_close, fds_to_ignore, is_child_zygote, instruction_set, app_data_dir,
+    is_top_app, pkg_data_info_list, whitelisted_data_info_list, mount_data_dirs, mount_storage_dirs,
+    mount_sysprop_overrides, Anon(jlongArray)])
+
+# INFO: GrapheneOS Android 17
+fas_grapheneos_c = ForkAndSpec('grapheneos_c', [Anon(jlongArray), uid, gid, gids, runtime_flags,
+    rlimits, mount_external, se_info, nice_name, fds_to_close, fds_to_ignore, is_child_zygote,
+    instruction_set, app_data_dir, is_top_app, Anon(jboolean), pkg_data_info_list,
+    whitelisted_data_info_list, mount_data_dirs, mount_storage_dirs, mount_sysprop_overrides])
+
 spec_q = SpecApp('q', [uid, gid, gids, runtime_flags, rlimits, mount_external, se_info,
     nice_name, is_child_zygote, instruction_set, app_data_dir])
 
@@ -213,23 +231,32 @@ spec_u = SpecApp('u', [uid, gid, gids, runtime_flags, rlimits, mount_external, s
     is_child_zygote, instruction_set, app_data_dir, is_top_app, pkg_data_info_list,
     whitelisted_data_info_list, mount_data_dirs, mount_storage_dirs, mount_sysprop_overrides])
 
+# INFO: Android 17
+spec_c = SpecApp('c', [uid, Anon(jint), gid, gids, runtime_flags, rlimits, mount_external,
+    se_info, nice_name, is_child_zygote, instruction_set, app_data_dir,
+    is_top_app, pkg_data_info_list, whitelisted_data_info_list,
+    mount_data_dirs, mount_storage_dirs, mount_sysprop_overrides])
+
 spec_samsung_q = SpecApp('samsung_q', [uid, gid, gids, runtime_flags, rlimits, mount_external,
     se_info, Anon(jint), Anon(jint), nice_name, is_child_zygote, instruction_set, app_data_dir])
+
+# INFO: GrapheneOS Android 14-16
+spec_grapheneos_u = SpecApp('grapheneos_u', [uid, gid, gids, runtime_flags, rlimits, mount_external,
+    se_info, nice_name, is_child_zygote, instruction_set, app_data_dir, is_top_app,
+    pkg_data_info_list, whitelisted_data_info_list, mount_data_dirs, mount_storage_dirs,
+    mount_sysprop_overrides, Anon(jlongArray)])
+
+# INFO: GrapheneOS Android 17
+spec_grapheneos_c = SpecApp('grapheneos_c', [Anon(jlongArray), uid, gid, gids, runtime_flags,
+    rlimits, mount_external, se_info, nice_name, is_child_zygote, instruction_set, app_data_dir,
+    is_top_app, pkg_data_info_list, whitelisted_data_info_list, mount_data_dirs,
+    mount_storage_dirs, mount_sysprop_overrides])
 
 server_l = ForkServer('l', [uid, gid, gids, runtime_flags, rlimits,
     permitted_capabilities, effective_capabilities])
 
 server_samsung_q = ForkServer('samsung_q', [uid, gid, gids, runtime_flags, Anon(jint), Anon(jint), rlimits,
     permitted_capabilities, effective_capabilities])
-
-# GrapheneOS Android 14 Support
-fas_grapheneos_u = ForkAndSpec('grapheneos_u', [uid, gid, gids, runtime_flags, rlimits, mount_external,
-    se_info, nice_name, fds_to_close, fds_to_ignore, is_child_zygote, instruction_set, app_data_dir,
-    is_top_app, pkg_data_info_list, whitelisted_data_info_list, mount_data_dirs, mount_storage_dirs, mount_sysprop_overrides, Anon(jlongArray)])
-
-spec_grapheneos_u = SpecApp('grapheneos_u', [uid, gid, gids, runtime_flags, rlimits, mount_external,
-    se_info, nice_name, is_child_zygote, instruction_set, app_data_dir, is_top_app, pkg_data_info_list,
-    whitelisted_data_info_list, mount_data_dirs, mount_storage_dirs, mount_sysprop_overrides, Anon(jlongArray)])
 
 hook_map = {}
 
@@ -252,8 +279,7 @@ def gen_jni_def(clz, methods):
             decl += ind(1) + f'return {m.ret.value};'
         decl += ind(0) + '}'
 
-    num_methods = len(methods)
-    decl += ind(0) + f'static JNINativeMethod {m.base_name()}_methods[{num_methods}] = {{'
+    decl += ind(0) + f'static JNINativeMethod {m.base_name()}_methods[] = {{'
     for m in methods:
         decl += ind(1) + '{'
         decl += ind(2) + f'"{m.base_name()}",'
@@ -261,7 +287,6 @@ def gen_jni_def(clz, methods):
         decl += ind(2) + f'(void *) &{m.name}'
         decl += ind(1) + '},'
     decl += ind(0) + '};'
-    decl += ind(0) + f'static const int {m.base_name()}_methods_count = {num_methods};'
     decl = ind(0) + f'static void *{m.base_name()}_orig = NULL;' + decl
     decl += ind(0)
 
@@ -276,10 +301,10 @@ with open('jni_hooks.h', 'w') as f:
 
     zygote = 'com/android/internal/os/Zygote'
 
-    methods = [fas_l, fas_o, fas_p, fas_q_alt, fas_r, fas_u, fas_samsung_m, fas_samsung_n, fas_samsung_o, fas_samsung_p, fas_samsung_b, fas_grapheneos_u]
+    methods = [fas_l, fas_o, fas_p, fas_q_alt, fas_r, fas_u, fas_c, fas_samsung_m, fas_samsung_n, fas_samsung_o, fas_samsung_p, fas_samsung_b, fas_grapheneos_u, fas_grapheneos_c]
     f.write(gen_jni_def(zygote, methods))
 
-    methods = [spec_q, spec_q_alt, spec_r, spec_u, spec_samsung_q, spec_grapheneos_u]
+    methods = [spec_q, spec_q_alt, spec_r, spec_u, spec_c, spec_samsung_q, spec_grapheneos_u, spec_grapheneos_c]
     f.write(gen_jni_def(zygote, methods))
 
     methods = [server_l, server_samsung_q]
@@ -287,12 +312,14 @@ with open('jni_hooks.h', 'w') as f:
 
     f.write("""
 static void do_hook_zygote(JNIEnv *env) {
+  const char *clz = "com/android/internal/os/Zygote";
+
   JNINativeMethod hooks[3];
   int hooks_count = 0;
 
-  const char *clz = "com/android/internal/os/Zygote";
-  hook_jni_methods(env, clz, nativeForkAndSpecialize_methods, nativeForkAndSpecialize_methods_count);
-  for (int i = 0; i < nativeForkAndSpecialize_methods_count; i++) {
+  int fork_specialize_methods_count = sizeof(nativeForkAndSpecialize_methods) / sizeof(nativeForkAndSpecialize_methods[0]);
+  hook_jni_methods(env, clz, nativeForkAndSpecialize_methods, fork_specialize_methods_count);
+  for (int i = 0; i < fork_specialize_methods_count; i++) {
     if (!nativeForkAndSpecialize_methods[i].fnPtr) continue;
 
     nativeForkAndSpecialize_orig = nativeForkAndSpecialize_methods[i].fnPtr;
@@ -301,8 +328,9 @@ static void do_hook_zygote(JNIEnv *env) {
     break;
   }
 
-  hook_jni_methods(env, clz, nativeSpecializeAppProcess_methods, nativeSpecializeAppProcess_methods_count);
-  for (int i = 0; i < nativeSpecializeAppProcess_methods_count; i++) {
+  int specialize_methods_count = sizeof(nativeSpecializeAppProcess_methods) / sizeof(nativeSpecializeAppProcess_methods[0]);
+  hook_jni_methods(env, clz, nativeSpecializeAppProcess_methods, specialize_methods_count);
+  for (int i = 0; i < specialize_methods_count; i++) {
     if (!nativeSpecializeAppProcess_methods[i].fnPtr) continue;
 
     nativeSpecializeAppProcess_orig = nativeSpecializeAppProcess_methods[i].fnPtr;
@@ -311,8 +339,9 @@ static void do_hook_zygote(JNIEnv *env) {
     break;
   }
 
-  hook_jni_methods(env, clz, nativeForkSystemServer_methods, nativeForkSystemServer_methods_count);
-  for (int i = 0; i < nativeForkSystemServer_methods_count; i++) {
+  int server_methods_count = sizeof(nativeForkSystemServer_methods) / sizeof(nativeForkSystemServer_methods[0]);
+  hook_jni_methods(env, clz, nativeForkSystemServer_methods, server_methods_count);
+  for (int i = 0; i < server_methods_count; i++) {
     if (!nativeForkSystemServer_methods[i].fnPtr) continue;
 
     nativeForkSystemServer_orig = nativeForkSystemServer_methods[i].fnPtr;

@@ -2,7 +2,7 @@
 
 [English](../README.md)
 
-ReZygisk es un fork de Zygisk Next, una implementación independiente de Zygisk, que provee soporte para la API de Zygisk en KernelSU, APatch y Magisk (Oficial y Kitsune).
+ReZygisk es un fork de Zygisk Next, una implementación independiente de Zygisk, que provee soporte para la API de Zygisk en KernelSU, APatch y Magisk.
 
 El código base fue reescrito completamente en C, lo que no solo trae un código mucho más limpio y fácil de seguir, sino también binarios más livianos y rápidos. También se introdujeron linkers personalizados para proteger a ReZygisk de detecciones futuras, sin usar el linker del sistema bajo circunstancias normales y evadiendo así cualquier detección basada en linkers.
 

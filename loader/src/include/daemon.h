@@ -47,8 +47,6 @@ static inline const char *rezygiskd_get_path() {
   return TMP_PATH;
 }
 
-int rezygiskd_connect(uint8_t retry);
-
 bool rezygiskd_zygote_injected();
 
 uint32_t rezygiskd_get_process_flags(uid_t uid, const char *const process);
