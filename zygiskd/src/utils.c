@@ -431,6 +431,9 @@ int non_blocking_execv(const char *restrict file, char *const argv[]) {
   if ((pid = fork()) == -1) {
     LOGE("fork: %s", strerror(errno));
 
+    close(link[0]);
+    close(link[1]);
+
     return -1;
   }
 
