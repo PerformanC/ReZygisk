@@ -651,6 +651,8 @@ bool parse_mountinfo(const char *restrict pid, struct mountinfos *restrict mount
       free(mounts->mounts[i].root);
     cleanup_mount_allocs:
       fclose(mountinfo);
+
+      mounts->length = i;
       free_mounts(mounts);
 
       return false;
