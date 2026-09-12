@@ -123,6 +123,7 @@ static void load_modules(struct Context *restrict context) {
       context->len = 0;
 
       closedir(dir);
+
       return;
     }
 
