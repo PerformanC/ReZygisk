@@ -118,7 +118,6 @@ static void load_modules(struct Context *restrict context) {
       }
 
       free(context->modules);
-      
       context->modules = NULL;
       context->len = 0;
 
