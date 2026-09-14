@@ -16,7 +16,15 @@ if [ "$(which magisk)" ]; then
       if [ -f "$file/post-fs-data.sh" ]; then
         cd "$file"
         log -p i -t "zygisk-sh" "Manually trigger post-fs-data.sh for $file"
+
+        # INFO: Don't propagate errexit
+        set +e
+
         sh "$(realpath ./post-fs-data.sh)"
+
+        # INFO: Re-enable errexit
+        set -e
+
         cd "$MODDIR"
       fi
     fi

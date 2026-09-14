@@ -111,6 +111,18 @@ static void load_modules(struct Context *restrict context) {
 
       close(lib_fd);
 
+      for (size_t i = 0; i < context->len; i++) {
+        free(context->modules[i].name);
+        if (context->modules[i].companion >= 0) close(context->modules[i].companion);
+        if (context->modules[i].lib_fd >= 0) close(context->modules[i].lib_fd);
+      }
+
+      free(context->modules);
+      context->modules = NULL;
+      context->len = 0;
+
+      closedir(dir);
+
       return;
     }
 

@@ -431,6 +431,9 @@ int non_blocking_execv(const char *restrict file, char *const argv[]) {
   if ((pid = fork()) == -1) {
     LOGE("fork: %s", strerror(errno));
 
+    close(link[0]);
+    close(link[1]);
+
     return -1;
   }
 
@@ -651,6 +654,8 @@ bool parse_mountinfo(const char *restrict pid, struct mountinfos *restrict mount
       free(mounts->mounts[i].root);
     cleanup_mount_allocs:
       fclose(mountinfo);
+
+      mounts->length = i;
       free_mounts(mounts);
 
       return false;
