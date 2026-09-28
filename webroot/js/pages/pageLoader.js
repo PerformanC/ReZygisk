@@ -228,7 +228,10 @@ function unuseHTML(page, pageId, shouldRemoveListeners = true) {
     if (child.id && !child.id.startsWith(pagePrefix)) child.id = `${pagePrefix}${child.id}`
     if (child.classList) {
       const newClasses = []
-      if (child.checked) child.classList.add(`--page_loader:checked=true`)
+      /* INFO: Remember the checkbox state both ways: a marker that was only ever
+                 added made a switch come back checked after it had been
+                 turned off and the page was left. */
+      if ('checked' in child) child.classList.toggle(`--page_loader:checked=true`, child.checked)
 
       for (const className of child.classList) {
         if (className.startsWith(pagePrefix)) {

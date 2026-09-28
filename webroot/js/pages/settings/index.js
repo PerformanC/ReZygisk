@@ -41,7 +41,8 @@ export async function load() {
   })
 
   const rz_webui_fullscreen_switch = document.getElementById('rz_webui_fullscreen_switch')
-  if (ConfigState.disableFullscreen) rz_webui_fullscreen_switch.checked = true
+  /* INFO: The saved setting decides, in both directions */
+  rz_webui_fullscreen_switch.checked = !!ConfigState.disableFullscreen
 
   utils.addListener(rz_webui_fullscreen_switch, 'click', () => {
     /* INFO: This is swapped, as it meant to disable the fullscreen */
@@ -52,7 +53,7 @@ export async function load() {
   })
 
   const rz_webui_font_switch = document.getElementById('rz_webui_font_switch')
-  if (ConfigState.enableSystemFont) rz_webui_font_switch.checked = true
+  rz_webui_font_switch.checked = !!ConfigState.enableSystemFont
 
   utils.addListener(rz_webui_font_switch, 'click', () => {
     /* INFO: This is swapped, as it meant to enable the system font */
