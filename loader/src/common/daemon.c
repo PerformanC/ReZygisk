@@ -42,9 +42,12 @@ static int rezygiskd_connect(uint8_t retry) {
 
       close(fd);
 
-      if (!retry) return -1;
+      if (retry == 1) return -1;
 
       sleep(1);
+
+      /* INFO: Try again with a new socket; fd is closed here. */
+      continue;
     }
 
     return fd;
