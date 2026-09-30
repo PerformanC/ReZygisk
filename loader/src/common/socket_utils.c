@@ -3,11 +3,14 @@
 #include <errno.h>
 
 #include <unistd.h>
+#include <poll.h>
 #include <sys/socket.h>
 
 #include "logging.h"
 
 #include "socket_utils.h"
+
+#define READ_TIMEOUT_MS 250
 
 /* TODO: Perhaps merge the write and read functions?
            Their signature and a single function changes. */
@@ -48,8 +51,23 @@ ssize_t read_loop_offset(int fd, void *buf, size_t count, off_t offset) {
       if (errno == EAGAIN) {
         LOGW("Got EAGAIN while reading from fd %d, retrying...\n", fd);
 
-        /* INFO: Sleep for 1ms*/
-        usleep(1000);
+        /* INFO: This fd may be non-blocking and serviced by an event loop. Retrying
+                   without waiting would spin forever, as the loop that delivers the
+                   remaining bytes cannot run while this call holds its thread. */
+        struct pollfd pfd = { .fd = fd, .events = POLLIN, .revents = 0 };
+
+        int ready = TEMP_FAILURE_RETRY(poll(&pfd, 1, READ_TIMEOUT_MS));
+        if (ready == -1) {
+          PLOGE("poll");
+
+          return -1;
+        }
+
+        if (ready == 0) {
+          LOGE("Timed out reading from fd %d after %d ms (%zu of %zu bytes).\n", fd, READ_TIMEOUT_MS, read_bytes, count);
+
+          return (ssize_t)read_bytes;
+        }
 
         continue;
       }
