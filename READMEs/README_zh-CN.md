@@ -1,6 +1,6 @@
 # ReZygisk
 
-[English](/README.md)
+[English](../README.md)
 
 ReZygisk 是 Zygisk Next 的一个分支，是 Zygisk 的独立实现，为 KernelSU、APatch 和 Magisk 提供 Zygisk API 支持。
 
@@ -22,11 +22,11 @@ Zygisk Next 的开发者是 Android 社区中著名且值得信赖的，然而�
 |-------------------|------------------------------------|
 | `Android NDK`     | Android 原生开发工具包             |
 
-### C++ 依赖项
+### C 依赖项
 
 | 依赖项        | 描述                                |
 |---------------|-------------------------------------|
-| `lsplt`       | Android 的简单 PLT Hook 库          |
+| `PLTI`       | Android 的简单 PLT Hook 库          |
 | `CSOLoader`   | 最先进（SOTA）的 Linux 自定义链接器 |
 
 ## 安装
@@ -75,4 +75,4 @@ Zygisk Next 的开发者是 Android 社区中著名且值得信赖的，然而�
 
 ## 许可证
 
-ReZygisk 采用 [AGPL 3.0](./LICENSE) 授权。你可以在 [开源倡议组织 (Open Source Initiative)](https://opensource.org/licenses/AGPL-3.0) 上了解更多相关信息。
+ReZygisk 采用 [AGPL 3.0](../LICENSE) 授权。你可以在 [开源倡议组织 (Open Source Initiative)](https://opensource.org/licenses/AGPL-3.0) 上了解更多相关信息。
