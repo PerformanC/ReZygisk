@@ -126,6 +126,9 @@ struct maps_info *parse_maps_safe(const char *pid) {
 
     close(sockets[0]);
 
+    /* INFO: Reap the child so it doesn't linger as a zombie. */
+    waitpid(ppid, NULL, 0);
+
     return NULL;
   }
 
@@ -136,17 +139,21 @@ struct maps_info *parse_maps_safe(const char *pid) {
     close(fd);
     close(sockets[0]);
 
+    waitpid(ppid, NULL, 0);
+
     return NULL;
   }
 
+  /* INFO: From here on `fd` is owned by `fp`: only fclose it, never close(fd), as
+             the fd number may already be reused by another zygote thread. */
   struct maps_info *info_array = calloc(1, sizeof(struct maps_info));
   if (!info_array) {
     PLOGE("allocate memory");
 
     fclose(fp);
-
-    close(fd);
     close(sockets[0]);
+
+    waitpid(ppid, NULL, 0);
 
     return NULL;
   }
@@ -158,8 +165,10 @@ struct maps_info *parse_maps_safe(const char *pid) {
 
     free(info_array);
 
-    close(fd);
+    fclose(fp);
     close(sockets[0]);
+
+    waitpid(ppid, NULL, 0);
 
     return NULL;
   }
@@ -230,7 +239,7 @@ struct maps_info *parse_maps_safe(const char *pid) {
       free(info_array->maps);
       free(info_array);
 
-      fclose(fp);
+      if (fp) fclose(fp);
       close(sockets[0]);
 
       waitpid(ppid, NULL, 0);
@@ -239,6 +248,8 @@ struct maps_info *parse_maps_safe(const char *pid) {
   }
 
   fclose(fp);
+  /* INFO: cleanup_maps below must not fclose it a second time. */
+  fp = NULL;
 
   /* INFO: Notify the children process that we are done */
   uint8_t can_kill_itself = 1;
@@ -253,6 +264,7 @@ struct maps_info *parse_maps_safe(const char *pid) {
   if (info_array->length == 0) {
     LOGE("Failed to find any maps in %s", pid);
 
+    free(info_array->maps);
     free(info_array);
 
     waitpid(ppid, NULL, 0);
@@ -387,6 +399,7 @@ struct maps_info *parse_maps(const char *pid) {
   if (info_array->length == 0) {
     LOGE("Failed to find any maps in %s", pid);
 
+    free(info_array->maps);
     free(info_array);
 
     return NULL;

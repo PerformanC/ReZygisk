@@ -177,7 +177,9 @@ int unix_listener_from_path(const char *restrict path) {
     return -1;
   }
 
-  int socket_fd = socket(AF_UNIX, SOCK_STREAM, 0);
+  /* INFO: CLOEXEC so companions never inherit the listener: otherwise connect()
+             still succeeds after ReZygiskd died and clients hang forever. */
+  int socket_fd = socket(AF_UNIX, SOCK_STREAM | SOCK_CLOEXEC, 0);
   if (socket_fd == -1) {
     LOGE("socket: %s", strerror(errno));
 
@@ -347,7 +349,8 @@ ssize_t read_string(int fd, char *restrict buf, size_t buf_size) {
     return -1;
   }
 
-  if (str_len > 0) buf[str_len] = '\0';
+  /* INFO: Terminate empty strings too, callers use buf right away. */
+  buf[str_len] = '\0';
 
   return read_bytes;
 }

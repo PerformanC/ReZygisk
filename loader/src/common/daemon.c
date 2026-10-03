@@ -103,6 +103,9 @@ uint32_t rezygiskd_get_process_flags(uid_t uid, const char *const process) {
 }
 
 void rezygiskd_get_info(struct rezygisk_info *info) {
+  /* INFO: Early returns below leave fields untouched, callers must never see garbage. */
+  memset(info, 0, sizeof(*info));
+
   int fd = rezygiskd_connect(1);
   if (fd == -1) {
     info->running = false;
@@ -133,7 +136,8 @@ void rezygiskd_get_info(struct rezygisk_info *info) {
     return;
   }
 
-  info->modules.modules = (char **)malloc(sizeof(char *) * info->modules.modules_count);
+  /* INFO: calloc, so a failure mid-loop never frees uninitialized pointers. */
+  info->modules.modules = (char **)calloc(info->modules.modules_count, sizeof(char *));
   if (!info->modules.modules) {
     PLOGE("allocating modules name memory");
 

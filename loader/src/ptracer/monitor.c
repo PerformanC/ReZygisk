@@ -493,6 +493,8 @@ static bool ensure_daemon_created(bool is_64bit) {
       }                                                           \
     }                                                             \
                                                                   \
+    update_status(NULL);                                          \
+                                                                  \
     continue;                                                     \
   }
 
@@ -628,8 +630,11 @@ void sigchld_listener_callback() {
     int pid;
     while ((pid = waitpid(-1, &sigchld_status, __WALL | WNOHANG)) != 0) {
       if (pid == -1) {
-        if (tracing_state == STOPPED && errno == ECHILD) break;
-        PLOGE("waitpid");
+        /* INFO: Never treat -1 as a process: with no children left (ECHILD) this
+                   would spin forever. The next SIGCHLD brings us back here. */
+        if (errno != ECHILD) PLOGE("waitpid");
+
+        break;
       }
 
       if (pid == 1) {
@@ -823,25 +828,68 @@ void sigchld_listener_stop() {
 static char pre_section[1024];
 static char post_section[1024];
 
-#define WRITE_STATUS_ABI(suffix)                                                     \
-  if (status ## suffix.supported) {                                                  \
-    strcat(status_text, ", ReZygisk " # suffix "-bit: ");                            \
-                                                                                     \
-    if (tracing_state != TRACING) strcat(status_text, "❌");                         \
-    else if (status ## suffix.zygote_injected && status ## suffix.daemon_running)    \
-      strcat(status_text, "✅");                                                     \
-    else strcat(status_text, "⚠️");                                                  \
-                                                                                     \
-    if (!status ## suffix.daemon_running) {                                          \
-      if (status ## suffix.daemon_error_info) {                                      \
-        strcat(status_text, "(ReZygiskd: ");                                         \
-        strcat(status_text, status ## suffix.daemon_error_info);                     \
-        strcat(status_text, ")");                                                    \
-      } else {                                                                       \
-        strcat(status_text, "(ReZygiskd: not running)");                             \
-      }                                                                              \
-    }                                                                                \
+#define WRITE_STATUS_ABI(suffix)                                                             \
+  if (status ## suffix.supported) {                                                          \
+    strlcat(status_text, ", ReZygisk " # suffix "-bit: ", sizeof(status_text));              \
+                                                                                             \
+    if (tracing_state != TRACING) strlcat(status_text, "❌", sizeof(status_text));           \
+    else if (status ## suffix.zygote_injected && status ## suffix.daemon_running)            \
+      strlcat(status_text, "✅", sizeof(status_text));                                       \
+    else strlcat(status_text, "⚠️", sizeof(status_text));                                    \
+                                                                                             \
+    if (!status ## suffix.daemon_running) {                                                  \
+      if (status ## suffix.daemon_error_info) {                                              \
+        strlcat(status_text, "(ReZygiskd: ", sizeof(status_text));                           \
+        strlcat(status_text, status ## suffix.daemon_error_info, sizeof(status_text));       \
+        strlcat(status_text, ")", sizeof(status_text));                                      \
+      } else {                                                                               \
+        strlcat(status_text, "(ReZygiskd: not running)", sizeof(status_text));               \
+      }                                                                                      \
+    }                                                                                        \
   }
+
+/* INFO: Writes a JSON string literal, escaping what could break the document. */
+static void write_json_string(FILE *json, const char *str) {
+  fputc('"', json);
+
+  for (const unsigned char *c = (const unsigned char *)str; *c; c++) {
+    switch (*c) {
+      case '"': fputs("\\\"", json); break;
+      case '\\': fputs("\\\\", json); break;
+      case '\n': fputs("\\n", json); break;
+      case '\r': fputs("\\r", json); break;
+      case '\t': fputs("\\t", json); break;
+      default: {
+        if (*c < 0x20) fprintf(json, "\\u%04x", *c);
+        else fputc(*c, json);
+      }
+    }
+  }
+
+  fputc('"', json);
+}
+
+static void write_json_daemon(FILE *json, const char *abi, struct rezygiskd_status *status, char **modules, uint32_t modules_len) {
+  fprintf(json, "    \"%s\": {\n", abi);
+  fprintf(json, "      \"state\": %d,\n", status->daemon_running);
+  if (status->daemon_error_info) {
+    fprintf(json, "      \"reason\": ");
+    write_json_string(json, status->daemon_error_info);
+    fprintf(json, ",\n");
+  }
+  fprintf(json, "      \"modules\": [");
+
+  if (modules) for (uint32_t i = 0; i < modules_len; i++) {
+    if (i > 0) fprintf(json, ", ");
+    write_json_string(json, modules[i]);
+  }
+
+  fprintf(json, "]\n");
+  fprintf(json, "    }");
+}
+
+#define STATE_JSON_PATH "/data/adb/rezygisk/state.json"
+#define STATE_JSON_TMP_PATH STATE_JSON_PATH ".tmp"
 
 static bool update_status(const char *message) {
   FILE *prop = fopen("/data/adb/modules/rezygisk/module.prop", "w");
@@ -858,21 +906,21 @@ static bool update_status(const char *message) {
     return true;
   }
 
-  char status_text[256] = "Monitor: ";
+  char status_text[512] = "Monitor: ";
   switch (tracing_state) {
     case TRACING: {
-      strcat(status_text, "✅");
+      strlcat(status_text, "✅", sizeof(status_text));
 
       break;
     }
     case STOPPING: [[fallthrough]];
     case STOPPED: {
-      strcat(status_text, "⛔");
+      strlcat(status_text, "⛔", sizeof(status_text));
 
       break;
     }
     case EXITING: {
-      strcat(status_text, "❌");
+      strlcat(status_text, "❌", sizeof(status_text));
 
       break;
     }
@@ -885,7 +933,9 @@ static bool update_status(const char *message) {
   fclose(prop);
 
   if (environment_information64.root_impl || environment_information32.root_impl) {
-    FILE *json = fopen("/data/adb/rezygisk/state.json", "w");
+    /* INFO: Write to a temporary file and rename it, so readers (WebUI) never
+               see a truncated or half-written document. */
+    FILE *json = fopen(STATE_JSON_TMP_PATH, "w");
     if (json == NULL) {
       PLOGE("failed to open state.json");
 
@@ -893,62 +943,45 @@ static bool update_status(const char *message) {
     }
 
     fprintf(json, "{\n");
-    fprintf(json, "  \"root\": \"%s\",\n", environment_information64.root_impl ? environment_information64.root_impl : environment_information32.root_impl);
+    fprintf(json, "  \"root\": ");
+    write_json_string(json, environment_information64.root_impl ? environment_information64.root_impl : environment_information32.root_impl);
+    fprintf(json, ",\n");
 
     fprintf(json, "  \"monitor\": {\n");
     fprintf(json, "    \"state\": \"%d\"", tracing_state);
-    if (monitor_stop_reason) fprintf(json, ",\n    \"reason\": \"%s\",\n", monitor_stop_reason);
-    else fprintf(json, "\n");
+    if (monitor_stop_reason) {
+      fprintf(json, ",\n    \"reason\": ");
+      write_json_string(json, monitor_stop_reason);
+    }
+    fprintf(json, "\n");
 
     if (status64.supported || status32.supported)
       fprintf(json, "  },\n");
     else
       fprintf(json, "  }\n");
 
-
     if (status64.supported || status32.supported) {
       fprintf(json, "  \"rezygiskd\": {\n");
       if (status64.supported) {
-        fprintf(json, "    \"64\": {\n");
-        fprintf(json, "      \"state\": %d,\n", status64.daemon_running);
-        if (status64.daemon_error_info) fprintf(json, "      \"reason\": \"%s\",\n", status64.daemon_error_info);
-        fprintf(json, "      \"modules\": [");
-
-        if (environment_information64.modules) for (uint32_t i = 0; i < environment_information64.modules_len; i++) {
-          if (i > 0) fprintf(json, ", ");
-          fprintf(json, "\"%s\"", environment_information64.modules[i]);
-        }
-
-        fprintf(json, "]\n");
-        fprintf(json, "    }");
-        if (status32.supported) fprintf(json, ",\n");
-        else fprintf(json, "\n");
+        write_json_daemon(json, "64", &status64, environment_information64.modules, environment_information64.modules_len);
+        fprintf(json, status32.supported ? ",\n" : "\n");
       }
 
       if (status32.supported) {
-        fprintf(json, "    \"32\": {\n");
-        fprintf(json, "      \"state\": %d,\n", status32.daemon_running);
-        if (status32.daemon_error_info) fprintf(json, "      \"reason\": \"%s\",\n", status32.daemon_error_info);
-        fprintf(json, "      \"modules\": [");
-
-        if (environment_information32.modules) for (uint32_t i = 0; i < environment_information32.modules_len; i++) {
-          if (i > 0) fprintf(json, ", ");
-          fprintf(json, "\"%s\"", environment_information32.modules[i]);
-        }
-
-        fprintf(json, "]\n");
-        fprintf(json, "    }\n");
+        write_json_daemon(json, "32", &status32, environment_information32.modules, environment_information32.modules_len);
+        fprintf(json, "\n");
       }
 
       fprintf(json, "  },\n");
 
+      /* INFO: Always report every supported ABI, so a non-injected 32-bit
+                 Zygote is shown as such instead of silently missing. */
       fprintf(json, "  \"zygote\": {\n");
       if (status64.supported) {
         fprintf(json, "    \"64\": %d", status64.zygote_injected);
-        if (status32.supported && status32.zygote_injected) fprintf(json, ",\n");
-        else fprintf(json, "\n");
+        fprintf(json, status32.supported ? ",\n" : "\n");
       }
-      if (status32.supported && status32.zygote_injected) {
+      if (status32.supported) {
         fprintf(json, "    \"32\": %d\n", status32.zygote_injected);
       }
       fprintf(json, "  }\n");
@@ -956,9 +989,21 @@ static bool update_status(const char *message) {
 
     fprintf(json, "}\n");
 
-    fclose(json);
+    if (fclose(json) == EOF) {
+      PLOGE("failed to write state.json");
+      unlink(STATE_JSON_TMP_PATH);
+
+      return false;
+    }
+
+    if (rename(STATE_JSON_TMP_PATH, STATE_JSON_PATH) == -1) {
+      PLOGE("failed to rename state.json");
+      unlink(STATE_JSON_TMP_PATH);
+
+      return false;
+    }
   } else {
-    if (remove("/data/adb/rezygisk/state.json") == -1) {
+    if (remove(STATE_JSON_PATH) == -1 && errno != ENOENT) {
       PLOGE("failed to remove state.json");
     }
   }
@@ -981,15 +1026,15 @@ static bool prepare_environment() {
   char line[1024];
   while (fgets(line, sizeof(line), orig_prop) != NULL) {
     if (strncmp(line, "description=", strlen("description=")) == 0) {
-      strcat(pre_section, "description=");
-      strcat(post_section, line + strlen("description="));
+      strlcat(pre_section, "description=", sizeof(pre_section));
+      strlcat(post_section, line + strlen("description="), sizeof(post_section));
       after_description = true;
 
       continue;
     }
 
-    if (after_description) strcat(post_section, line);
-    else strcat(pre_section, line);
+    if (after_description) strlcat(post_section, line, sizeof(post_section));
+    else strlcat(pre_section, line, sizeof(pre_section));
   }
 
   fclose(orig_prop);

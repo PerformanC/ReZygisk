@@ -164,7 +164,9 @@ static int create_daemon_socket(void) {
 
 static int spawn_companion(char *restrict argv[], char *restrict name, int lib_fd) {
   int sockets[2];
-  if (socketpair(AF_UNIX, SOCK_STREAM, 0, sockets) == -1) {
+  /* INFO: CLOEXEC so sibling companions don't hold each other's sockets. The
+             companion end has the flag cleared right before exec. */
+  if (socketpair(AF_UNIX, SOCK_STREAM | SOCK_CLOEXEC, 0, sockets) == -1) {
     LOGE("Failed creating socket pair.");
 
     return -1;
@@ -368,13 +370,18 @@ void zygiskd_start(char *restrict argv[]) {
 
   bool first_process = true;
   while (1) {
-    int client_fd = accept(socket_fd, NULL, NULL);
+    int client_fd = accept4(socket_fd, NULL, NULL, SOCK_CLOEXEC);
     if (client_fd == -1) {
+      /* INFO: Transient errors must not take the daemon down. */
+      if (errno == EINTR || errno == ECONNABORTED) continue;
+
       LOGE("accept: %s", strerror(errno));
 
       break;
     }
 
+    /* INFO: A single misbehaving client (e.g. killed between connect and write)
+               must not stop ReZygiskd for every other process until reboot. */
     uint8_t action8 = 0;
     ssize_t len = read_uint8_t(client_fd, &action8);
     if (len == -1) {
@@ -382,13 +389,13 @@ void zygiskd_start(char *restrict argv[]) {
 
       close(client_fd);
 
-      break;
+      continue;
     } else if (len == 0) {
       LOGI("Client disconnected");
 
       close(client_fd);
 
-      break;
+      continue;
     }
 
     enum DaemonSocketAction action = (enum DaemonSocketAction)action8;

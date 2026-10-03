@@ -43,7 +43,10 @@ create_sys_perm $TMP_PATH
 
 # INFO: We need to cleanup the module.prop to its default state before ReZygisk writes to it
 #         so that it never duplicates the module status in there.
-cp "$MODDIR/module.prop.bak" "$MODDIR/module.prop"
+# INFO: Guarded, as under errexit a missing backup would prevent the monitor from starting.
+if [ -f "$MODDIR/module.prop.bak" ]; then
+  cp "$MODDIR/module.prop.bak" "$MODDIR/module.prop"
+fi
 
 # INFO: Utilize the one with the biggest output, as some devices with Tango have the full list
 #         in ro.product.cpu.abilist but others only have a subset there, and the full list in
