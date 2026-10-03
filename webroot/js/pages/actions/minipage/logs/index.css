@@ -1,0 +1,10 @@
+/* INFO: Log viewer mini page */
+#logs_list:empty::before {
+  content: attr(data-empty);
+  display: block;
+  padding: 40px 16px;
+  text-align: center;
+  color: var(--desc);
+  font-family: var(--font-family);
+  font-size: 13px;
+}

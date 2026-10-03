@@ -19,9 +19,10 @@ export async function load() {
 
     document.removeEventListener('click', themeButtonListener)
 
-    themeList[getThemeMode](true)
-
+    /* INFO: Store first so the accent picks the tone matching the new theme. */
     setThemeData(getThemeMode)
+
+    themeList[getThemeMode](true)
     loadPage('settings')
   }, false)
 }

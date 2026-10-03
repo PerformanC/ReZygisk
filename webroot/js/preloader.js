@@ -2,14 +2,23 @@ import { exec, fullScreen } from './kernelsu.js'
 import { setDark } from './themes/dark.js'
 import { setThemeData, themeList } from './themes/main.js'
 import { setLight } from './themes/light.js'
-import { loadPage } from './pages/pageLoader.js'
+import { applyAccent } from './themes/accent.js'
 
 /* INFO: This sets the default theme to system if not set */
 let sys_theme = localStorage.getItem('/ReZygisk/theme')
-if (!sys_theme) sys_theme = setThemeData('system')
+if (!sys_theme || !themeList[sys_theme]) sys_theme = setThemeData('system')
 themeList[sys_theme](true)
 
-const ConfigState = JSON.parse(localStorage.getItem('/ReZygisk/webui_config') || '{}')
+/* INFO: Restore text direction for RTL languages on startup, not only on language change. */
+const savedLanguage = localStorage.getItem('/TreatWheel/language') || 'en_US'
+document.getElementById('main_html').setAttribute('dir', /^(ar|fa|he|ur)_/.test(savedLanguage) ? 'rtl' : 'ltr')
+document.getElementById('main_html').setAttribute('lang', savedLanguage.replace('_', '-'))
+
+let ConfigState = {}
+try {
+  ConfigState = JSON.parse(localStorage.getItem('/ReZygisk/webui_config') || '{}')
+} catch {}
+
 
 if (!ConfigState.disableFullscreen) fullScreen(true)
 
@@ -37,9 +46,12 @@ document.addEventListener('click', async (event) => {
 }, false)
 
 window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (event) => {
-  if (sys_theme !== 'system') return
+  /* INFO: Read it again, the user may have switched theme since startup. */
+  if (localStorage.getItem('/ReZygisk/theme') !== 'system') return
 
   const newColorScheme = event.matches ? 'dark' : 'light'
   if (newColorScheme === 'dark') setDark()
   else if (newColorScheme === 'light') setLight()
+
+  applyAccent()
 })

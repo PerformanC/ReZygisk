@@ -1,19 +1,38 @@
-<div class="panel">
-  <div class="header">ReZygisk: {{title}}</div>
+<div class="panel nz">
+  <div class="nz_header">
+    <div class="nz_header_title">{{title}}</div>
+  </div>
 
-  <!-- INFO: Settings card body (monitor) -->
-  <div class="dimc" style="margin: 0 15px 0 15px; border-radius: 20px;">
-    <div class="dimc liste" style="padding: 45px 22px 45px; border-radius: 20px;">
-      <div id="monitor_title" class="dimc" style="font-size: 1.22em;">{{monitor.title}}</div>
-      <div id="monitor_status" class="dimc" style="font-size: 1.1em;">{{monitor.status.unknown}}</div>
+  <!-- INFO: Monitor control -->
+  <div class="nz_card">
+    <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px;">
+      <div style="display: flex; align-items: center; gap: 12px; min-width: 0;">
+        <div class="nz_action_icon" id="monitor_icon"></div>
+        <div style="min-width: 0;">
+          <div style="font-size: 17px; font-weight: 600;">{{monitor.title}}</div>
+          <div id="monitor_reason" class="nz_header_sub" style="margin-top: 2px;">{{monitor.description}}</div>
+        </div>
+      </div>
+      <span id="monitor_status" class="nz_pill nz_pill_muted"><span class="nz_dot"></span><span id="monitor_status_text">{{monitor.status.unknown}}</span></span>
     </div>
 
-    <div class="small_card_bg" style="padding: 15px 20px 15px 20px; border-radius: 20px;">
-      <div class="small_card_bg button_list">
-        <div id="monitor_stop_button" class="center button">{{monitor.button.stop}}</div>
-        <div id="monitor_start_button" class="center button">{{monitor.button.start}}</div>
-        <div id="monitor_pause_button" class="center button">{{monitor.button.pause}}</div>
-      </div>
+    <div class="nz_btn_row" style="margin-top: 18px;">
+      <button id="monitor_start_button" class="nz_btn nz_btn_tonal"><span id="monitor_start_icon" style="display: contents;"></span>{{monitor.button.start}}</button>
+      <button id="monitor_pause_button" class="nz_btn nz_btn_tonal"><span id="monitor_pause_icon" style="display: contents;"></span>{{monitor.button.pause}}</button>
+      <button id="monitor_stop_button" class="nz_btn nz_btn_outline"><span id="monitor_stop_icon" style="display: contents;"></span>{{monitor.button.stop}}</button>
     </div>
   </div>
+
+  <!-- INFO: Daemon info -->
+  <div class="nz_section">
+    <span>{{daemon.title}}</span>
+    <span id="daemon_run" class="nz_section_action">{{daemon.run}}</span>
+  </div>
+  <div class="nz_card">
+    <div id="daemon_output" class="nz_header_sub" style="margin: 0;">{{daemon.description}}</div>
+  </div>
+
+  <!-- INFO: Tools -->
+  <div class="nz_section">{{tools.title}}</div>
+  <div id="actions_tools" class="nz_grid"></div>
 </div>

@@ -18,6 +18,7 @@ export const allMainPages = [
 ]
 
 export const allMiniPages = [
+  'mini_actions_logs',
   'mini_settings_language',
   'mini_settings_theme'
 ]
@@ -435,6 +436,11 @@ export async function loadPage(pageId) {
 
         if (isClick) history.back()
 
+        /* INFO: If another page was already requested (navbar/back), it owns the
+                   navbar state now. Resetting it here would trigger an extra
+                   history.back() and close the WebUI. */
+        if (whichCurrentPage() !== pageId) return true
+
         const parentPage = miniPageRegex.exec(pageId)[1]
         setNavbar(parentPage)
 
@@ -500,7 +506,8 @@ export async function loadPage(pageId) {
   } finally {
     isPageTransitioning = false
 
-    if (pageId === 'home' && currentPage !== 'home')
+    /* INFO: The first page load has no history entry of ours to pop. */
+    if (currentPage && pageId === 'home' && currentPage !== 'home')
       history.back()
     else if (pageId !== 'home' && currentPage === 'home')
       history.pushState(true, '', location.pathname)
@@ -595,28 +602,60 @@ export async function reloadPage() {
   utils.reapplyListeners()
 }
 
-export function getStrings(pageId, forceDefault = false) {
-  return fetch(`lang/${forceDefault ? 'en_US' : (localStorage.getItem(`/${moduleName}/language`) || 'en_US')}.json`)
-    .then((response) => response.json())
-    .then((data) => {
-      return {
-        ...data.pages[pageId],
-        ...data.globals,
-        navbar: Object.fromEntries(allPages.map((page) => [page, data.pages[page].title]))
-      }
-    })
-    .catch((err) => {
-      if (!forceDefault) {
-        toast('Error loading strings for the selected language, loading default (en_US) strings.')
+const langCache = {}
 
-        return getStrings(pageId, true)
-      }
+function fetchLanguage(langId) {
+  if (!langCache[langId]) {
+    langCache[langId] = fetch(`lang/${langId}.json`)
+      .then((response) => response.json())
+      .catch((err) => {
+        delete langCache[langId]
 
-      toast('Error loading default strings!')
-      console.error(`Failed to load default strings for page ${pageId}: `, err)
+        throw err
+      })
+  }
 
-      return false
-    })
+  return langCache[langId]
+}
+
+/* INFO: Fills every key missing in a translation with the en_US value, so newly
+           added strings never break pages of languages not yet translated. */
+function deepMerge(base, override) {
+  if (typeof base !== 'object' || base === null) return override === undefined ? base : override
+  if (typeof override !== 'object' || override === null) return base
+
+  const out = { ...base }
+  for (const key of Object.keys(override)) {
+    out[key] = deepMerge(base[key], override[key])
+  }
+
+  return out
+}
+
+export async function getStrings(pageId, forceDefault = false) {
+  const langId = forceDefault ? 'en_US' : (localStorage.getItem(`/${moduleName}/language`) || 'en_US')
+
+  try {
+    const defaults = await fetchLanguage('en_US')
+    const data = langId === 'en_US' ? defaults : deepMerge(defaults, await fetchLanguage(langId))
+
+    return {
+      ...data.pages[pageId],
+      ...data.globals,
+      navbar: Object.fromEntries(allPages.map((page) => [page, data.pages[page]?.title]))
+    }
+  } catch (err) {
+    if (!forceDefault) {
+      toast('Error loading strings for the selected language, loading default (en_US) strings.')
+
+      return getStrings(pageId, true)
+    }
+
+    toast('Error loading default strings!')
+    console.error(`Failed to load default strings for page ${pageId}: `, err)
+
+    return false
+  }
 }
 
 export function setLanguage(langId) {

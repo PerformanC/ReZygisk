@@ -1,10 +1,16 @@
-<div class="panel">
-  <div class="header">ReZygisk: {{title}} </div>
-
-  <div id="modules_list" style="width: 100%; height: fit-content; display: grid;">
-    <div id="modules_list_not_avaliable" class="not_avaliable">
-      {{notAvaliable}}
+<div class="panel nz">
+  <div class="nz_header">
+    <div>
+      <div class="nz_header_title">{{title}}</div>
+      <div id="modules_count" class="nz_header_sub">&nbsp;</div>
     </div>
-    <!-- N/A -->
+    <button id="modules_refresh" class="nz_icon_btn" aria-label="Refresh"></button>
   </div>
+
+  <label id="modules_search_box" class="nz_search" style="display: none;">
+    <span id="modules_search_icon" style="display: contents;"></span>
+    <input id="modules_search" type="search" autocomplete="off" spellcheck="false" placeholder="{{search}}">
+  </label>
+
+  <div id="modules_list"></div>
 </div>

@@ -1,9 +1,9 @@
 <!DOCTYPE html>
 <html id="main_html" lang="en" dir="none">
   <head>
-    <meta name="viewport" content="initial-scale=1, width=device-width" />
-    <meta name="viewport" content="viewport-fit=cover" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="color-scheme" content="dark light" />
 
     <link rel="stylesheet" type="text/css" href="https://mui.kernelsu.org/internal/insets.css">
 
@@ -11,6 +11,7 @@
     <link rel="stylesheet" href="index.css">
     <link rel="stylesheet" href="css/index.css">
     <link rel="stylesheet" href="css/icons.css">
+    <link rel="stylesheet" href="css/components.css">
 
     <script src="js/pages/pageLoader.js" type="module"></script>
     <script src="js/preloader.js" type="module"></script>
@@ -89,6 +90,11 @@
           </label>
         </div>
         <!-- INFO: Below are mini page options, they don't not show in the navbar. It use for a way to go back to main pages -->
+        <div style="display: none;">
+          <input id="n_mini_actions_logs" style="display: none;" type="radio" name="navbutton" value="mini_actions_logs"/>
+          <div id="ni_mini_actions_logs" style="display: none;"></div>
+          <div id="nibg_mini_actions_logs" style="display: none;"></div>
+        </div>
         <div style="display: none;">
           <input id="n_mini_settings_language" style="display: none;" type="radio" name="navbutton" value="mini_settings_language"/>
           <div id="ni_mini_settings_language" style="display: none;"></div>

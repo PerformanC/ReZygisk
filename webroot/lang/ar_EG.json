@@ -19,6 +19,43 @@
           "notInjected": "لم يتم الحقن",
           "unknown": "غير معروف"
         }
+      },
+      "rootImpls": {
+        "multiple": "متعدد"
+      },
+      "hero": {
+        "injected": "تم حقن {working} من {expected} Zygote",
+        "module": "وحدة واحدة",
+        "modules": "{count} وحدات",
+        "noState": "لا توجد حالة بعد. قد لا تكون المراقبة قيد التشغيل."
+      },
+      "issues": {
+        "monitor": "المراقبة لا تتتبع حالياً",
+        "daemon": "ReZygiskd {bits} بت"
+      },
+      "components": {
+        "title": "المكونات",
+        "monitor": "المراقبة",
+        "daemon": "ReZygiskd {bits} بت",
+        "running": "يعمل",
+        "notRunning": "لا يعمل",
+        "tracing": "جارٍ التتبع",
+        "stopping": "جارٍ الإيقاف",
+        "stopped": "متوقف",
+        "exited": "خرج",
+        "modules": "وحدات Zygisk",
+        "viewAll": "عرض الكل"
+      },
+      "device": {
+        "title": "الجهاز",
+        "model": "الجهاز",
+        "sdk": "SDK {sdk}",
+        "patch": "التحديث الأمني",
+        "build": "البنية",
+        "selinux": "SELinux",
+        "abi": "المعمارية",
+        "uptime": "مدة التشغيل",
+        "pids": "العمليات"
       }
     },
     "actions": {
@@ -36,13 +73,69 @@
           "start": "تشغيل",
           "stop": "إيقاف",
           "pause": "إيقاف مؤقت"
+        },
+        "description": "يتتبع init لحقن Zygote عند كل تشغيل أو إعادة تشغيل.",
+        "reason": "السبب",
+        "failed": "تعذّر الوصول إلى المراقبة. هل هي قيد التشغيل؟",
+        "confirmExit": {
+          "title": "إيقاف المراقبة؟",
+          "message": "ستخرج المراقبة ولا يمكن تشغيلها مجدداً حتى إعادة التشغيل. عمليات Zygote المحقونة مسبقاً ستستمر بالعمل."
+        }
+      },
+      "daemon": {
+        "title": "الخدمة",
+        "run": "استعلام",
+        "description": "استعلم من ReZygiskd عن رقم العملية ونوع الروت والوحدات المحمّلة.",
+        "notRunning": "ReZygiskd لا يستجيب."
+      },
+      "tools": {
+        "title": "الأدوات",
+        "logs": {
+          "title": "السجلات المباشرة",
+          "desc": "بث سجلات ReZygisk مع الفلاتر"
+        },
+        "export": {
+          "title": "تصدير التشخيص",
+          "desc": "حفظ تقرير كامل في Download/ReZygisk",
+          "working": "جارٍ جمع التشخيص…",
+          "done": "تم الحفظ في {path}",
+          "failed": "فشل تصدير التشخيص"
+        },
+        "copyState": {
+          "title": "نسخ الحالة",
+          "desc": "نسخ state.json إلى الحافظة",
+          "failed": "ملف state.json غير متوفر"
+        },
+        "restart": {
+          "title": "إعادة تشغيل سريعة",
+          "desc": "إعادة تشغيل Zygote وإطار أندرويد",
+          "confirmTitle": "إعادة تشغيل Zygote؟",
+          "confirmMessage": "سيتم إغلاق جميع التطبيقات وإعادة تشغيل إطار أندرويد.",
+          "confirm": "إعادة التشغيل"
+        },
+        "reboot": {
+          "title": "إعادة التشغيل",
+          "desc": "إعادة تشغيل الجهاز",
+          "confirmTitle": "إعادة تشغيل الجهاز؟",
+          "confirmMessage": "سيُعاد تشغيل جهازك الآن.",
+          "confirm": "إعادة التشغيل"
         }
       }
     },
     "modules": {
       "title": "الوحدات",
       "notAvaliable": "لا توجد وحدات تستخدم Zygisk.",
-      "arch": "المعمارية:"
+      "arch": "المعمارية:",
+      "count": "{count} وحدات Zygisk نشطة",
+      "search": "ابحث في الوحدات",
+      "noResults": "لا توجد وحدات مطابقة للبحث.",
+      "emptyHint": "ثبّت وحدة Zygisk وأعد التشغيل لتظهر هنا.",
+      "disabled": "معطّلة",
+      "pendingRemoval": "بانتظار الحذف",
+      "by": "بواسطة",
+      "versionCode": "رمز الإصدار",
+      "path": "المسار",
+      "copyId": "نسخ المعرّف"
     },
     "settings": {
       "title": "الإعدادات",
@@ -65,7 +158,16 @@
       "moduleDevelopers": "مطورو الإضافة",
       "WebUIDevelopers": "مطورو WebUI",
       "orginalDevelopers": "المطورون الأصليون للإضافة",
-      "moduleLicense": "ترخيص الإضافة"
+      "moduleLicense": "ترخيص الإضافة",
+      "accent": {
+        "title": "لون التمييز",
+        "description": "اختر اللون المستخدم للتمييز في الواجهة."
+      },
+      "refresh": {
+        "title": "التحديث التلقائي",
+        "description": "عدد مرات قراءة حالة ReZygisk في الصفحات المباشرة.",
+        "off": "إيقاف"
+      }
     },
     "mini_settings_language": {
       "title": "تغيير اللغة"
@@ -78,9 +180,28 @@
         "amoled": "وضع الأموليد",
         "system_based": "حسب النظام"
       }
+    },
+    "mini_actions_logs": {
+      "title": "السجلات المباشرة",
+      "live": "مباشر",
+      "paused": "متوقف",
+      "pause": "إيقاف مؤقت",
+      "clear": "مسح",
+      "save": "حفظ",
+      "search": "تصفية السجلات",
+      "all": "الكل",
+      "empty": "لا توجد سجلات بعد. نسخ release تسجّل المعلومات والتحذيرات والأخطاء فقط.",
+      "saved": "تم الحفظ في {path}",
+      "saveFailed": "فشل حفظ السجلات"
     }
   },
   "globals": {
-    "unknown": "غير معروف"
+    "unknown": "غير معروف",
+    "copy": "نسخ",
+    "copied": "تم النسخ إلى الحافظة",
+    "cancel": "إلغاء",
+    "updated": "آخر تحديث {time}",
+    "justNow": "الآن",
+    "secondsAgo": "منذ {n}"
   }
 }

@@ -1,5 +1,9 @@
 <div class="panel">
-  <div class="header">ReZygisk: {{title}} </div>
+  <div class="nz">
+    <div class="nz_header">
+      <div class="nz_header_title">{{title}}</div>
+    </div>
+  </div>
 
   <!-- INFO: Change language -->
   <div id="lang_page_toggle" class="small_card dimc card_animation">
@@ -20,6 +24,26 @@
       </div>
       <div class="dimc desc" style="font-size: 0.9em; padding-left: 5px; padding-bottom: 6px;">
         {{theme.description}}
+      </div>
+    </div>
+  </div>
+
+  <!-- INFO: Accent color + refresh interval -->
+  <div class="nz" style="margin-top: 15px;">
+    <div class="nz_card" style="margin-bottom: 15px; background: var(--dim); border-radius: 15px; border: none;">
+      <div class="nz_setting_title">{{accent.title}}</div>
+      <div class="nz_setting_desc">{{accent.description}}</div>
+      <div id="rz_accent_swatches" class="nz_swatches"></div>
+    </div>
+
+    <div class="nz_card" style="margin-bottom: 0; background: var(--dim); border-radius: 15px; border: none;">
+      <div class="nz_setting_title">{{refresh.title}}</div>
+      <div class="nz_setting_desc">{{refresh.description}}</div>
+      <div id="rz_refresh_interval" class="nz_segmented">
+        <button data-interval="0">{{refresh.off}}</button>
+        <button data-interval="3000">3s</button>
+        <button data-interval="5000">5s</button>
+        <button data-interval="10000">10s</button>
       </div>
     </div>
   </div>

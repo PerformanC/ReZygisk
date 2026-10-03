@@ -19,6 +19,43 @@
           "notInjected": "Not Injected",
           "unknown": "Unknown"
         }
+      },
+      "rootImpls": {
+        "multiple": "Multiple"
+      },
+      "hero": {
+        "injected": "{working} of {expected} Zygotes injected",
+        "module": "1 module",
+        "modules": "{count} modules",
+        "noState": "No state reported yet. The monitor may not be running."
+      },
+      "issues": {
+        "monitor": "Monitor is not tracing",
+        "daemon": "ReZygiskd {bits}-bit"
+      },
+      "components": {
+        "title": "Components",
+        "monitor": "Monitor",
+        "daemon": "ReZygiskd {bits}-bit",
+        "running": "Running",
+        "notRunning": "Not running",
+        "tracing": "Tracing",
+        "stopping": "Stopping",
+        "stopped": "Stopped",
+        "exited": "Exited",
+        "modules": "Zygisk modules",
+        "viewAll": "View all"
+      },
+      "device": {
+        "title": "Device",
+        "model": "Device",
+        "sdk": "SDK {sdk}",
+        "patch": "Security patch",
+        "build": "Build",
+        "selinux": "SELinux",
+        "abi": "ABI",
+        "uptime": "Uptime",
+        "pids": "Processes"
       }
     },
     "actions": {
@@ -36,13 +73,69 @@
           "start": "Start",
           "stop": "Stop",
           "pause": "Pause"
+        },
+        "description": "Traces init to inject Zygote on every (re)start.",
+        "reason": "Reason",
+        "failed": "Failed to reach the monitor. Is it running?",
+        "confirmExit": {
+          "title": "Stop the monitor?",
+          "message": "The monitor will exit and cannot be started again until reboot. Already injected Zygotes keep working."
+        }
+      },
+      "daemon": {
+        "title": "Daemon",
+        "run": "Query",
+        "description": "Query ReZygiskd for its PID, root implementation and loaded modules.",
+        "notRunning": "ReZygiskd is not responding."
+      },
+      "tools": {
+        "title": "Tools",
+        "logs": {
+          "title": "Live logs",
+          "desc": "Stream ReZygisk logcat with filters"
+        },
+        "export": {
+          "title": "Export diagnostics",
+          "desc": "Save a full report to Download/ReZygisk",
+          "working": "Collecting diagnostics…",
+          "done": "Saved to {path}",
+          "failed": "Failed to export diagnostics"
+        },
+        "copyState": {
+          "title": "Copy state",
+          "desc": "Copy state.json to clipboard",
+          "failed": "state.json is not available"
+        },
+        "restart": {
+          "title": "Soft reboot",
+          "desc": "Restart Zygote and the Android framework",
+          "confirmTitle": "Restart Zygote?",
+          "confirmMessage": "All apps will close and the Android framework will restart.",
+          "confirm": "Restart"
+        },
+        "reboot": {
+          "title": "Reboot",
+          "desc": "Reboot the device",
+          "confirmTitle": "Reboot device?",
+          "confirmMessage": "Your device will reboot now.",
+          "confirm": "Reboot"
         }
       }
     },
     "modules": {
       "title": "Modules",
       "notAvaliable": "No modules using Zygisk here.",
-      "arch": "Architecture: "
+      "arch": "Architecture: ",
+      "count": "{count} active Zygisk modules",
+      "search": "Search modules",
+      "noResults": "No modules match your search.",
+      "emptyHint": "Install a Zygisk module and reboot to see it here.",
+      "disabled": "Disabled",
+      "pendingRemoval": "Removal pending",
+      "by": "by",
+      "versionCode": "Version code",
+      "path": "Path",
+      "copyId": "Copy ID"
     },
     "settings": {
       "title": "Settings",
@@ -65,7 +158,16 @@
       "moduleDevelopers": "Module Developer(s)",
       "WebUIDevelopers": "WebUI Developer(s)",
       "orginalDevelopers": "Original Module Developer(s)",
-      "moduleLicense": "Module License"
+      "moduleLicense": "Module License",
+      "accent": {
+        "title": "Accent color",
+        "description": "Pick the highlight color used across the WebUI."
+      },
+      "refresh": {
+        "title": "Auto refresh",
+        "description": "How often live pages re-read ReZygisk's state.",
+        "off": "Off"
+      }
     },
     "mini_settings_language": {
       "title": "Change language"
@@ -78,9 +180,28 @@
         "amoled": "Amoled Theme",
         "system_based": "System Based Theme"
       }
+    },
+    "mini_actions_logs": {
+      "title": "Live logs",
+      "live": "Live",
+      "paused": "Paused",
+      "pause": "Pause",
+      "clear": "Clear",
+      "save": "Save",
+      "search": "Filter logs",
+      "all": "All",
+      "empty": "No ReZygisk logs yet. Release builds only log info, warnings and errors.",
+      "saved": "Saved to {path}",
+      "saveFailed": "Failed to save logs"
     }
   },
   "globals": {
-    "unknown": "Unknown"
+    "unknown": "Unknown",
+    "copy": "Copy",
+    "copied": "Copied to clipboard",
+    "cancel": "Cancel",
+    "updated": "Updated {time}",
+    "justNow": "just now",
+    "secondsAgo": "{n} ago"
   }
 }

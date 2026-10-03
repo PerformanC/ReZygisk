@@ -1,4 +1,5 @@
 import { exec, toast } from '../../../../kernelsu.js'
+import { escapeHTML } from '../../../../rz.js'
 
 import { loadPage, setLanguage, reloadPage } from '../../../pageLoader.js'
 
@@ -33,7 +34,7 @@ export async function loadOnce() {
     return;
   }
 
-  const langList = langListCmd.stdout.split('\n')
+  const langList = langListCmd.stdout.split('\n').map((lang) => lang.trim()).filter((lang) => /^[a-zA-Z_-]+\.json$/.test(lang))
   if (langList.length === 0) {
     toast('No languages found!')
 
@@ -48,10 +49,11 @@ export async function loadOnceView() {
   for (let i = 0; i < availableLanguages.length; i++) {
     const langCode = availableLanguages[i]
     const langData = await _getLanguageData(langCode)
+    if (!langData || typeof langData.langName !== 'string') continue
 
     lang_list_buf.push(`
       <div lang-data="${langCode}" class="dim card card_animation" style="padding: 20px 15px; cursor: pointer;">
-        <div lang-data="${langCode}" class="dimc" style="font-size: 1.1em;">${langData.langName}</div>
+        <div lang-data="${langCode}" class="dimc" style="font-size: 1.1em;">${escapeHTML(langData.langName)}</div>
       </div>
     `)
   }
@@ -83,8 +85,8 @@ export async function load() {
     /* INFO: Strip .json from the end of the filename */
     setLanguage(getLangLocate.replace('.json', ''))
 
-    if (getLangLocate.includes('ar_')) main_html.setAttribute('dir', 'rtl')
-    else main_html.setAttribute('dir', 'ltr')
+    main_html.setAttribute('dir', /^(ar|fa|he|ur)_/.test(getLangLocate) ? 'rtl' : 'ltr')
+    main_html.setAttribute('lang', getLangLocate.replace('.json', '').replace('_', '-'))
 
     loadPage('settings')
 

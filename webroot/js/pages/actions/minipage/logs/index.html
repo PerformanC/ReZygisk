@@ -1,0 +1,21 @@
+<div class="nz">
+  <div class="nz_log_toolbar">
+    <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px;">
+      <span id="logs_live" class="nz_log_live"><span class="nz_dot nz_dot_ok"></span><span id="logs_live_text">{{live}}</span></span>
+      <div style="display: flex; gap: 6px;">
+        <button id="logs_pause" class="nz_icon_btn" aria-label="{{pause}}"></button>
+        <button id="logs_clear" class="nz_icon_btn" aria-label="{{clear}}"></button>
+        <button id="logs_copy" class="nz_icon_btn" aria-label="{{copy}}"></button>
+        <button id="logs_save" class="nz_icon_btn" aria-label="{{save}}"></button>
+      </div>
+    </div>
+    <div id="logs_levels" class="nz_log_levels"></div>
+    <label class="nz_search" style="margin: 0;">
+      <span id="logs_search_icon" style="display: contents;"></span>
+      <input id="logs_search" type="search" autocomplete="off" spellcheck="false" placeholder="{{search}}">
+    </label>
+  </div>
+
+  <div id="logs_list" class="nz_log_list"></div>
+  <div style="height: 40px;"></div>
+</div>
