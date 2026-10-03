@@ -304,7 +304,7 @@ export async function load() {
   })
 
   /* INFO: Re-render quickly when coming back to the page, then keep it live. */
-  if (lastUpdate) refresh()
+  if (lastUpdate && Date.now() - lastUpdate > 1500) refresh()
 
   stopPolling()
   stopPolling = startPolling(() => refresh(), isActive)

@@ -257,7 +257,7 @@ export function timeAgo(date, strings) {
   const seconds = Math.max(0, Math.round((Date.now() - date) / 1000))
   if (seconds < 5) return strings?.justNow || 'just now'
 
-  return (strings?.secondsAgo || '{n}s ago').replace('{n}', seconds < 60 ? seconds : `${Math.floor(seconds / 60)}m`)
+  return (strings?.secondsAgo || '{n}s ago').replace('{n}', seconds < 60 ? `${seconds}s` : `${Math.floor(seconds / 60)}m`)
 }
 
 export async function copyText(text, successMessage = 'Copied') {
