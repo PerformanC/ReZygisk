@@ -143,14 +143,8 @@ bool rezygiskd_listener_init() {
     return false;
   }
 
-  struct sockaddr_un addr = {
-    .sun_family = AF_UNIX,
-    .sun_path = { 0 }
-  };
-
-  size_t sun_path_len = sprintf(addr.sun_path, "%s/%s", rezygiskd_get_path(), SOCKET_NAME);
-
-  socklen_t socklen = sizeof(sa_family_t) + sun_path_len;
+  struct sockaddr_un addr;
+  socklen_t socklen = abstract_addr(&addr, SOCKET_NAME);
   if (bind(monitor_sock_fd, (struct sockaddr *)&addr, socklen) == -1) {
     PLOGE("bind socket");
 
@@ -1062,14 +1056,8 @@ int send_control_command(enum rezygiskd_command cmd) {
   int sockfd = socket(PF_UNIX, SOCK_DGRAM | SOCK_CLOEXEC, 0);
   if (sockfd == -1) return -1;
 
-  struct sockaddr_un addr = {
-    .sun_family = AF_UNIX,
-    .sun_path = { 0 }
-  };
-
-  size_t sun_path_len = snprintf(addr.sun_path, sizeof(addr.sun_path), "%s/%s", rezygiskd_get_path(), SOCKET_NAME);
-
-  socklen_t socklen = sizeof(sa_family_t) + sun_path_len;
+  struct sockaddr_un addr;
+  socklen_t socklen = abstract_addr(&addr, SOCKET_NAME);
 
   struct rzd_msg_header msg = {
     .cmd = cmd,

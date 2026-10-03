@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <stddef.h>
 #include <string.h>
 #include <errno.h>
 
@@ -117,6 +118,25 @@ static bool get_current_attr(char *restrict output, size_t size) {
   return true;
 }
 
+/*
+  INFO: Abstract namespace: no path, so the socket stays out of /proc/net/unix,
+        which any app can read. The name is the basename of the path passed in,
+        so both ends still agree without a new shared constant.
+*/
+static socklen_t abstract_addr(struct sockaddr_un *addr, const char *path) {
+  memset(addr, 0, sizeof(*addr));
+  addr->sun_family = AF_UNIX;
+
+  const char *name = strrchr(path, '/');
+  name = name ? name + 1 : path;
+
+  size_t len = strlen(name);
+  if (len > sizeof(addr->sun_path) - 2) len = sizeof(addr->sun_path) - 2;
+  memcpy(addr->sun_path + 1, name, len);
+
+  return (socklen_t)(offsetof(struct sockaddr_un, sun_path) + 1 + len);
+}
+
 void unix_datagram_sendto(const char *restrict path, const void *restrict buf, size_t len) {
   char current_attr[PATH_MAX];
   if (!get_current_attr(current_attr, sizeof(current_attr))) {
@@ -127,10 +147,8 @@ void unix_datagram_sendto(const char *restrict path, const void *restrict buf, s
 
   set_socket_create_context(current_attr);
 
-  struct sockaddr_un addr = {
-    .sun_family = AF_UNIX
-  };
-  strncpy(addr.sun_path, path, sizeof(addr.sun_path) - 1);
+  struct sockaddr_un addr;
+  socklen_t socklen = abstract_addr(&addr, path);
 
   int socket_fd = socket(AF_UNIX, SOCK_DGRAM, 0);
   if (socket_fd == -1) {
@@ -141,7 +159,7 @@ void unix_datagram_sendto(const char *restrict path, const void *restrict buf, s
     return;
   }
 
-  if (connect(socket_fd, (struct sockaddr *)&addr, sizeof(addr)) == -1) {
+  if (connect(socket_fd, (struct sockaddr *)&addr, socklen) == -1) {
     LOGE("connect: %s", strerror(errno));
 
     close(socket_fd);
@@ -184,12 +202,10 @@ int unix_listener_from_path(const char *restrict path) {
     return -1;
   }
 
-  struct sockaddr_un addr = {
-    .sun_family = AF_UNIX
-  };
-  strncpy(addr.sun_path, path, sizeof(addr.sun_path) - 1);
+  struct sockaddr_un addr;
+  socklen_t socklen = abstract_addr(&addr, path);
 
-  if (bind(socket_fd, (struct sockaddr *)&addr, sizeof(struct sockaddr_un)) == -1) {
+  if (bind(socket_fd, (struct sockaddr *)&addr, socklen) == -1) {
     LOGE("bind: %s", strerror(errno));
 
     close(socket_fd);

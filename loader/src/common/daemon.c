@@ -15,17 +15,8 @@
 #define SOCKET_FILE_NAME LP_SELECT("cp32", "cp64") ".sock"
 
 static int rezygiskd_connect(uint8_t retry) {
-  struct sockaddr_un addr = {
-    .sun_family = AF_UNIX,
-    .sun_path = { 0 }
-  };
-  /*
-    INFO: Application must assume that sun_path can hold _POSIX_PATH_MAX characters.
-
-    Sources:
-     - https://pubs.opengroup.org/onlinepubs/009696699/basedefs/sys/un.h.html
-  */
-  strcpy(addr.sun_path, TMP_PATH "/" SOCKET_FILE_NAME);
+  struct sockaddr_un addr;
+  socklen_t socklen = abstract_addr(&addr, SOCKET_FILE_NAME);
 
   retry++;
   while (--retry) {
@@ -36,7 +27,7 @@ static int rezygiskd_connect(uint8_t retry) {
       return -1;
     }
 
-    int ret = connect(fd, (struct sockaddr *)&addr, sizeof(addr));
+    int ret = connect(fd, (struct sockaddr *)&addr, socklen);
     if (ret == -1) {
       PLOGE("connect (retry: %d)", retry);
 
