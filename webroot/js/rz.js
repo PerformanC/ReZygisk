@@ -22,7 +22,7 @@ export async function setUmountDisabled(disabled) {
 
 export const LOG_TAGS = [ 'zygisk-core', 'zygiskd', 'zygiskd-companion', 'zygisk-elfutil', 'zygisk-ptrace', 'zygisk-injector' ]
   .flatMap((tag) => [ `${tag}64`, `${tag}32` ])
-  .concat([ 'zygisk-sh' ])
+  .concat([ 'zygisk-sh', 'TreatWheel' ])
 
 /* INFO: Monitor states, mirrors `enum ptracer_tracing_state` in loader/src/ptracer/monitor.c */
 export const MONITOR_STATE = {
