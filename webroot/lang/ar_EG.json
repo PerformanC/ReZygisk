@@ -31,7 +31,8 @@
       },
       "issues": {
         "monitor": "المراقبة لا تتتبع حالياً",
-        "daemon": "NextZygiskd {bits} بت"
+        "daemon": "NextZygiskd {bits} بت",
+        "modules": "{count} وحدات Zygisk لا تعمل"
       },
       "components": {
         "title": "المكونات",
@@ -44,7 +45,8 @@
         "stopped": "متوقف",
         "exited": "خرج",
         "modules": "وحدات Zygisk",
-        "viewAll": "عرض الكل"
+        "viewAll": "عرض الكل",
+        "modulesWorking": "{count} تعمل"
       },
       "hiding": {
         "title": "الإخفاء",
@@ -142,9 +144,8 @@
     },
     "modules": {
       "title": "الوحدات",
-      "notAvaliable": "لا توجد وحدات تستخدم Zygisk.",
-      "arch": "المعمارية:",
-      "count": "{count} وحدات Zygisk نشطة",
+      "notAvaliable": "لا توجد وحدات Zygisk مثبتة.",
+      "count": "{count} وحدات Zygisk",
       "search": "ابحث في الوحدات",
       "noResults": "لا توجد وحدات مطابقة للبحث.",
       "emptyHint": "ثبّت وحدة Zygisk وأعد التشغيل لتظهر هنا.",
@@ -153,7 +154,36 @@
       "by": "بواسطة",
       "versionCode": "رمز الإصدار",
       "path": "المسار",
-      "copyId": "نسخ المعرّف"
+      "copyId": "نسخ المعرّف",
+      "countWorking": "{count} تعمل",
+      "countIssues": "{count} فيها مشاكل",
+      "filter": {
+        "all": "الكل",
+        "working": "تعمل",
+        "issues": "مشاكل"
+      },
+      "status": {
+        "working": "تعمل",
+        "partial": "جزئياً",
+        "notLoaded": "لا تعمل",
+        "disabled": "معطّلة",
+        "removal": "تُحذف",
+        "unknown": "غير معروف",
+        "pending": "يحتاج إعادة تشغيل"
+      },
+      "reasons": {
+        "noLib": "لا توجد مكتبة Zygisk لهذا الجهاز ({abi}). الوحدة لا تدعم معمارية جهازك.",
+        "daemonDown": "خدمة NextZygiskd {bits}-بت لا تعمل، فلم تتمكن من تحميل هذه الوحدة.",
+        "update": "يوجد تحديث معلّق. أعد التشغيل لتطبيقه.",
+        "failed": "لم تُحمَّل في {bits}-بت. إما فشل تحميلها، أو ثُبتت بعد الإقلاع، أو تم رفضها. أعد التشغيل ثم راجع السجلات.",
+        "installed": "تم التثبيت. أعد التشغيل لتفعيلها."
+      },
+      "lib": {
+        "missing": "غير موجودة",
+        "loaded": "محمّلة",
+        "notLoaded": "غير محمّلة"
+      },
+      "updatePending": "تحديث معلّق"
     },
     "settings": {
       "title": "الإعدادات",

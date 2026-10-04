@@ -12,5 +12,13 @@
     <input id="modules_search" type="search" autocomplete="off" spellcheck="false" placeholder="{{search}}">
   </label>
 
+  <div class="nz" style="margin: 0 15px 12px;">
+    <div id="modules_filter" class="nz_segmented" style="display: none;">
+      <button data-filter="all" aria-pressed="true">{{filter.all}}</button>
+      <button data-filter="working">{{filter.working}}</button>
+      <button data-filter="issues">{{filter.issues}}</button>
+    </div>
+  </div>
+
   <div id="modules_list"></div>
 </div>

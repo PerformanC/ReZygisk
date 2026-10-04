@@ -10,6 +10,7 @@ import {
   formatDuration,
   getDeviceInfo,
   getInstalledModules,
+  getZygiskModules,
   getModuleProp,
   getState,
   haptic,
@@ -25,6 +26,7 @@ let lastUpdate = 0
 let lastDevice = {}
 let lastVersion = null
 let installedModules = null
+let zygiskModules = null
 let stopPolling = () => {}
 let tickerTimer = null
 let refreshing = false
@@ -125,8 +127,18 @@ function renderIssues(summary, strings) {
     })
   })
 
+  const broken = (zygiskModules || []).filter((mod) => mod.status === 'notLoaded' || mod.status === 'partial')
+  if (broken.length) {
+    issues.push({
+      tone: 'warn',
+      title: fill(strings.issues.modules, { count: broken.length }),
+      body: broken.map((mod) => mod.name).join(', '),
+      action: 'modules'
+    })
+  }
+
   container.innerHTML = issues.map((issue) => `
-    <div class="nz_banner ${issue.tone === 'warn' ? 'nz_banner_warn' : ''}">
+    <div class="nz_banner ${issue.tone === 'warn' ? 'nz_banner_warn' : ''} ${issue.action ? 'nz_card_tap' : ''}" ${issue.action ? `data-action="${issue.action}"` : ''}>
       <div style="flex-shrink: 0; width: 22px; height: 22px; fill: ${issue.tone === 'warn' ? 'var(--warn)' : 'var(--err)'};">${icon(issue.tone === 'warn' ? 'warn' : 'error')}</div>
       <div><b>${escapeHTML(issue.title)}</b>${escapeHTML(issue.body)}</div>
     </div>
@@ -170,11 +182,16 @@ function renderComponents(summary, strings) {
     }))
   })
 
+  /* INFO: Count every installed Zygisk module, not only the loaded ones. */
+  const installed = zygiskModules ? zygiskModules.filter((mod) => mod.status !== 'disabled' && mod.status !== 'removal') : null
+  const workingCount = installed ? installed.filter((mod) => mod.status === 'working').length : summary.modules.length
+  const hasIssues = installed ? installed.some((mod) => mod.status === 'notLoaded' || mod.status === 'partial') : false
+
   tiles.push(tile({
     label: strings.components.modules,
-    value: String(summary.modules.length),
-    hint: strings.components.viewAll,
-    tone: summary.modules.length ? 'ok' : '',
+    value: installed ? `${workingCount} / ${installed.length}` : String(summary.modules.length),
+    hint: installed ? fill(strings.components.modulesWorking, { count: workingCount }) : strings.components.viewAll,
+    tone: hasIssues ? 'warn' : (workingCount ? 'ok' : ''),
     iconName: 'modules',
     action: 'modules'
   }))
@@ -291,6 +308,9 @@ async function refresh({ full = false } = {}) {
     const summary = summarizeState(state)
     cachedRoot = summary.root
 
+    if (full || zygiskModules === null) zygiskModules = await getZygiskModules(summary)
+    if (!isActive()) return
+
     renderHero(summary, overallStatus(summary), strings)
     renderIssues(summary, strings)
     renderComponents(summary, strings)
@@ -333,6 +353,14 @@ export async function load() {
   })
 
   utils.addListener(document.getElementById('home_components'), 'click', (event) => {
+    const target = event.target.closest('[data-action]')
+    if (!target) return
+
+    haptic()
+    loadPage(target.getAttribute('data-action'))
+  })
+
+  utils.addListener(document.getElementById('home_issues'), 'click', (event) => {
     const target = event.target.closest('[data-action]')
     if (!target) return
 

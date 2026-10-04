@@ -70,6 +70,15 @@ const responses = [
 
     return ids.map((id) => `@@MODULE ${id}\n${moduleProps[id] || ''}\n${id === 'shamiko' ? '@@disabled=1\n' : ''}${id === 'zygisk_lsposed' ? '@@webui=1\n@@action=1\n' : ''}`).join('\n')
   } ],
+  [ /^echo "@@abilist=/, () => [
+    '@@abilist=arm64-v8a,armeabi-v7a,armeabi',
+    '@@MODULE playintegrityfix', moduleProps.playintegrityfix, '@@libs=arm64-v8a.so armeabi-v7a.so',
+    '@@MODULE zygisk_lsposed', moduleProps.zygisk_lsposed, '@@webui=1', '@@action=1', '@@libs=arm64-v8a.so armeabi-v7a.so x86.so x86_64.so',
+    '@@MODULE shamiko', moduleProps.shamiko, '@@disabled=1', '@@libs=arm64-v8a.so armeabi-v7a.so',
+    '@@MODULE treat_wheel', moduleProps.treat_wheel, '@@libs=arm64-v8a.so armeabi-v7a.so',
+    '@@MODULE x86_only_mod', 'id=x86_only_mod\nname=Emulator Helper\nversion=v2.0\nauthor=dev', '@@libs=x86.so x86_64.so',
+    '@@MODULE new_module', 'id=new_module\nname=Freshly Installed\nversion=v1.0\nauthor=dev', '@@update=1', '@@libs=arm64-v8a.so'
+  ].join('\n') ],
   [ /^for d in \/data\/adb\/modules/, () => [
     'playintegrityfix|1|Play Integrity Fix', 'zygisk_lsposed|1|LSPosed', 'shamiko|0|Shamiko',
     'treat_wheel|1|Treat Wheel', 'tricky_store|1|Tricky Store', 'rezygisk|1|NextZygisk'

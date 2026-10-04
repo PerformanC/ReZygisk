@@ -2,11 +2,27 @@ import { whichCurrentPage } from '../navbar.js'
 import { getStrings } from '../pageLoader.js'
 import utils from '../utils.js'
 import { icon } from '../../icons.js'
-import { copyText, escapeHTML, getModulesDetails, getState, haptic, summarizeState } from '../../rz.js'
+import { copyText, escapeHTML, getState, getZygiskModules, haptic, startPolling, summarizeState } from '../../rz.js'
+
+const STATUS_TONE = {
+  working: 'ok',
+  partial: 'warn',
+  notLoaded: 'err',
+  disabled: 'muted',
+  removal: 'err',
+  pending: 'warn',
+  unknown: 'muted'
+}
+
+const ISSUES = [ 'partial', 'notLoaded', 'unknown' ]
 
 let modules = []
 let query = ''
+let filter = 'all'
 let loading = false
+let lastSignature = ''
+let stopPolling = () => {}
+const openCards = new Set()
 
 function isActive() {
   return whichCurrentPage() === 'modules'
@@ -19,29 +35,56 @@ function hueOf(text) {
   return Math.abs(hash) % 360
 }
 
-function moduleCard(mod, strings, index) {
-  const name = mod.name || mod.id
-  const initial = name.trim().charAt(0).toUpperCase() || '?'
+function reasonText(mod, strings) {
+  if (!mod.reason) return null
 
-  const tags = mod.bits.map((bits) => `<span class="nz_pill">${escapeHTML(bits)}-bit</span>`)
-  if (mod.disabled) tags.push(`<span class="nz_pill nz_pill_warn">${escapeHTML(strings.disabled)}</span>`)
-  if (mod.remove) tags.push(`<span class="nz_pill nz_pill_err">${escapeHTML(strings.pendingRemoval)}</span>`)
-  if (mod.webui) tags.push(`<span class="nz_pill nz_pill_muted">WebUI</span>`)
-  if (mod.action) tags.push(`<span class="nz_pill nz_pill_muted">Action</span>`)
+  return (strings.reasons[mod.reason.key] || '')
+    .replace('{abi}', mod.reason.abi || '')
+    .replace('{bits}', mod.reason.bits || '')
+}
+
+function moduleCard(mod, strings, index) {
+  const initial = mod.name.trim().charAt(0).toUpperCase() || '?'
+  const tone = STATUS_TONE[mod.status] || 'muted'
+  const reason = reasonText(mod, strings)
+
+  const tags = []
+  mod.targets.forEach((target) => {
+    if (!target.hasLib) return
+
+    tags.push(`<span class="nz_pill ${target.loaded ? 'nz_pill_ok' : 'nz_pill_muted'}">${escapeHTML(target.bits)}-bit${target.loaded ? ' ✓' : ''}</span>`)
+  })
+  if (mod.updatePending) tags.push(`<span class="nz_pill nz_pill_warn">${escapeHTML(strings.updatePending)}</span>`)
+  if (mod.webui) tags.push('<span class="nz_pill nz_pill_muted">WebUI</span>')
+  if (mod.action) tags.push('<span class="nz_pill nz_pill_muted">Action</span>')
 
   const meta = [ mod.version, mod.author && `${strings.by} ${mod.author}` ].filter(Boolean).join(' · ')
 
+  const libRows = mod.targets.map((target) => `
+    <div class="nz_row">
+      <div class="nz_row_label nz_mono">zygisk/${escapeHTML(target.abi)}.so</div>
+      <div class="nz_row_value">${escapeHTML(!target.hasLib ? strings.lib.missing : target.loaded ? strings.lib.loaded : strings.lib.notLoaded)}</div>
+    </div>
+  `).join('')
+
   return `
-    <div class="nz_card nz_card_tap" data-module="${escapeHTML(mod.id)}" data-open="false" style="animation-delay: ${Math.min(index, 12) * 30}ms;">
+    <div class="nz_card nz_card_tap" data-module="${escapeHTML(mod.id)}" data-open="${openCards.has(mod.id)}" style="animation-delay: ${Math.min(index, 12) * 30}ms;">
       <div class="nz_module">
-        <div class="nz_avatar" style="--hue: ${hueOf(mod.id)};">${escapeHTML(initial)}</div>
+        <div class="nz_avatar" style="--hue: ${hueOf(mod.id)};${mod.status === 'disabled' || mod.status === 'removal' ? ' filter: grayscale(1); opacity: 0.6;' : ''}">${escapeHTML(initial)}</div>
         <div class="nz_module_body">
-          <div class="nz_module_name">${escapeHTML(name)}</div>
-          <div class="nz_module_meta">${escapeHTML(meta || mod.id)}</div>
+          <div style="display: flex; align-items: flex-start; justify-content: space-between; gap: 8px;">
+            <div style="min-width: 0;">
+              <div class="nz_module_name">${escapeHTML(mod.name)}</div>
+              <div class="nz_module_meta nz_mono">${escapeHTML(mod.id)}</div>
+            </div>
+            <span class="nz_pill nz_pill_${tone}" style="flex-shrink: 0;"><span class="nz_dot ${tone === 'muted' ? '' : `nz_dot_${tone}`}"></span>${escapeHTML(strings.status[mod.status])}</span>
+          </div>
+          ${meta ? `<div class="nz_module_meta">${escapeHTML(meta)}</div>` : ''}
+          ${reason ? `<div class="nz_module_desc" style="color: var(--${tone === 'err' ? 'err' : 'warn'}); -webkit-line-clamp: unset;">${escapeHTML(reason)}</div>` : ''}
           ${mod.description ? `<div class="nz_module_desc">${escapeHTML(mod.description)}</div>` : ''}
           <div class="nz_module_tags">${tags.join('')}</div>
           <div class="nz_module_extra">
-            <div class="nz_row"><div class="nz_row_label">ID</div><div class="nz_row_value nz_mono">${escapeHTML(mod.id)}</div></div>
+            ${libRows}
             ${mod.versionCode ? `<div class="nz_row"><div class="nz_row_label">${escapeHTML(strings.versionCode)}</div><div class="nz_row_value nz_mono">${escapeHTML(mod.versionCode)}</div></div>` : ''}
             <div class="nz_row"><div class="nz_row_label">${escapeHTML(strings.path)}</div><div class="nz_row_value nz_mono">/data/adb/modules/${escapeHTML(mod.id)}</div></div>
             <div style="margin-top: 12px;">
@@ -58,11 +101,18 @@ function render(strings) {
   const list = document.getElementById('modules_list')
   if (!list) return
 
+  const working = modules.filter((mod) => mod.status === 'working').length
+  const issues = modules.filter((mod) => ISSUES.includes(mod.status)).length
+
   document.getElementById('modules_count').textContent = modules.length
-    ? strings.count.replace('{count}', modules.length)
+    ? [ strings.count.replace('{count}', modules.length), strings.countWorking.replace('{count}', working), issues ? strings.countIssues.replace('{count}', issues) : null ].filter(Boolean).join(' · ')
     : ' '
 
   document.getElementById('modules_search_box').style.display = modules.length > 3 ? '' : 'none'
+  document.getElementById('modules_filter').style.display = modules.length > 1 ? '' : 'none'
+  document.querySelectorAll('#modules_filter [data-filter]').forEach((button) => {
+    button.setAttribute('aria-pressed', button.getAttribute('data-filter') === filter ? 'true' : 'false')
+  })
 
   if (modules.length === 0) {
     list.innerHTML = `
@@ -77,9 +127,9 @@ function render(strings) {
   }
 
   const q = query.trim().toLowerCase()
-  const filtered = q
-    ? modules.filter((mod) => [ mod.name, mod.id, mod.author, mod.description ].some((field) => field && field.toLowerCase().includes(q)))
-    : modules
+  const filtered = modules
+    .filter((mod) => filter === 'all' || (filter === 'working' ? mod.status === 'working' : ISSUES.includes(mod.status)))
+    .filter((mod) => !q || [ mod.name, mod.id, mod.author, mod.description ].some((field) => field && field.toLowerCase().includes(q)))
 
   if (filtered.length === 0) {
     list.innerHTML = `<div class="nz_empty">${icon('search')}<div>${escapeHTML(strings.noResults)}</div></div>`
@@ -101,26 +151,14 @@ async function refresh() {
     const [ state, strings ] = await Promise.all([ getState(), getStrings('modules') ])
     if (!strings) return
 
-    const summary = summarizeState(state)
-    const details = await getModulesDetails(summary.modules.map((mod) => mod.id))
+    const next = await getZygiskModules(summarizeState(state))
+    const signature = JSON.stringify(next)
 
-    modules = summary.modules.map((mod) => {
-      const prop = details[mod.id] || {}
+    /* INFO: Polling must not replay the card animations when nothing changed. */
+    if (signature === lastSignature && document.getElementById('modules_list')?.childElementCount) return
 
-      return {
-        id: mod.id,
-        bits: mod.bits,
-        name: prop.name || null,
-        version: prop.version || null,
-        versionCode: prop.versionCode || null,
-        author: prop.author || null,
-        description: prop.description || null,
-        disabled: prop['@@disabled'] === '1',
-        remove: prop['@@remove'] === '1',
-        webui: prop['@@webui'] === '1',
-        action: prop['@@action'] === '1'
-      }
-    }).sort((a, b) => (a.name || a.id).localeCompare(b.name || b.id))
+    lastSignature = signature
+    modules = next
 
     if (isActive()) render(strings)
   } finally {
@@ -162,6 +200,15 @@ export async function load() {
     render(strings)
   })
 
+  utils.addListener(document.getElementById('modules_filter'), 'click', (event) => {
+    const value = event.target.closest('[data-filter]')?.getAttribute('data-filter')
+    if (!value) return
+
+    haptic()
+    filter = value
+    render(strings)
+  })
+
   utils.addListener(document.getElementById('modules_list'), 'click', (event) => {
     const copyId = event.target.closest('[data-copy-id]')?.getAttribute('data-copy-id')
     if (copyId) {
@@ -175,8 +222,18 @@ export async function load() {
     if (!card) return
 
     haptic()
-    card.setAttribute('data-open', card.getAttribute('data-open') === 'true' ? 'false' : 'true')
+
+    const id = card.getAttribute('data-module')
+    const open = card.getAttribute('data-open') !== 'true'
+    card.setAttribute('data-open', open ? 'true' : 'false')
+
+    if (open) openCards.add(id)
+    else openCards.delete(id)
   })
 
   if (modules.length || query) render(strings)
+
+  /* INFO: Live status, re-rendering keeps expanded cards open. */
+  stopPolling()
+  stopPolling = startPolling(() => refresh(), isActive)
 }

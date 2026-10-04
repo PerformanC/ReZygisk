@@ -443,3 +443,131 @@ export function detectHidingModules(installed, loadedIds = []) {
 
   return found
 }
+
+/* INFO: Zygisk ABI names, mirrors ARCH_STR used by zygiskd to pick zygisk/<abi>.so */
+function abiForBits(bits, abilist) {
+  if (bits === '64') return abilist.includes('x86_64') ? 'x86_64' : 'arm64-v8a'
+
+  /* INFO: zygiskd is native: on x86 devices (even with ARM translation) it is x86. */
+  return abilist.includes('x86') ? 'x86' : 'armeabi-v7a'
+}
+
+/* INFO: Every installed module shipping a zygisk/ folder, with the reason it is or
+           is not working. Uses one exec for all modules. */
+export async function getZygiskModules(summary) {
+  const result = await run(
+    'echo "@@abilist=$(getprop ro.product.cpu.abilist)"; ' +
+    'for d in /data/adb/modules/*/; do i=${d%/}; i=${i##*/}; [ -d "$d/zygisk" ] || continue; [ "$i" = rezygisk ] && continue; ' +
+    'echo "@@MODULE $i"; cat "$d/module.prop" 2>/dev/null; echo; ' +
+    '[ -f "$d/disable" ] && echo "@@disabled=1"; [ -f "$d/remove" ] && echo "@@remove=1"; ' +
+    '[ -d "/data/adb/modules_update/$i" ] && echo "@@update=1"; ' +
+    '[ -d "$d/webroot" ] && echo "@@webui=1"; [ -f "$d/action.sh" ] && echo "@@action=1"; ' +
+    'echo "@@libs=$(ls "$d/zygisk" 2>/dev/null | grep "\\.so$" | tr "\\n" " ")"; done; ' +
+    /* INFO: First installs live in modules_update until the next boot. */
+    'for d in /data/adb/modules_update/*/; do i=${d%/}; i=${i##*/}; [ -d "$d/zygisk" ] || continue; [ "$i" = rezygisk ] && continue; ' +
+    '[ -d "/data/adb/modules/$i" ] && continue; echo "@@MODULE $i"; cat "$d/module.prop" 2>/dev/null; echo; echo "@@new=1"; ' +
+    'echo "@@libs=$(ls "$d/zygisk" 2>/dev/null | grep "\\.so$" | tr "\\n" " ")"; done'
+  )
+
+  let abilist = []
+  const props = {}
+  let current = null
+
+  result.stdout.split('\n').forEach((line) => {
+    if (line.startsWith('@@abilist=')) {
+      abilist = line.slice(10).split(',').map((abi) => abi.trim()).filter(Boolean)
+
+      return
+    }
+
+    if (line.startsWith('@@MODULE ')) {
+      current = line.slice(9).trim()
+      props[current] = {}
+
+      return
+    }
+    if (!current) return
+
+    const idx = line.indexOf('=')
+    if (idx <= 0) return
+
+    props[current][line.slice(0, idx).trim()] = line.slice(idx + 1).trim()
+  })
+
+  const loaded = new Map(summary.modules.map((mod) => [ mod.id, mod.bits ]))
+
+  /* INFO: Modules loaded by the daemon but without zygisk/ in the scan (should not
+             happen) are still listed, so nothing the daemon reports is hidden. */
+  for (const id of loaded.keys()) {
+    if (!props[id] && isSafeModuleId(id)) props[id] = { '@@libs': '' }
+  }
+
+  return Object.entries(props).filter(([ id ]) => isSafeModuleId(id)).map(([ id, prop ]) => {
+    const libs = (prop['@@libs'] || '').split(' ').map((lib) => lib.replace(/\.so$/, '')).filter(Boolean)
+    const loadedBits = loaded.get(id) || []
+
+    /* INFO: For every ABI a daemon runs for, does the module ship a library? */
+    const targets = summary.daemons.map((daemon) => {
+      const abi = abiForBits(daemon.bits, abilist)
+
+      return {
+        bits: daemon.bits,
+        abi,
+        hasLib: libs.includes(abi),
+        daemonRunning: daemon.running,
+        loaded: loadedBits.includes(daemon.bits)
+      }
+    })
+
+    let status = 'unknown'
+    let reason = null
+
+    if (prop['@@new'] === '1') {
+      status = 'pending'
+      reason = { key: 'installed' }
+    } else if (prop['@@remove'] === '1') status = 'removal'
+    else if (prop['@@disabled'] === '1') status = 'disabled'
+    else if (!summary.known) status = 'unknown'
+    else {
+      const expected = targets.filter((target) => target.hasLib)
+      const working = expected.filter((target) => target.loaded)
+
+      if (expected.length === 0) {
+        status = 'notLoaded'
+        reason = { key: 'noLib', abi: targets.map((target) => target.abi).join(', ') }
+      } else if (working.length === expected.length) {
+        status = 'working'
+      } else {
+        const missing = expected.filter((target) => !target.loaded)
+
+        status = working.length ? 'partial' : 'notLoaded'
+
+        if (missing.some((target) => !target.daemonRunning)) reason = { key: 'daemonDown', bits: missing.map((t) => t.bits).join('/') }
+        else if (prop['@@update'] === '1') reason = { key: 'update' }
+        else reason = { key: 'failed', bits: missing.map((t) => t.bits).join('/') }
+      }
+    }
+
+    return {
+      id,
+      name: prop.name || id,
+      version: prop.version || null,
+      versionCode: prop.versionCode || null,
+      author: prop.author || null,
+      description: prop.description || null,
+      webui: prop['@@webui'] === '1',
+      action: prop['@@action'] === '1',
+      updatePending: prop['@@update'] === '1',
+      libs,
+      targets,
+      loadedBits,
+      status,
+      reason
+    }
+  }).sort((a, b) => {
+    /* INFO: Problems first, then by name */
+    const rank = { notLoaded: 0, partial: 1, pending: 2, unknown: 3, working: 4, removal: 5, disabled: 6 }
+
+    return (rank[a.status] - rank[b.status]) || a.name.localeCompare(b.name)
+  })
+}
