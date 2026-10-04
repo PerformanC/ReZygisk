@@ -52,7 +52,7 @@ function moduleCard(mod, strings, index) {
   mod.targets.forEach((target) => {
     if (!target.hasLib) return
 
-    tags.push(`<span class="nz_pill ${target.loaded ? 'nz_pill_ok' : 'nz_pill_muted'}">${escapeHTML(target.bits)}-bit${target.loaded ? ' ✓' : ''}</span>`)
+    tags.push(`<span dir="ltr" class="nz_pill ${target.loaded ? 'nz_pill_ok' : 'nz_pill_muted'}">${escapeHTML(target.bits)}-bit${target.loaded ? ' ✓' : ''}</span>`)
   })
   if (mod.updatePending) tags.push(`<span class="nz_pill nz_pill_warn">${escapeHTML(strings.updatePending)}</span>`)
   if (mod.webui) tags.push('<span class="nz_pill nz_pill_muted">WebUI</span>')
