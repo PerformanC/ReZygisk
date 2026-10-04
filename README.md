@@ -1,3 +1,5 @@
+<p align="center"><img src="docs/assets/banner.png" alt="NextZygisk" width="100%"></p>
+
 # NextZygisk
 
 NextZygisk is a fork of [ReZygisk](https://github.com/PerformanC/ReZygisk) by The PerformanC Organization, focused on performance, robustness and a modern WebUI. It keeps ReZygisk's module ID (`rezygisk`), so it updates an existing ReZygisk install in place and stays compatible with tools that look for it (root managers, Treat Wheel, ...).

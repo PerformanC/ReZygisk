@@ -7,6 +7,18 @@ MIN_KSUD_VERSION=@MIN_KSUD_VERSION@
 MIN_MAGISK_VERSION=@MIN_MAGISK_VERSION@
 MIN_APATCH_VERSION=@MIN_APATCH_VERSION@
 
+# INFO: Install banner, shown in every root manager's install log.
+ui_print " "
+ui_print ' _  _         _   ____         _    _'
+ui_print '| \| |_____ _| |_|_  /  _ __ _(_)__| |__'
+ui_print '| .` / -_) \ /  _|/ / || / _` | (_-< / /'
+ui_print '|_|\_\___/_\_\\__/___\_, \__, |_/__/_\_\'
+ui_print '                     |__/|___/'
+ui_print " "
+ui_print "  Standalone Zygisk  ·  fast  ·  robust  ·  hides accurately"
+ui_print "  Based on ReZygisk by The PerformanC Organization"
+ui_print " "
+
 if [ "$BOOTMODE" ] && [ "$KSU" ]; then
   ui_print "- Installing from KernelSU app"
   ui_print "- KernelSU version: $KSU_KERNEL_VER_CODE (kernel) + $KSU_VER_CODE (ksud)"
