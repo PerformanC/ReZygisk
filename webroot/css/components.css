@@ -784,3 +784,105 @@
     transition-duration: 0.01ms !important;
   }
 }
+
+/* INFO: Selectable option rows (theme / language mini pages) */
+.nz .nz_option {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin: 0 15px 10px;
+  padding: 14px 16px;
+  border-radius: var(--radius-m);
+  border: 1.5px solid var(--outline);
+  background: var(--surface);
+  cursor: pointer;
+  transition: transform 0.15s var(--ease), border-color 0.2s, background 0.2s;
+  animation: nzRise 0.3s var(--ease) both;
+}
+
+.nz_option:active { transform: scale(0.98); }
+
+.nz .nz_option[aria-checked="true"] {
+  border-color: var(--accent);
+  background: linear-gradient(0deg, var(--accent-softer), var(--accent-softer)), var(--surface);
+}
+
+.nz_option_body { flex: 1; min-width: 0; }
+.nz_option_title { font-size: 15.5px; font-weight: 600; }
+.nz_option_desc { font-size: 12.5px; color: var(--desc); margin-top: 3px; line-height: 1.4; }
+
+.nz .nz_radio {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: 2px solid var(--desc);
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  transition: border-color 0.2s, background 0.2s;
+}
+
+.nz .nz_option[aria-checked="true"] .nz_radio {
+  border-color: var(--accent);
+  background: var(--accent);
+}
+
+.nz_radio svg { width: 16px; height: 16px; fill: var(--on-accent); opacity: 0; transition: opacity 0.2s; }
+.nz_option[aria-checked="true"] .nz_radio svg { opacity: 1; }
+
+/* INFO: Miniature of a theme: background, two surfaces and an accent line */
+.nz .nz_theme_preview {
+  width: 54px;
+  height: 54px;
+  border-radius: 14px;
+  flex-shrink: 0;
+  position: relative;
+  overflow: hidden;
+  background: var(--p-bg);
+  border: 1px solid rgba(127, 127, 127, 0.25);
+}
+
+.nz .nz_theme_preview i {
+  position: absolute;
+  left: 8px;
+  right: 8px;
+  height: 11px;
+  border-radius: 4px;
+  background: var(--p-surface);
+}
+
+.nz .nz_theme_preview i:nth-child(1) { top: 9px; }
+.nz .nz_theme_preview i:nth-child(2) { top: 24px; right: 20px; }
+.nz .nz_theme_preview i:nth-child(3) { top: 39px; height: 6px; right: 26px; background: var(--accent); }
+
+.nz .nz_theme_preview_split {
+  background: linear-gradient(135deg, #141414 0 50%, #f2f2f2 50% 100%);
+}
+
+.nz .nz_theme_preview_split i { background: rgba(127, 127, 127, 0.45); }
+
+.nz .nz_lang_badge {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  background: var(--accent-soft);
+  color: var(--font);
+  direction: ltr;
+}
+
+.nz_option_code {
+  font-family: var(--mono);
+  font-size: 11.5px;
+  color: var(--desc);
+  margin-top: 3px;
+}
+
+.nz_option_code bdi {
+  direction: ltr;
+}

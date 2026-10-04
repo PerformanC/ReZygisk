@@ -228,6 +228,13 @@
         "light": "Light Theme",
         "amoled": "Amoled Theme",
         "system_based": "System Based Theme"
+      },
+      "section": "Appearance",
+      "description": {
+        "system_based": "Follows your device's dark mode setting",
+        "dark": "Soft dark grey, easy on the eyes",
+        "amoled": "Pure black, saves battery on OLED screens",
+        "light": "Bright and clean"
       }
     },
     "mini_actions_logs": {

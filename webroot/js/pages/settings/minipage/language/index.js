@@ -1,5 +1,6 @@
 import { exec, toast } from '../../../../kernelsu.js'
 import { escapeHTML } from '../../../../rz.js'
+import { icon } from '../../../../icons.js'
 
 import { loadPage, setLanguage, reloadPage } from '../../../pageLoader.js'
 
@@ -44,21 +45,45 @@ export async function loadOnce() {
   availableLanguages = langList
 }
 
+function currentLanguage() {
+  return localStorage.getItem('/TreatWheel/language') || 'en_US'
+}
+
+function markCurrent() {
+  const current = currentLanguage()
+
+  document.querySelectorAll('#lang_list [lang-data]').forEach((option) => {
+    if (!option.classList.contains('nz_option')) return
+
+    option.setAttribute('aria-checked', option.getAttribute('lang-data').replace('.json', '') === current ? 'true' : 'false')
+  })
+}
+
 export async function loadOnceView() {
-  const lang_list_buf = []
-  for (let i = 0; i < availableLanguages.length; i++) {
-    const langCode = availableLanguages[i]
-    const langData = await _getLanguageData(langCode)
-    if (!langData || typeof langData.langName !== 'string') continue
+  const languages = await Promise.all(availableLanguages.map(async (langCode) => [ langCode, await _getLanguageData(langCode) ]))
 
-    lang_list_buf.push(`
-      <div lang-data="${langCode}" class="dim card card_animation" style="padding: 20px 15px; cursor: pointer;">
-        <div lang-data="${langCode}" class="dimc" style="font-size: 1.1em;">${escapeHTML(langData.langName)}</div>
-      </div>
-    `)
-  }
+  const lang_list_buf = languages
+    .filter(([ , langData ]) => langData && typeof langData.langName === 'string')
+    .map(([ langCode, langData ], i) => {
+      const code = langCode.replace('.json', '')
 
-  document.getElementById('lang_list').innerHTML = lang_list_buf.join('')
+      return `
+        <div lang-data="${escapeHTML(langCode)}" class="nz_option" role="radio" aria-checked="false" style="animation-delay: ${Math.min(i, 12) * 25}ms;">
+          <div class="nz_lang_badge">${escapeHTML(code.split('_')[0].toUpperCase())}</div>
+          <div class="nz_option_body">
+            <div class="nz_option_title">${escapeHTML(langData.langName)}</div>
+            <div class="nz_option_code"><bdi>${escapeHTML(code)}</bdi></div>
+          </div>
+          <div class="nz_radio">${icon('done')}</div>
+        </div>
+      `
+    })
+
+  document.getElementById('lang_list').innerHTML = `<div class="nz" style="padding-top: 4px;">${lang_list_buf.join('')}</div>`
+
+  /* INFO: The page loader does not await this function, so load() may run before
+             the list exists. Mark the current language here too. */
+  markCurrent()
 }
 
 export async function onceViewAfterUpdate() {
@@ -66,17 +91,11 @@ export async function onceViewAfterUpdate() {
 }
 
 export async function load() {
-  // _setNewThemeIcon()
-
-  // const sp_lang_close = document.getElementById('sp_lang_close')
-
-  // sp_lang_close.addEventListener('click', async function langCloseButtonListener() {
-  //   sp_lang_close.removeEventListener('click', langCloseButtonListener)
-  //   loadPage('settings')
-  // })
+  markCurrent()
 
   document.addEventListener('click', async function langButtonListener(event) {
-    const getLangLocate = event.target.getAttribute('lang-data')
+    const option = event.target.closest('[lang-data]')
+    const getLangLocate = option?.getAttribute('lang-data')
     const main_html = document.getElementById('main_html')
     if (!getLangLocate || typeof getLangLocate !== 'string') return
 
@@ -84,6 +103,7 @@ export async function load() {
 
     /* INFO: Strip .json from the end of the filename */
     setLanguage(getLangLocate.replace('.json', ''))
+    markCurrent()
 
     main_html.setAttribute('dir', /^(ar|fa|he|ur)_/.test(getLangLocate) ? 'rtl' : 'ltr')
     main_html.setAttribute('lang', getLangLocate.replace('.json', '').replace('_', '-'))
