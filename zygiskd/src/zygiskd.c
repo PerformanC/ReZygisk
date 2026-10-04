@@ -9,6 +9,7 @@
 #include <sys/wait.h>
 
 #include <linux/limits.h>
+#include <time.h>
 #include <unistd.h>
 
 #include "constants.h"
@@ -434,6 +435,12 @@ void zygiskd_start(char *restrict argv[]) {
           break;
         }
 
+#ifdef DEBUG
+        /* INFO: Debug builds measure how long app launches wait for their flags. */
+        struct timespec flags_start;
+        clock_gettime(CLOCK_MONOTONIC, &flags_start);
+#endif
+
         uint32_t flags = 0;
         if (first_process) {
           flags |= PROCESS_IS_FIRST_STARTED;
@@ -471,6 +478,14 @@ void zygiskd_start(char *restrict argv[]) {
             break;
           }
         }
+
+#ifdef DEBUG
+        struct timespec flags_end;
+        clock_gettime(CLOCK_MONOTONIC, &flags_end);
+
+        long flags_us = (long)(flags_end.tv_sec - flags_start.tv_sec) * 1000000L + (flags_end.tv_nsec - flags_start.tv_nsec) / 1000L;
+        LOGI("GetProcessFlags for uid %u (%s) took %ld us\n", uid, process, flags_us);
+#endif
 
         ret = write_uint32_t(client_fd, flags);
         ASSURE_SIZE_WRITE("GetProcessFlags", "flags", ret, sizeof(flags), break);

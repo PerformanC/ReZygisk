@@ -7,6 +7,7 @@
 #include <poll.h>
 #include <sys/mount.h>
 #include <sys/socket.h>
+#include <sys/stat.h>
 #include <sys/sysmacros.h>
 #include <sys/types.h>
 #include <sys/un.h>
@@ -199,7 +200,8 @@ int unix_listener_from_path(const char *restrict path) {
     return -1;
   }
 
-  if (listen(socket_fd, 2) == -1) {
+  /* INFO: Every app launch queues here, keep the backlog wide for boot bursts. */
+  if (listen(socket_fd, SOMAXCONN) == -1) {
     LOGE("listen: %s", strerror(errno));
 
     close(socket_fd);
@@ -353,6 +355,120 @@ ssize_t read_string(int fd, char *restrict buf, size_t buf_size) {
   buf[str_len] = '\0';
 
   return read_bytes;
+}
+
+char *exec_command_output(const char *restrict file, const char *const argv[], size_t max_len) {
+  int link[2];
+  if (pipe2(link, O_CLOEXEC) == -1) {
+    LOGE("pipe2: %s", strerror(errno));
+
+    return NULL;
+  }
+
+  pid_t pid = fork();
+  if (pid == -1) {
+    LOGE("fork: %s", strerror(errno));
+
+    close(link[0]);
+    close(link[1]);
+
+    return NULL;
+  }
+
+  if (pid == 0) {
+    /* INFO: dup2 clears O_CLOEXEC on the new descriptor. */
+    dup2(link[1], STDOUT_FILENO);
+
+    execv(file, (char *const *)argv);
+
+    _exit(1);
+  }
+
+  close(link[1]);
+
+  size_t capacity = 4096 > max_len ? max_len : 4096;
+  size_t length = 0;
+  bool truncated = false;
+  char *output = malloc(capacity);
+
+  while (output) {
+    if (length + 1 >= capacity) {
+      if (capacity >= max_len) {
+        truncated = true;
+
+        break;
+      }
+
+      size_t new_capacity = capacity * 2 > max_len ? max_len : capacity * 2;
+      char *new_output = realloc(output, new_capacity);
+      if (!new_output) {
+        free(output);
+        output = NULL;
+
+        break;
+      }
+
+      output = new_output;
+      capacity = new_capacity;
+    }
+
+    ssize_t nbytes = read(link[0], output + length, capacity - length - 1);
+    if (nbytes == -1 && errno == EINTR) continue;
+    if (nbytes <= 0) break;
+
+    length += (size_t)nbytes;
+  }
+
+  close(link[0]);
+
+  int status = 0;
+  while (waitpid(pid, &status, 0) == -1 && errno == EINTR);
+
+  if (!output) {
+    LOGE("Failed to allocate memory for command output");
+
+    return NULL;
+  }
+
+  /* INFO: Partial output is worse than none: callers would cache incomplete data. */
+  if (truncated) {
+    LOGE("Output of %s exceeded %zu bytes", file, max_len);
+
+    free(output);
+
+    return NULL;
+  }
+
+  if (!WIFEXITED(status) || WEXITSTATUS(status) != 0) {
+    LOGE("Command %s exited with status %d", file, status);
+
+    free(output);
+
+    return NULL;
+  }
+
+  output[length] = '\0';
+
+  return output;
+}
+
+void file_stamp_get(const char *restrict path, struct file_stamp *restrict stamp) {
+  struct stat st;
+  if (stat(path, &st) != 0) {
+    memset(stamp, 0, sizeof(*stamp));
+
+    return;
+  }
+
+  stamp->exists = true;
+  stamp->ino = st.st_ino;
+  stamp->size = st.st_size;
+  stamp->mtime = st.st_mtim;
+}
+
+bool file_stamp_equal(const struct file_stamp *a, const struct file_stamp *b) {
+  return a->exists == b->exists && a->ino == b->ino && a->size == b->size &&
+         a->mtime.tv_sec == b->mtime.tv_sec && a->mtime.tv_nsec == b->mtime.tv_nsec;
 }
 
 /* INFO: Cannot use restrict here as execv does not have restrict */

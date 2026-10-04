@@ -53,6 +53,8 @@ void apatch_get_existence(struct root_impl_state *state) {
   else state->state = Abnormal;
 }
 
+#define APATCH_PACKAGE_CONFIG "/data/adb/ap/package_config"
+
 struct package_config {
   char *process;
   uid_t uid;
@@ -71,6 +73,8 @@ void _apatch_free_package_config(struct packages_config *restrict config) {
   }
 
   free(config->configs);
+  config->configs = NULL;
+  config->size = 0;
 }
 
 /* WARNING: Dynamic memory based */
@@ -78,7 +82,7 @@ bool _apatch_get_package_config(struct packages_config *restrict config) {
   config->configs = NULL;
   config->size = 0;
 
-  FILE *fp = fopen("/data/adb/ap/package_config", "r");
+  FILE *fp = fopen(APATCH_PACKAGE_CONFIG, "re");
   if (fp == NULL) {
     LOGE("Failed to open APatch's package_config: %s", strerror(errno));
 
@@ -141,39 +145,53 @@ bool _apatch_get_package_config(struct packages_config *restrict config) {
   return true;
 }
 
-bool apatch_uid_granted_root(uid_t uid) {
-  struct packages_config config;
-  if (!_apatch_get_package_config(&config)) return false;
+/* INFO: package_config used to be parsed twice on every app launch. Keep the parsed
+           copy until the file changes (APatch rewrites it on every config change). */
+static struct packages_config cached_config = { 0 };
+static struct file_stamp cached_config_stamp = { 0 };
+static bool cached_config_valid = false;
 
-  for (size_t i = 0; i < config.size; i++) {
-    if (config.configs[i].uid != APP_ID(uid)) continue;
+static const struct packages_config *_apatch_get_cached_package_config(void) {
+  struct file_stamp stamp;
+  file_stamp_get(APATCH_PACKAGE_CONFIG, &stamp);
 
-    /* INFO: This allow us to copy the information to avoid use-after-free */
-    bool root_granted = config.configs[i].root_granted;
+  if (cached_config_valid && file_stamp_equal(&stamp, &cached_config_stamp)) return &cached_config;
 
-    _apatch_free_package_config(&config);
-
-    return root_granted;
+  if (cached_config_valid) {
+    _apatch_free_package_config(&cached_config);
+    cached_config_valid = false;
   }
 
-  _apatch_free_package_config(&config);
+  /* INFO: Stamp taken before parsing: a concurrent write only triggers one more reload. */
+  if (!_apatch_get_package_config(&cached_config)) return NULL;
+
+  cached_config_stamp = stamp;
+  cached_config_valid = true;
+
+  return &cached_config;
+}
+
+bool apatch_uid_granted_root(uid_t uid) {
+  const struct packages_config *config = _apatch_get_cached_package_config();
+  if (!config) return false;
+
+  for (size_t i = 0; i < config->size; i++) {
+    if (config->configs[i].uid != APP_ID(uid)) continue;
+
+    return config->configs[i].root_granted;
+  }
 
   return false;
 }
 
 bool apatch_uid_should_umount(uid_t uid, const char *const process) {
-  struct packages_config config;
-  if (!_apatch_get_package_config(&config)) return false;
+  const struct packages_config *config = _apatch_get_cached_package_config();
+  if (!config) return false;
 
-  for (size_t i = 0; i < config.size; i++) {
-    if (config.configs[i].uid != APP_ID(uid)) continue;
+  for (size_t i = 0; i < config->size; i++) {
+    if (config->configs[i].uid != APP_ID(uid)) continue;
 
-    /* INFO: This allow us to copy the information to avoid use-after-free */
-    bool umount_needed = config.configs[i].umount_needed;
-
-    _apatch_free_package_config(&config);
-
-    return umount_needed;
+    return config->configs[i].umount_needed;
   }
 
   /* INFO: Isolated services have different UIDs than the main app, and
@@ -184,22 +202,15 @@ bool apatch_uid_should_umount(uid_t uid, const char *const process) {
   if (IS_ISOLATED_SERVICE(uid)) {
     size_t targeted_process_length = strlen(process);
 
-    for (size_t i = 0; i < config.size; i++) {
-      size_t config_process_length = strlen(config.configs[i].process);
+    for (size_t i = 0; i < config->size; i++) {
+      size_t config_process_length = strlen(config->configs[i].process);
       size_t smallest_process_length = targeted_process_length < config_process_length ? targeted_process_length : config_process_length;
 
-      if (strncmp(config.configs[i].process, process, smallest_process_length) != 0) continue;
+      if (strncmp(config->configs[i].process, process, smallest_process_length) != 0) continue;
 
-      /* INFO: This allow us to copy the information to avoid use-after-free */
-      bool umount_needed = config.configs[i].umount_needed;
-
-      _apatch_free_package_config(&config);
-
-      return umount_needed;
+      return config->configs[i].umount_needed;
     }
   }
-
-  _apatch_free_package_config(&config);
 
   return false;
 }

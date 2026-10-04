@@ -107,7 +107,20 @@ bool uid_should_umount(uid_t uid, const char *const process) {
   }
 }
 
+/* INFO: The manager package is looked up on every app launch. Remember where it was
+           found, so the next lookups cost a single stat() instead of a full scan.
+           The stat also follows reinstalls (new UID) and uninstalls (rescan). */
+static char cached_pkg[NAME_MAX + 1] = { 0 };
+static char cached_pkg_path[PATH_MAX] = { 0 };
+
 uid_t uid_from_pkg(const char *restrict pkg) {
+  if (cached_pkg[0] != '\0' && strcmp(cached_pkg, pkg) == 0) {
+    struct stat cached_st;
+    if (stat(cached_pkg_path, &cached_st) == 0) return APP_ID(cached_st.st_uid);
+
+    cached_pkg[0] = '\0';
+  }
+
   DIR *dir = opendir("/data/user");
   if (!dir) {
     LOGE("Failed to opendir /data/user: %s", strerror(errno));
@@ -139,6 +152,9 @@ uid_t uid_from_pkg(const char *restrict pkg) {
     }
 
     found = true;
+
+    snprintf(cached_pkg, sizeof(cached_pkg), "%s", pkg);
+    snprintf(cached_pkg_path, sizeof(cached_pkg_path), "%s", stat_path);
 
     break;
   }

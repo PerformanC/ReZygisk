@@ -1,7 +1,9 @@
 #ifndef UTILS_H
 #define UTILS_H
 
+#include <stdbool.h>
 #include <stdio.h>
+#include <time.h>
 #include <sys/types.h>
 
 #include <android/log.h>
@@ -22,17 +24,24 @@
   #define LOG_TAG "zygiskd" LP_SELECT("32", "64")
 #endif
 
-#define LOGI(...)                                              \
-  __android_log_print(ANDROID_LOG_INFO, LOG_TAG, __VA_ARGS__); \
-  printf(__VA_ARGS__)
+/* INFO: do/while so each macro is a single statement, safe in brace-less ifs. */
+#define LOGI(...)                                                \
+  do {                                                           \
+    __android_log_print(ANDROID_LOG_INFO, LOG_TAG, __VA_ARGS__); \
+    printf(__VA_ARGS__);                                         \
+  } while (0)
 
 #define LOGW(...)                                                \
-  __android_log_print(ANDROID_LOG_WARN, LOG_TAG, __VA_ARGS__);   \
-  printf(__VA_ARGS__)
+  do {                                                           \
+    __android_log_print(ANDROID_LOG_WARN, LOG_TAG, __VA_ARGS__); \
+    printf(__VA_ARGS__);                                         \
+  } while (0)
 
-#define LOGE(...)                                                \
-  __android_log_print(ANDROID_LOG_ERROR , LOG_TAG, __VA_ARGS__); \
-  printf(__VA_ARGS__)
+#define LOGE(...)                                                 \
+  do {                                                            \
+    __android_log_print(ANDROID_LOG_ERROR, LOG_TAG, __VA_ARGS__); \
+    printf(__VA_ARGS__);                                          \
+  } while (0)
 
 #define ASSURE_SIZE_WRITE(area_name, subarea_name, sent_size, expected_size, return_type)                        \
   if (sent_size != (ssize_t)(expected_size)) {                                                                   \
@@ -88,6 +97,22 @@ ssize_t write_string(int fd, const char *restrict str);
 ssize_t read_string(int fd, char *restrict buf, size_t buf_size);
 
 bool exec_command(char *restrict buf, size_t len, const char *restrict file, const char *const argv[]);
+
+/* WARNING: Dynamic memory based. Returns the whole stdout, NUL-terminated, or NULL on failure,
+             non-zero exit or output larger than max_len. */
+char *exec_command_output(const char *restrict file, const char *const argv[], size_t max_len);
+
+/* INFO: Identifies a file version, used to invalidate caches when the file changes. */
+struct file_stamp {
+  bool exists;
+  ino_t ino;
+  off_t size;
+  struct timespec mtime;
+};
+
+void file_stamp_get(const char *restrict path, struct file_stamp *restrict stamp);
+
+bool file_stamp_equal(const struct file_stamp *a, const struct file_stamp *b);
 
 bool check_unix_socket(int fd, bool block);
 
