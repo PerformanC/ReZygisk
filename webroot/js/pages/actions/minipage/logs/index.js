@@ -184,7 +184,7 @@ export async function load() {
     haptic()
 
     const result = await run(
-      'D=/sdcard/Download/ReZygisk; mkdir -p "$D"; F="$D/rezygisk-logcat-$(date +%Y%m%d-%H%M%S).txt"; ' +
+      'D=/sdcard/Download/NextZygisk; mkdir -p "$D"; F="$D/nextzygisk-logcat-$(date +%Y%m%d-%H%M%S).txt"; ' +
       `logcat -d -v threadtime -s ${LOG_TAGS.map(shellQuote).join(' ')} > "$F" 2>&1 && echo "$F"`
     )
 

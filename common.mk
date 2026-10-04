@@ -13,8 +13,10 @@ MIN_KSU_VERSION ?= 10940
 MIN_KSUD_VERSION ?= 11425
 MIN_MAGISK_VERSION ?= 26402
 
+# INFO: The ID stays "rezygisk" so existing installs update in place and
+#         tools that look for ReZygisk (root managers, Treat Wheel) keep working.
 MODULE_ID ?= rezygisk
-MODULE_NAME ?= ReZygisk
+MODULE_NAME ?= NextZygisk
 
 NDK_VERSION ?= 29.0.13113456
 ANDROID_HOME ?= $(HOME)/Android/Sdk

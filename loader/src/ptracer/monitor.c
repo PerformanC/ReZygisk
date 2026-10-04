@@ -283,7 +283,7 @@ void rezygiskd_listener_callback() {
       }
       case DAEMON64_SET_INFO:
       case DAEMON32_SET_INFO: {
-        const char *daemon_name = (msg->cmd == DAEMON64_SET_INFO ? "ReZygiskd64" : "ReZygiskd32");
+        const char *daemon_name = (msg->cmd == DAEMON64_SET_INFO ? "NextZygiskd64" : "NextZygiskd32");
 
         LOGD("Received %s info", daemon_name);
 
@@ -377,7 +377,7 @@ void rezygiskd_listener_callback() {
       }
       case DAEMON64_SET_ERROR_INFO:
       case DAEMON32_SET_ERROR_INFO: {
-        const char *daemon_name = (msg->cmd == DAEMON64_SET_ERROR_INFO ? "ReZygiskd64" : "ReZygiskd32");
+        const char *daemon_name = (msg->cmd == DAEMON64_SET_ERROR_INFO ? "NextZygiskd64" : "NextZygiskd32");
 
         LOGD("Received %s error info", daemon_name);
 
@@ -521,7 +521,7 @@ static bool ensure_daemon_created(bool is_64bit) {
       LOGW("ReZygiskd " #abi "-bit not running, stop injecting");     \
                                                                       \
       tracing_state = STOPPING;                                       \
-      monitor_stop_reason = "ReZygiskd not running";                  \
+      monitor_stop_reason = "NextZygiskd not running";                  \
       ptrace(PTRACE_INTERRUPT, 1, 0, 0);                              \
                                                                       \
       break;                                                          \
@@ -547,7 +547,7 @@ static bool ensure_daemon_created(bool is_64bit) {
       LOGW("ReZygiskd 32-bit not running, stop injecting");        \
                                                                    \
       tracing_state = STOPPING;                                    \
-      monitor_stop_reason = "ReZygiskd not running";               \
+      monitor_stop_reason = "NextZygiskd not running";               \
       ptrace(PTRACE_INTERRUPT, 1, 0, 0);                           \
                                                                    \
       break;                                                       \
@@ -830,7 +830,7 @@ static char post_section[1024];
 
 #define WRITE_STATUS_ABI(suffix)                                                             \
   if (status ## suffix.supported) {                                                          \
-    strlcat(status_text, ", ReZygisk " # suffix "-bit: ", sizeof(status_text));              \
+    strlcat(status_text, ", NextZygisk " # suffix "-bit: ", sizeof(status_text));              \
                                                                                              \
     if (tracing_state != TRACING) strlcat(status_text, "❌", sizeof(status_text));           \
     else if (status ## suffix.zygote_injected && status ## suffix.daemon_running)            \
@@ -839,11 +839,11 @@ static char post_section[1024];
                                                                                              \
     if (!status ## suffix.daemon_running) {                                                  \
       if (status ## suffix.daemon_error_info) {                                              \
-        strlcat(status_text, "(ReZygiskd: ", sizeof(status_text));                           \
+        strlcat(status_text, "(NextZygiskd: ", sizeof(status_text));                           \
         strlcat(status_text, status ## suffix.daemon_error_info, sizeof(status_text));       \
         strlcat(status_text, ")", sizeof(status_text));                                      \
       } else {                                                                               \
-        strlcat(status_text, "(ReZygiskd: not running)", sizeof(status_text));               \
+        strlcat(status_text, "(NextZygiskd: not running)", sizeof(status_text));               \
       }                                                                                      \
     }                                                                                        \
   }

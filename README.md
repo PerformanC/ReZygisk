@@ -1,6 +1,20 @@
-# ReZygisk
+# NextZygisk
+
+NextZygisk is a fork of [ReZygisk](https://github.com/PerformanC/ReZygisk) by The PerformanC Organization, focused on performance, robustness and a modern WebUI. It keeps ReZygisk's module ID (`rezygisk`), so it updates an existing ReZygisk install in place and stays compatible with tools that look for it (root managers, Treat Wheel, ...).
+
+## What's new in NextZygisk
+
+- **Faster app launches**: the daemon no longer runs `magisk --sqlite` up to three times (Magisk) nor parses `package_config` twice (APatch) for every app launch. Lookups are cached in memory and reloaded only when the root implementation's database changes.
+- **Redesigned WebUI**: live status dashboard, rich module list with search, monitor controls that reflect the real state, live log viewer, diagnostics export, accent colors and full Arabic (RTL) support.
+- **Robustness and security fixes**: valid `state.json` after a monitor stop, a stack overflow in the status writer, a 100% CPU spin in the monitor, the daemon exiting because of a single misbehaving client, file descriptors leaking into companions, a possible wrong manager UID, double closes inside Zygote and more.
+
+The original ReZygisk README follows, with the module name updated.
+
+---
 
 [Español(Argentina)](/READMEs/README_es-AR.md)|[Bahasa Indonesia](/READMEs/README_id-ID.md)|[Português Brasileiro](/READMEs/README_pt-BR.md)|[Українська](/READMEs/README_uk-UA.md)|[Tiếng Việt](/READMEs/README_vi-VN.md)|[فارسی](/READMEs/README_fa-IR.md)|[简体中文](/READMEs/README_zh-CN.md)
+
+## About ReZygisk
 
 ReZygisk is a fork of Zygisk Next, a standalone implementation of Zygisk, providing Zygisk API support for KernelSU, APatch and Magisk.
 
@@ -33,7 +47,7 @@ The Zygisk Next developers are famous and trusted in the Android community, howe
 
 ### 1. Select the right zip
 
-The selection of the build/zip is important, as it will determine how hidden and stable ReZygisk will be. This, however, is not a hard task:
+The selection of the build/zip is important, as it will determine how hidden and stable NextZygisk will be. This, however, is not a hard task:
 
 - `release` should be the one chosen for most cases, it removes app-level logging and offers more optimized binaries.
 - `debug`, however, offers the opposite, with heavy logging and no optimizations, For this reason, **you should only use it for debugging purposes** and **when obtaining logs for creating an Issue**.
@@ -47,11 +61,11 @@ After choosing the right build, you should flash it using your current root mana
 After flashing, check the installation logs to ensure there are no errors, and if everything is fine, you can reboot your device.
 
 > [!WARNING]
-> Magisk users should disable built-in Zygisk, as it will conflict with ReZygisk. This can be done by going to the `Settings` section of Magisk and disabling the `Zygisk` option.
+> Magisk users should disable built-in Zygisk, as it will conflict with NextZygisk. This can be done by going to the `Settings` section of Magisk and disabling the `Zygisk` option.
 
 ### 3. Verify the installation
 
-After rebooting, you can verify if ReZygisk is working properly by checking the module description in the `Modules` section of your root manager. The description should indicate that the necessary daemons are running. For example, if your environment supports both 64-bit and 32-bit, it should look similar to this: `[Monitor: ✅, ReZygisk 64-bit: ✅, ReZygisk 32-bit: ✅] Standalone implementation of Zygisk.`
+After rebooting, you can verify if NextZygisk is working properly by checking the module description in the `Modules` section of your root manager. The description should indicate that the necessary daemons are running. For example, if your environment supports both 64-bit and 32-bit, it should look similar to this: `[Monitor: ✅, NextZygisk 64-bit: ✅, NextZygisk 32-bit: ✅] Standalone implementation of Zygisk.`
 
 ## Translation
 
@@ -75,4 +89,4 @@ It is mandatory to follow PerformanC's [Contribution Guidelines](https://github.
 
 ## License
 
-ReZygisk is licensed under [AGPL 3.0](./LICENSE). You can read more about it on [Open Source Initiative](https://opensource.org/licenses/AGPL-3.0).
+NextZygisk, like ReZygisk, is licensed under [AGPL 3.0](./LICENSE). You can read more about it on [Open Source Initiative](https://opensource.org/licenses/AGPL-3.0).

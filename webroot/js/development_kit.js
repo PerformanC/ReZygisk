@@ -9,7 +9,7 @@ const state = `
     "rezygiskd": {
       "64": {
         "state": 1,
-        "modules": ["playintegrityfix", "zygisk_lsposed", "shamiko"]
+        "modules": ["playintegrityfix", "zygisk_lsposed", "shamiko", "treat_wheel"]
       },
       "32": {
         "state": 1,
@@ -27,6 +27,7 @@ const state = `
 const moduleProps = {
   playintegrityfix: 'id=playintegrityfix\nname=Play Integrity Fix\nversion=v19.1\nversionCode=19100\nauthor=chiteroman & osm0sis\ndescription=Fix Play Integrity verdicts to get a certified device on Android 16 QPR2 and older.',
   zygisk_lsposed: 'id=zygisk_lsposed\nname=LSPosed\nversion=v1.10.2 (7190)\nversionCode=7190\nauthor=LSPosed Developers\ndescription=Another enhanced implementation of Xposed Framework. Supports Android 8.1 ~ 16. Requires Zygisk.',
+  treat_wheel: 'id=treat_wheel\nname=Treat Wheel\nversion=v1.4\nversionCode=14\nauthor=Unknown\ndescription=Hides the Zygisk and root environment from apps.',
   shamiko: 'id=shamiko\nname=Shamiko\nversion=v1.2.5 (418)\nversionCode=418\nauthor=LSPosed Developers\ndescription=Hide root and modules from apps on the denylist.'
 }
 
@@ -34,7 +35,7 @@ function fakeLogcat() {
   const now = new Date()
   const tags = [ 'zygisk-ptrace64', 'zygiskd64', 'zygisk-core64', 'zygiskd32', 'zygisk-injector64' ]
   const msgs = [
-    [ 'I', 'status updated: Monitor: ✅, ReZygisk 64-bit: ✅, ReZygisk 32-bit: ✅' ],
+    [ 'I', 'status updated: Monitor: ✅, NextZygisk 64-bit: ✅, NextZygisk 32-bit: ✅' ],
     [ 'I', 'Zygote64 injected' ],
     [ 'D', 'GetProcessFlags: uid 10234 -> 0x2' ],
     [ 'W', 'companion for module shamiko not found, skipping' ],
@@ -58,7 +59,7 @@ function fakeLogcat() {
 const responses = [
   /* INFO: Set localStorage 'rz_dev_state' to a raw state.json to preview other states. */
   [ /cat \/data\/adb\/rezygisk\/state\.json$/, () => localStorage.getItem('rz_dev_state') || state ],
-  [ /cat \/data\/adb\/modules\/rezygisk\/module\.prop$/, () => 'id=rezygisk\nname=ReZygisk\nversion=v1.0.0 (505-7e3db00-release)\nversionCode=505\nauthor=The PerformanC Organization\ndescription=[Monitor: ✅, ReZygisk 64-bit: ✅, ReZygisk 32-bit: ✅] Standalone implementation of Zygisk.' ],
+  [ /cat \/data\/adb\/modules\/rezygisk\/module\.prop$/, () => 'id=rezygisk\nname=NextZygisk\nversion=v1.0.0 (505-7e3db00-release)\nversionCode=505\nauthor=The PerformanC Organization\ndescription=[Monitor: ✅, NextZygisk 64-bit: ✅, NextZygisk 32-bit: ✅] Standalone implementation of Zygisk.' ],
   [ /^echo "model=/, () => [
     'model=Pixel 9 Pro', 'brand=google', 'device=caiman', 'android=16', 'sdk=36', 'patch=2026-09-05',
     'build=BP3A.250905.014', 'abi=arm64-v8a,armeabi-v7a,armeabi', 'kernel=6.1.134-android14-11-g4c2d3e',
@@ -69,12 +70,16 @@ const responses = [
 
     return ids.map((id) => `@@MODULE ${id}\n${moduleProps[id] || ''}\n${id === 'shamiko' ? '@@disabled=1\n' : ''}${id === 'zygisk_lsposed' ? '@@webui=1\n@@action=1\n' : ''}`).join('\n')
   } ],
+  [ /^for d in \/data\/adb\/modules/, () => [
+    'playintegrityfix|1|Play Integrity Fix', 'zygisk_lsposed|1|LSPosed', 'shamiko|0|Shamiko',
+    'treat_wheel|1|Treat Wheel', 'tricky_store|1|Tricky Store', 'rezygisk|1|NextZygisk'
+  ].join('\n') ],
   [ /^for b in .*zygisk-ptrace64/, () => '/data/adb/modules/rezygisk/bin/zygisk-ptrace64' ],
   [ / info 2>&1 \| tail/, () => '# zygisk-ptrace64\nDaemon process PID: 1290\nRoot implementation: KernelSU\nModules: 3\n - Play Integrity Fix\n - LSPosed\n - Shamiko\n\n# zygisk-ptrace32\nDaemon process PID: 1291\nRoot implementation: KernelSU\nModules: 2\n - Play Integrity Fix\n - LSPosed' ],
-  [ / ctl (start|stop|exit)$/, () => '[ReZygisk]: command sent' ],
+  [ / ctl (start|stop|exit)$/, () => '[NextZygisk]: command sent' ],
   [ /^logcat -d/, () => fakeLogcat() ],
   [ /\/system\/bin\/ls \/data\/adb\/modules\/rezygisk\/webroot\/lang$/, () => 'ar_EG.json\nde_DE.json\nen_US.json\nes_AR.json\nid_ID.json\nit_IT.json\nja_JP.json\nko_KR.json\npl_PL.json\npt_BR.json\nru_RU.json\ntr_TR.json\nuk_UA.json\nvi_VN.json\nzh_CN.json' ],
-  [ /\/sdcard\/Download\/ReZygisk/, () => '/sdcard/Download/ReZygisk/rezygisk-diagnostics-20261003-120000.txt' ]
+  [ /\/sdcard\/Download\/NextZygisk/, () => '/sdcard/Download/NextZygisk/nextzygisk-diagnostics-20261003-120000.txt' ]
 ]
 
 export function getDevelopmentExecResponse(command) {

@@ -6,8 +6,10 @@ import {
   MONITOR_STATE,
   copyText,
   escapeHTML,
+  detectHidingModules,
   formatDuration,
   getDeviceInfo,
+  getInstalledModules,
   getModuleProp,
   getState,
   haptic,
@@ -22,6 +24,7 @@ const RING_LENGTH = 2 * Math.PI * 42
 let lastUpdate = 0
 let lastDevice = {}
 let lastVersion = null
+let installedModules = null
 let stopPolling = () => {}
 let tickerTimer = null
 let refreshing = false
@@ -179,6 +182,48 @@ function renderComponents(summary, strings) {
   container.innerHTML = tiles.join('')
 }
 
+function renderHiding(summary, strings) {
+  const container = document.getElementById('home_hiding')
+  if (!container || installedModules === null) return
+
+  const loadedIds = summary.modules.map((mod) => mod.id)
+  const found = detectHidingModules(installedModules, loadedIds)
+
+  if (found.length === 0) {
+    container.innerHTML = `
+      <div class="nz_tile nz_tile_wide">
+        <div class="nz_tile_label">${icon('shield')}<span>${escapeHTML(strings.hiding.none)}</span></div>
+        <div class="nz_tile_hint" style="white-space: normal;">${escapeHTML(strings.hiding.noneHint)}</div>
+      </div>
+    `
+
+    return
+  }
+
+  container.innerHTML = found.map((mod) => {
+    let value = strings.hiding.enabled
+    let tone = 'ok'
+
+    if (!mod.enabled) {
+      value = strings.hiding.disabled
+      tone = ''
+    } else if (mod.zygisk && summary.known) {
+      /* INFO: A Zygisk based hider that NextZygisk did not load is not protecting anything. */
+      value = mod.loaded ? strings.hiding.active : strings.hiding.notLoaded
+      tone = mod.loaded ? 'ok' : 'warn'
+    }
+
+    return tile({
+      label: mod.label,
+      value,
+      hint: strings.hiding.roles[mod.key],
+      tone,
+      iconName: 'shield',
+      action: 'modules'
+    })
+  }).join('')
+}
+
 function deviceRows(strings) {
   const d = lastDevice
   const androidValue = d.android ? `${d.android}${d.sdk ? ` · ${fill(strings.device.sdk, { sdk: d.sdk })}` : ''}` : null
@@ -237,7 +282,8 @@ async function refresh({ full = false } = {}) {
       getState(),
       getStrings('home'),
       full ? getDeviceInfo().then((info) => { lastDevice = info }) : null,
-      full || !lastVersion ? getModuleProp().then((prop) => { lastVersion = prop.version || null }) : null
+      full || !lastVersion ? getModuleProp().then((prop) => { lastVersion = prop.version || null }) : null,
+      full || installedModules === null ? getInstalledModules().then((mods) => { installedModules = mods }) : null
     ])
 
     if (!strings || !isActive()) return
@@ -248,6 +294,7 @@ async function refresh({ full = false } = {}) {
     renderHero(summary, overallStatus(summary), strings)
     renderIssues(summary, strings)
     renderComponents(summary, strings)
+    renderHiding(summary, strings)
     if (full) renderDevice(strings)
 
     lastUpdate = Date.now()
@@ -291,6 +338,13 @@ export async function load() {
 
     haptic()
     loadPage(target.getAttribute('data-action'))
+  })
+
+  utils.addListener(document.getElementById('home_hiding'), 'click', (event) => {
+    if (!event.target.closest('[data-action]')) return
+
+    haptic()
+    loadPage('modules')
   })
 
   utils.addListener(document.getElementById('home_device'), 'click', (event) => {

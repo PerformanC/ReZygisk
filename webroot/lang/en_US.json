@@ -31,12 +31,12 @@
       },
       "issues": {
         "monitor": "Monitor is not tracing",
-        "daemon": "ReZygiskd {bits}-bit"
+        "daemon": "NextZygiskd {bits}-bit"
       },
       "components": {
         "title": "Components",
         "monitor": "Monitor",
-        "daemon": "ReZygiskd {bits}-bit",
+        "daemon": "NextZygiskd {bits}-bit",
         "running": "Running",
         "notRunning": "Not running",
         "tracing": "Tracing",
@@ -45,6 +45,24 @@
         "exited": "Exited",
         "modules": "Zygisk modules",
         "viewAll": "View all"
+      },
+      "hiding": {
+        "title": "Hiding",
+        "active": "Active",
+        "notLoaded": "Not loaded",
+        "enabled": "Enabled",
+        "disabled": "Disabled",
+        "none": "No hiding module detected",
+        "noneHint": "Root hiding modules such as Treat Wheel, Shamiko or Zygisk Assistant will show up here with their live status.",
+        "roles": {
+          "treatwheel": "Hides the Zygisk and root environment",
+          "shamiko": "Hides root and Zygisk",
+          "assistant": "Hides root and Zygisk",
+          "nohello": "Hides root and Zygisk",
+          "tricky": "Keystore and attestation",
+          "pif": "Play Integrity verdicts",
+          "susfs": "Kernel level traces"
+        }
       },
       "device": {
         "title": "Device",
@@ -85,18 +103,18 @@
       "daemon": {
         "title": "Daemon",
         "run": "Query",
-        "description": "Query ReZygiskd for its PID, root implementation and loaded modules.",
-        "notRunning": "ReZygiskd is not responding."
+        "description": "Query NextZygiskd for its PID, root implementation and loaded modules.",
+        "notRunning": "NextZygiskd is not responding."
       },
       "tools": {
         "title": "Tools",
         "logs": {
           "title": "Live logs",
-          "desc": "Stream ReZygisk logcat with filters"
+          "desc": "Stream NextZygisk logcat with filters"
         },
         "export": {
           "title": "Export diagnostics",
-          "desc": "Save a full report to Download/ReZygisk",
+          "desc": "Save a full report to Download/NextZygisk",
           "working": "Collecting diagnostics…",
           "done": "Saved to {path}",
           "failed": "Failed to export diagnostics"
@@ -155,6 +173,7 @@
         "title": "Enable system font",
         "description": "This option will enable system font in current WebUI. NOTE: May not be compatible with FlipFont"
       },
+      "basedOn": "Based on",
       "moduleDevelopers": "Module Developer(s)",
       "WebUIDevelopers": "WebUI Developer(s)",
       "orginalDevelopers": "Original Module Developer(s)",
@@ -165,7 +184,7 @@
       },
       "refresh": {
         "title": "Auto refresh",
-        "description": "How often live pages re-read ReZygisk's state.",
+        "description": "How often live pages re-read NextZygisk's state.",
         "off": "Off"
       }
     },
@@ -190,7 +209,7 @@
       "save": "Save",
       "search": "Filter logs",
       "all": "All",
-      "empty": "No ReZygisk logs yet. Release builds only log info, warnings and errors.",
+      "empty": "No NextZygisk logs yet. Release builds only log info, warnings and errors.",
       "saved": "Saved to {path}",
       "saveFailed": "Failed to save logs"
     }

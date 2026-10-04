@@ -6,7 +6,7 @@
 #include "monitor.h"
 
 int main(int argc, char **argv) {
-  printf("The ReZygisk Tracer %s\n\n", ZKSU_VERSION);
+  printf("The NextZygisk Tracer %s\n\n", ZKSU_VERSION);
 
   if (argc >= 2 && strcmp(argv[1], "monitor") == 0) {
     init_monitor();
@@ -39,7 +39,7 @@ int main(int argc, char **argv) {
     enum rezygiskd_command command;
 
     if (argc < 3) {
-      printf("[ReZygisk]: Usage: %s ctl <start|stop|exit>\n", argv[0]);
+      printf("[NextZygisk]: Usage: %s ctl <start|stop|exit>\n", argv[0]);
 
       return 1;
     }
@@ -48,18 +48,18 @@ int main(int argc, char **argv) {
     else if (strcmp(argv[2], "stop") == 0) command = STOP;
     else if (strcmp(argv[2], "exit") == 0) command = EXIT;
     else {
-      printf("[ReZygisk]: Usage: %s ctl <start|stop|exit>\n", argv[0]);
+      printf("[NextZygisk]: Usage: %s ctl <start|stop|exit>\n", argv[0]);
 
       return 1;
     }
 
     if (send_control_command(command) == -1) {
-      printf("[ReZygisk]: Failed to send the command, is the daemon running?\n");
+      printf("[NextZygisk]: Failed to send the command, is the daemon running?\n");
 
       return 1;
     }
 
-    printf("[ReZygisk]: command sent\n");
+    printf("[NextZygisk]: command sent\n");
 
     return 0;
   } else if (argc >= 2 && strcmp(argv[1], "version") == 0) {
@@ -120,7 +120,7 @@ int main(int argc, char **argv) {
       " - monitor\n"
       " - trace <pid> [--restart]\n"
       " - ctl <start|stop|exit>\n"
-      " - version: Shows the version of ReZygisk.\n"
+      " - version: Shows the version of NextZygisk.\n"
       " - info: Shows information about the created daemon/injection.\n"
       "\n"
       "<...>: Obligatory\n"

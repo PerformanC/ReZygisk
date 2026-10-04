@@ -5,3 +5,7 @@
 #home_device .nz_row_value:active {
   opacity: 0.6;
 }
+
+#home_hiding .nz_tile_hint {
+  white-space: normal;
+}

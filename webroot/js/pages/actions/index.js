@@ -116,11 +116,11 @@ async function runDaemonInfo(strings) {
 async function exportDiagnostics(strings) {
   const ptracer = await getPtracer()
   const script = [
-    'D=/sdcard/Download/ReZygisk',
+    'D=/sdcard/Download/NextZygisk',
     'mkdir -p "$D"',
-    'F="$D/rezygisk-diagnostics-$(date +%Y%m%d-%H%M%S).txt"',
+    'F="$D/nextzygisk-diagnostics-$(date +%Y%m%d-%H%M%S).txt"',
     '{',
-    'echo "===== ReZygisk diagnostics ====="; date; echo',
+    'echo "===== NextZygisk diagnostics ====="; date; echo',
     `echo "===== module.prop ====="; cat ${MODDIR}/module.prop; echo`,
     `echo "===== state.json ====="; cat ${STATE_FILE}; echo`,
     'echo "===== device ====="; uname -a; echo "SELinux: $(getenforce)"',

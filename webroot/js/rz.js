@@ -1,4 +1,4 @@
-/* INFO: Shared data layer for every ReZygisk WebUI page. Batches shell calls,
+/* INFO: Shared data layer for every NextZygisk WebUI page. Batches shell calls,
            de-duplicates in-flight requests and keeps all untrusted strings escaped. */
 import { exec, toast } from './kernelsu.js'
 
@@ -400,4 +400,46 @@ export async function monitorControl(command) {
   if (![ 'start', 'stop', 'exit' ].includes(command)) return { ok: false }
 
   return run(`${await getPtracer()} ctl ${command}`)
+}
+
+/* INFO: Root hiding modules commonly used alongside NextZygisk, matched by module
+           name or ID since their IDs differ between forks. `zygisk` marks modules
+           that must be loaded by NextZygisk to do their job. */
+export const HIDING_MODULES = [
+  { key: 'treatwheel', label: 'Treat Wheel', match: /treat[\s_-]*wheel/i, zygisk: true },
+  { key: 'shamiko', label: 'Shamiko', match: /shamiko/i, zygisk: true },
+  { key: 'assistant', label: 'Zygisk Assistant', match: /zygisk[\s_-]*assistant/i, zygisk: true },
+  { key: 'nohello', label: 'NoHello', match: /no[\s_-]*hello/i, zygisk: true },
+  { key: 'tricky', label: 'Tricky Store', match: /tricky[\s_-]*store/i, zygisk: false },
+  { key: 'pif', label: 'Play Integrity', match: /play[\s_-]*integrity|playintegrityfix/i, zygisk: true },
+  { key: 'susfs', label: 'SUSFS', match: /susfs/i, zygisk: false }
+]
+
+/* INFO: Lists every installed module (id, name, enabled) in one exec. */
+export async function getInstalledModules() {
+  const result = await run(
+    'for d in /data/adb/modules/*/; do [ -f "$d/module.prop" ] || continue; ' +
+    'i=${d%/}; i=${i##*/}; s=1; [ -f "$d/disable" ] && s=0; [ -f "$d/remove" ] && s=0; ' +
+    'n=$(grep -m1 "^name=" "$d/module.prop" | cut -d= -f2-); echo "$i|$s|$n"; done'
+  )
+
+  return result.stdout.split('\n').map((line) => {
+    const [ id, enabled, ...name ] = line.split('|')
+    if (!id || !isSafeModuleId(id)) return null
+
+    return { id, enabled: enabled === '1', name: name.join('|').trim() || id }
+  }).filter(Boolean)
+}
+
+export function detectHidingModules(installed, loadedIds = []) {
+  const found = []
+
+  for (const known of HIDING_MODULES) {
+    const mod = installed.find((m) => known.match.test(m.name) || known.match.test(m.id))
+    if (!mod) continue
+
+    found.push({ ...known, id: mod.id, name: mod.name, enabled: mod.enabled, loaded: loadedIds.includes(mod.id) })
+  }
+
+  return found
 }

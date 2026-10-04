@@ -31,12 +31,12 @@
       },
       "issues": {
         "monitor": "المراقبة لا تتتبع حالياً",
-        "daemon": "ReZygiskd {bits} بت"
+        "daemon": "NextZygiskd {bits} بت"
       },
       "components": {
         "title": "المكونات",
         "monitor": "المراقبة",
-        "daemon": "ReZygiskd {bits} بت",
+        "daemon": "NextZygiskd {bits} بت",
         "running": "يعمل",
         "notRunning": "لا يعمل",
         "tracing": "جارٍ التتبع",
@@ -45,6 +45,24 @@
         "exited": "خرج",
         "modules": "وحدات Zygisk",
         "viewAll": "عرض الكل"
+      },
+      "hiding": {
+        "title": "الإخفاء",
+        "active": "نشط",
+        "notLoaded": "غير محمّل",
+        "enabled": "مفعّل",
+        "disabled": "معطّل",
+        "none": "لم يتم العثور على وحدة إخفاء",
+        "noneHint": "وحدات إخفاء الروت مثل Treat Wheel أو Shamiko أو Zygisk Assistant ستظهر هنا مع حالتها المباشرة.",
+        "roles": {
+          "treatwheel": "يخفي بيئة Zygisk والروت",
+          "shamiko": "يخفي الروت و Zygisk",
+          "assistant": "يخفي الروت و Zygisk",
+          "nohello": "يخفي الروت و Zygisk",
+          "tricky": "مخزن المفاتيح والتوثيق",
+          "pif": "نتائج Play Integrity",
+          "susfs": "آثار مستوى النواة"
+        }
       },
       "device": {
         "title": "الجهاز",
@@ -85,18 +103,18 @@
       "daemon": {
         "title": "الخدمة",
         "run": "استعلام",
-        "description": "استعلم من ReZygiskd عن رقم العملية ونوع الروت والوحدات المحمّلة.",
-        "notRunning": "ReZygiskd لا يستجيب."
+        "description": "استعلم من NextZygiskd عن رقم العملية ونوع الروت والوحدات المحمّلة.",
+        "notRunning": "NextZygiskd لا يستجيب."
       },
       "tools": {
         "title": "الأدوات",
         "logs": {
           "title": "السجلات المباشرة",
-          "desc": "بث سجلات ReZygisk مع الفلاتر"
+          "desc": "بث سجلات NextZygisk مع الفلاتر"
         },
         "export": {
           "title": "تصدير التشخيص",
-          "desc": "حفظ تقرير كامل في Download/ReZygisk",
+          "desc": "حفظ تقرير كامل في Download/NextZygisk",
           "working": "جارٍ جمع التشخيص…",
           "done": "تم الحفظ في {path}",
           "failed": "فشل تصدير التشخيص"
@@ -155,6 +173,7 @@
         "title": "تفعيل خط النظام",
         "description": "يعرض هذا الخيار النص بخط النظام بدلاً من خط WebUI. قد لا يتوافق مع FlipFont."
       },
+      "basedOn": "مبني على",
       "moduleDevelopers": "مطورو الإضافة",
       "WebUIDevelopers": "مطورو WebUI",
       "orginalDevelopers": "المطورون الأصليون للإضافة",
@@ -165,7 +184,7 @@
       },
       "refresh": {
         "title": "التحديث التلقائي",
-        "description": "عدد مرات قراءة حالة ReZygisk في الصفحات المباشرة.",
+        "description": "عدد مرات قراءة حالة NextZygisk في الصفحات المباشرة.",
         "off": "إيقاف"
       }
     },

@@ -8,7 +8,7 @@
 #include "utils.h"
 
 int main(int argc, char *argv[]) {
-  LOGI("Welcome to ReZygiskd%s", LP_SELECT("32", "64"));
+  LOGI("Welcome to NextZygiskd%s", LP_SELECT("32", "64"));
 
   if (argc > 1) {
     if (strcmp(argv[1], "companion") == 0) {
@@ -25,7 +25,7 @@ int main(int argc, char *argv[]) {
     }
 
     else if (strcmp(argv[1], "version") == 0) {
-      LOGI("ReZygisk Daemon %s", ZKSU_VERSION);
+      LOGI("NextZygisk Daemon %s", ZKSU_VERSION);
 
       return 0;
     }

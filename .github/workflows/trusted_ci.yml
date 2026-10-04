@@ -36,11 +36,11 @@ jobs:
       - name: Upload release
         uses: actions/upload-artifact@v7
         with:
-          path: "build/out/ReZygisk-v*-release.zip"
+          path: "build/out/NextZygisk-v*-release.zip"
           archive: false
 
       - name: Upload debug
         uses: actions/upload-artifact@v7
         with:
-          path: "build/out/ReZygisk-v*-debug.zip"
+          path: "build/out/NextZygisk-v*-debug.zip"
           archive: false
