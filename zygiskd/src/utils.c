@@ -452,6 +452,13 @@ char *exec_command_output(const char *restrict file, const char *const argv[], s
   return output;
 }
 
+bool is_umount_disabled(void) {
+  static int disabled = -1;
+  if (disabled == -1) disabled = access(UMOUNT_DISABLED_FILE, F_OK) == 0;
+
+  return disabled == 1;
+}
+
 void file_stamp_get(const char *restrict path, struct file_stamp *restrict stamp) {
   struct stat st;
   if (stat(path, &st) != 0) {
@@ -891,7 +898,9 @@ int save_mns_fd(int pid, enum MountNamespaceState mns_state, struct root_impl im
       goto finalize_mns_fork;
     }
 
-    if (mns_state == Clean) {
+    /* INFO: With unmount disabled by the user, the "clean" namespace is the app's own
+               one, untouched: another module is expected to hide root mounts. */
+    if (mns_state == Clean && !is_umount_disabled()) {
       unshare(CLONE_NEWNS);
 
       if (!umount_root(impl)) {

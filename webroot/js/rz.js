@@ -6,6 +6,20 @@ export const MODDIR = '/data/adb/modules/rezygisk'
 export const STATE_DIR = '/data/adb/rezygisk'
 export const STATE_FILE = `${STATE_DIR}/state.json`
 
+export const UMOUNT_DISABLED_FILE = '/data/adb/nextzygisk/umount_disabled'
+
+export async function isUmountDisabled() {
+  const result = await run(`[ -f ${UMOUNT_DISABLED_FILE} ] && echo 1 || echo 0`)
+
+  return result.stdout.trim() === '1'
+}
+
+export async function setUmountDisabled(disabled) {
+  return run(disabled
+    ? `mkdir -p /data/adb/nextzygisk && touch ${UMOUNT_DISABLED_FILE}`
+    : `rm -f ${UMOUNT_DISABLED_FILE}`)
+}
+
 export const LOG_TAGS = [ 'zygisk-core', 'zygiskd', 'zygiskd-companion', 'zygisk-elfutil', 'zygisk-ptrace', 'zygisk-injector' ]
   .flatMap((tag) => [ `${tag}64`, `${tag}32` ])
   .concat([ 'zygisk-sh' ])

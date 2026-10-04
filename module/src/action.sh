@@ -78,6 +78,12 @@ for bits in 64 32; do
   fi
 done
 
+if [ -f /data/adb/nextzygisk/umount_disabled ]; then
+  echo "Root unmount: OFF ⚠️ (denylist apps may see root mounts unless another module hides them)"
+else
+  echo "Root unmount: on ✅"
+fi
+
 # INFO: Same ABI choice as zygiskd: native x86 when available, ARM otherwise.
 ABILIST=$(getprop ro.product.cpu.abilist)
 case "$ABILIST" in *x86_64*) ABI64=x86_64 ;; *) ABI64=arm64-v8a ;; esac

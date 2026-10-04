@@ -886,3 +886,53 @@
 .nz_option_code bdi {
   direction: ltr;
 }
+
+/* INFO: Switch */
+.nz_switch {
+  position: relative;
+  width: 52px;
+  height: 32px;
+  flex-shrink: 0;
+  cursor: pointer;
+}
+
+.nz_switch input {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.nz .nz_switch span {
+  position: absolute;
+  inset: 0;
+  border-radius: 999px;
+  background: var(--surface-2);
+  border: 2px solid var(--desc);
+  transition: background 0.2s, border-color 0.2s;
+}
+
+.nz .nz_switch span::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 5px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--desc);
+  transform: translateY(-50%);
+  transition: transform 0.2s var(--ease), width 0.2s, height 0.2s, background 0.2s;
+}
+
+.nz .nz_switch input:checked + span {
+  background: var(--accent);
+  border-color: var(--accent);
+}
+
+.nz .nz_switch input:checked + span::after {
+  width: 22px;
+  height: 22px;
+  background: var(--on-accent);
+  transform: translate(18px, -50%);
+}

@@ -35,7 +35,7 @@ MODULE_INPUTS = scripts/sign.py \
         $(shell find webroot -type f | sort) \
         $(wildcard module/private_key module/public_key)
 
-.PHONY: debug release build clean                                         \
+.PHONY: debug release build clean updateWebUI                             \
         installKsu installMagisk installAPatch                            \
         installKsuAndReboot installMagiskAndReboot installAPatchAndReboot
 
@@ -141,3 +141,17 @@ clean:
 	rm -rf $(BUILD_DIR)
 	$(MAKE) -C loader clean BUILD_DIR=$(BUILD_DIR)
 	$(MAKE) -C zygiskd clean BUILD_DIR=$(BUILD_DIR)
+
+# INFO: Development helper: replaces the installed WebUI without rebuilding the module.
+WEBUI_TMP := /data/local/tmp/nextzygisk_webroot
+WEBUI_DST := /data/adb/modules/rezygisk/webroot
+
+updateWebUI:
+	@echo "Updating WebUI..."
+ifeq ($(TERMUX_VERSION),)
+	adb shell "rm -rf $(WEBUI_TMP)"
+	adb push webroot $(WEBUI_TMP)
+	adb shell "su -c 'rm -rf $(WEBUI_DST) && cp -r $(WEBUI_TMP) $(WEBUI_DST) && rm -rf $(WEBUI_TMP)'"
+else
+	su -c "rm -rf $(WEBUI_DST) && cp -r $(CURDIR)/webroot $(WEBUI_DST)"
+endif

@@ -15,8 +15,10 @@ import {
   getPtracer,
   getState,
   haptic,
+  isUmountDisabled,
   monitorControl,
   run,
+  setUmountDisabled,
   startPolling,
   summarizeState
 } from '../../rz.js'
@@ -143,6 +145,19 @@ async function exportDiagnostics(strings) {
   else toast(strings.tools.export.failed)
 }
 
+async function renderUmount(strings) {
+  const disabled = await isUmountDisabled()
+  if (!isActive()) return
+
+  const toggle = document.getElementById('umount_switch')
+  const desc = document.getElementById('umount_desc')
+  if (!toggle || !desc) return
+
+  toggle.checked = !disabled
+  desc.textContent = disabled ? strings.umount.off : strings.umount.on
+  desc.style.color = disabled ? 'var(--warn)' : ''
+}
+
 function renderTools(strings) {
   const tools = [
     { id: 'logs', iconName: 'logs', ...strings.tools.logs },
@@ -237,6 +252,41 @@ export async function load() {
   document.getElementById('monitor_stop_icon').innerHTML = icon('stop')
 
   renderTools(strings)
+  renderUmount(strings)
+
+  utils.addListener(document.getElementById('umount_switch'), 'change', async (event) => {
+    haptic()
+
+    const toggle = event.target
+    const enable = toggle.checked
+
+    if (!enable) {
+      /* INFO: Turning it off weakens hiding, make sure it is intended. */
+      toggle.checked = true
+
+      const ok = await confirmDialog({
+        title: strings.umount.confirmTitle,
+        message: strings.umount.confirmMessage,
+        confirm: strings.umount.confirm,
+        cancel: strings.cancel,
+        danger: true
+      })
+      if (!ok) return
+
+      toggle.checked = false
+    }
+
+    const result = await setUmountDisabled(!enable)
+    if (!result.ok) {
+      toast(strings.umount.failed)
+      toggle.checked = !enable
+
+      return
+    }
+
+    toast(strings.umount.reboot)
+    renderUmount(strings)
+  })
 
   utils.addListener(document.getElementById('monitor_start_button'), 'click', () => {
     haptic()

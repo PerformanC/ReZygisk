@@ -32,7 +32,9 @@
       "issues": {
         "monitor": "Monitor is not tracing",
         "daemon": "NextZygiskd {bits}-bit",
-        "modules": "{count} Zygisk modules not working"
+        "modules": "{count} Zygisk modules not working",
+        "umountOff": "Root unmount is off",
+        "umountOffBody": "Apps on the denylist can see root mounts unless another module hides them."
       },
       "components": {
         "title": "Components",
@@ -140,6 +142,17 @@
           "confirmMessage": "Your device will reboot now.",
           "confirm": "Reboot"
         }
+      },
+      "umount": {
+        "section": "Hiding",
+        "title": "Root unmount",
+        "on": "On: NextZygisk unmounts root for apps on the denylist. Recommended.",
+        "off": "Off: apps on the denylist can see root mounts unless another module hides them. Applies after reboot.",
+        "confirmTitle": "Turn off root unmount?",
+        "confirmMessage": "Apps on the denylist will be able to see root mounts unless another module unmounts them. Only do this if another module handles unmounting. Takes effect after reboot.",
+        "confirm": "Turn off",
+        "reboot": "Saved. Reboot to apply.",
+        "failed": "Failed to change the setting"
       }
     },
     "modules": {

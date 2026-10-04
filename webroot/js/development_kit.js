@@ -57,6 +57,9 @@ function fakeLogcat() {
 }
 
 const responses = [
+  [ /^\[ -f \/data\/adb\/nextzygisk\/umount_disabled \]/, () => (localStorage.getItem('rz_dev_umount_off') === '1' ? '1' : '0') ],
+  [ /touch \/data\/adb\/nextzygisk\/umount_disabled$/, () => { localStorage.setItem('rz_dev_umount_off', '1'); return '' } ],
+  [ /^rm -f \/data\/adb\/nextzygisk\/umount_disabled$/, () => { localStorage.removeItem('rz_dev_umount_off'); return '' } ],
   /* INFO: Set localStorage 'rz_dev_state' to a raw state.json to preview other states. */
   [ /cat \/data\/adb\/rezygisk\/state\.json$/, () => localStorage.getItem('rz_dev_state') || state ],
   [ /cat \/data\/adb\/modules\/rezygisk\/module\.prop$/, () => 'id=rezygisk\nname=NextZygisk\nversion=v1.0.0 (505-7e3db00-release)\nversionCode=505\nauthor=The PerformanC Organization\ndescription=[Monitor: ✅, NextZygisk 64-bit: ✅, NextZygisk 32-bit: ✅] Standalone implementation of Zygisk.' ],

@@ -69,6 +69,15 @@ else
   ui_print "- Device platform: $ARCH"
 fi
 
+# INFO: Two Zygisk implementations at once conflict. Disable the known ones (the user
+#         can re-enable them from the root manager) and say so.
+for other in zygisksu; do
+  if [ -d "/data/adb/modules/$other" ] && [ ! -f "/data/adb/modules/$other/disable" ]; then
+    touch "/data/adb/modules/$other/disable"
+    ui_print "- Disabled \"$other\" (Zygisk Next): it conflicts with NextZygisk"
+  fi
+done
+
 ui_print "- Extracting verify.sh"
 unzip -o "$ZIPFILE" 'verify.sh' -d "$TMPDIR" >&2
 if [ ! -f "$TMPDIR/verify.sh" ]; then

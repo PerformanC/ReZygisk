@@ -10,7 +10,7 @@ ZKSU_VERSION ?= $(VER_NAME)
 
 ifeq ($(BUILD_TYPE),release)
 	TYPE_CFLAGS = -O3 -ffast-math -flto
-	TYPE_LDFLAGS = -Wl,--strip-all -flto
+	TYPE_LDFLAGS = -Wl,--strip-all -Wl,--gc-sections -flto
 else
 	TYPE_CFLAGS = -g -O0 -DDEBUG
 	TYPE_LDFLAGS =
@@ -23,7 +23,8 @@ ZYGISKD_CFLAGS = -D_GNU_SOURCE -std=c99 -Wpedantic -Wall -Wextra -Werror  \
 				 -DMIN_APATCH_VERSION=$(MIN_APATCH_VERSION)               \
 				 -DMIN_KSU_VERSION=$(MIN_KSU_VERSION)                     \
 				 -DMIN_MAGISK_VERSION=$(MIN_MAGISK_VERSION)               \
-				 '-DZKSU_VERSION="$(ZKSU_VERSION)"'
+				 '-DZKSU_VERSION="$(ZKSU_VERSION)"'                        \
+				 $(NDK_CFLAGS)
 
 SRCS = src/root_impl/apatch.c src/root_impl/common.c        \
 	   src/root_impl/kernelsu.c src/root_impl/magisk.c      \

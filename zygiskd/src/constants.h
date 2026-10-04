@@ -6,6 +6,11 @@
 
 #define PROCESS_NAME_MAX_LEN 256 + 1
 
+/* INFO: Persistent user settings. Unlike /data/adb/rezygisk, it is not wiped on boot. */
+#define NEXTZYGISK_DATA_DIR "/data/adb/nextzygisk"
+/* INFO: When present, NextZygisk does not unmount root for apps on the denylist. */
+#define UMOUNT_DISABLED_FILE NEXTZYGISK_DATA_DIR "/umount_disabled"
+
 #define ZYGOTE_INJECTED LP_SELECT(5, 4)
 #define DAEMON_SET_INFO LP_SELECT(7, 6)
 #define DAEMON_SET_ERROR_INFO LP_SELECT(9, 8)

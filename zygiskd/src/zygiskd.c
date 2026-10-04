@@ -291,6 +291,9 @@ void zygiskd_start(char *restrict argv[]) {
             to that, "= { 0 }" is used to ensure that the values are clean. */
   struct Context context = { 0 };
 
+  /* INFO: Latch the user's unmount choice at startup, so it stays consistent until reboot. */
+  if (is_umount_disabled()) LOGW("Root unmount is disabled by the user (%s)\n", UMOUNT_DISABLED_FILE);
+
   struct root_impl impl;
   get_impl(&impl);
   if (impl.impl == None || impl.impl == Multiple) {

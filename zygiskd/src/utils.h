@@ -110,6 +110,9 @@ struct file_stamp {
   struct timespec mtime;
 };
 
+/* INFO: Read once per daemon lifetime, toggling it applies on the next boot. */
+bool is_umount_disabled(void);
+
 void file_stamp_get(const char *restrict path, struct file_stamp *restrict stamp);
 
 bool file_stamp_equal(const struct file_stamp *a, const struct file_stamp *b);

@@ -11,6 +11,7 @@ import {
   getDeviceInfo,
   getInstalledModules,
   getZygiskModules,
+  isUmountDisabled,
   getModuleProp,
   getState,
   haptic,
@@ -27,6 +28,7 @@ let lastDevice = {}
 let lastVersion = null
 let installedModules = null
 let zygiskModules = null
+let umountDisabled = false
 let stopPolling = () => {}
 let tickerTimer = null
 let refreshing = false
@@ -126,6 +128,15 @@ function renderIssues(summary, strings) {
       body: daemon.reason || strings.components.notRunning
     })
   })
+
+  if (umountDisabled) {
+    issues.push({
+      tone: 'warn',
+      title: strings.issues.umountOff,
+      body: strings.issues.umountOffBody,
+      action: 'actions'
+    })
+  }
 
   const broken = (zygiskModules || []).filter((mod) => mod.status === 'notLoaded' || mod.status === 'partial')
   if (broken.length) {
@@ -300,7 +311,8 @@ async function refresh({ full = false } = {}) {
       getStrings('home'),
       full ? getDeviceInfo().then((info) => { lastDevice = info }) : null,
       full || !lastVersion ? getModuleProp().then((prop) => { lastVersion = prop.version || null }) : null,
-      full || installedModules === null ? getInstalledModules().then((mods) => { installedModules = mods }) : null
+      full || installedModules === null ? getInstalledModules().then((mods) => { installedModules = mods }) : null,
+      full ? isUmountDisabled().then((disabled) => { umountDisabled = disabled }) : null
     ])
 
     if (!strings || !isActive()) return
