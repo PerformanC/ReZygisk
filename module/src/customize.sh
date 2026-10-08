@@ -83,6 +83,10 @@ extract "$ZIPFILE" 'verify.sh'     "$TMPDIR/.vunzip"
 extract "$ZIPFILE" 'sepolicy.rule' "$TMPDIR"
 
 if [ "$KSU" ]; then
+  # INFO: `sepolicy.rule` must not contain comments, as ksud builds from before KernelSU's
+  #         comment support (e.g. v0.9.5, the last KernelSU version supporting non-GKI,
+  #         below 5.10, kernels) parse every non-empty line as a policy statement and abort
+  #         the installation on "#" lines.
   ui_print "- Checking SELinux patches"
   if ! check_sepolicy "$TMPDIR/sepolicy.rule"; then
     ui_print "*********************************************************"
