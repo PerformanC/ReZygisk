@@ -9,7 +9,10 @@
 #include <dirent.h>
 #include <fcntl.h>
 #include <limits.h>
+#include <link.h>
+#include <pthread.h>
 #include <sys/mman.h>
+#include <sys/prctl.h>
 #include <sys/stat.h>
 #include <sys/types.h>
 
@@ -290,6 +293,194 @@ DCL_HOOK_FUNC(void, _ZNK18FileDescriptorInfo14ReopenOrDetach, void *_this, void 
 }
 
 static void unhook_functions(void);
+
+/* INFO: Trace cleanup utilities. After a module (or the library itself) is
+           unloaded, the process can retain detectable artifacts:
+           1. dangling destructor pointers in libc's __pthread_keys (a module
+              created a pthread key but was unloaded without cleaning it up);
+           2. /data/adb paths left in maps when self-unload fails or is skipped.
+           Detectors find these by scanning libc data / maps. The helpers below
+           scrub them at unload time, so any module (well-behaved or not) leaves
+           no trace behind. */
+
+/* ---------- maps spoofing ---------- */
+
+#ifndef PR_SET_VMA
+#define PR_SET_VMA 0x53564d41
+#endif
+#ifndef PR_SET_VMA_ANON_NAME
+#define PR_SET_VMA_ANON_NAME 0
+#endif
+
+/* INFO: Replace mappings still carrying `needle` in their path with an
+           anonymous copy of the same contents, renamed to "dalvik-DEX data"
+           so they blend in with ART's own anonymous mappings. */
+static void rz_spoof_maps(const char *needle, bool clear_write_permission) {
+  if (!needle) return;
+
+  /* INFO: This runs from the self-unload path, which executes inside
+             libzygisk.so's own executable segment - the same library carries
+             a /data/adb/ path. Swapping the segment we are currently executing
+             would make the next instruction fetch fail (SEGV_ACCERR on a page
+             that has no PROT_EXEC), so skip the mapping holding our PC. Its
+             path residue is covered by the trailing munmap of self. */
+  uintptr_t self_pc = (uintptr_t)&rz_spoof_maps;
+
+  struct maps_info *maps = parse_maps_safe("self");
+  if (!maps) return;
+
+  for (size_t i = 0; i < maps->length; i++) {
+    struct map_entry *map = &maps->maps[i];
+    if (!map->path || map->path[0] == '\0' || !strstr(map->path, needle)) continue;
+
+    if (self_pc >= map->start && self_pc < map->end) continue;
+
+    void *addr = (void *)map->start;
+    size_t size = map->end - map->start;
+    if (size == 0) continue;
+
+    /* INFO: Back up the contents into an anonymous mapping and mremap it over
+               the original address: same bytes, no file association. */
+    void *copy = mmap(NULL, size, PROT_READ | PROT_WRITE,
+                      MAP_ANONYMOUS | MAP_PRIVATE, -1, 0);
+    if (copy == MAP_FAILED) continue;
+
+    int orig_perms = map->perms;
+    if (!(orig_perms & PROT_READ)) {
+      if (mprotect(addr, size, PROT_READ) != 0) {
+        munmap(copy, size);
+        continue;
+      }
+    }
+
+    memcpy(copy, addr, size);
+
+    if (mremap(copy, size, size, MREMAP_MAYMOVE | MREMAP_FIXED, addr) == MAP_FAILED) {
+      munmap(copy, size);
+      mprotect(addr, size, orig_perms);
+      continue;
+    }
+
+    /* INFO: On success the source mapping is consumed by mremap
+               (no MREMAP_DONTUNMAP), so `copy` must not be unmapped again. */
+    mprotect(addr, size, orig_perms);
+    prctl(PR_SET_VMA, PR_SET_VMA_ANON_NAME, addr, size, "dalvik-DEX data");
+
+    if (clear_write_permission &&
+        (orig_perms & (PROT_READ | PROT_WRITE | PROT_EXEC)) ==
+            (PROT_READ | PROT_WRITE | PROT_EXEC)) {
+      mprotect(addr, size, orig_perms & ~PROT_WRITE);
+    }
+  }
+
+  free_maps(maps);
+}
+
+/* ---------- dangling pthread key cleanup ---------- */
+
+/* INFO: bionic's pthread key table (libc key_map, kPthreadKeysMax = 130
+           entries; see bionic/libc/bionic/pthread_key.cpp):
+             64-bit: 16 bytes per entry { uintptr_t seq; void (*dtor)(void *); }
+             32-bit:  8 bytes per entry { uint32_t  seq; void (*dtor)(void *); }
+           seq bit0 marks "in use". pthread_key_create returns
+           (index | 0x80000000) - NOT a plain index - and pthread_key_delete
+           internally masks it with 0xFF. Code that uses the returned value as
+           an array index must extract the low 8 bits first, otherwise the high
+           bit turns into a huge pointer offset and crashes (observed as a
+           SIGSEGV in system_server on Android 16). */
+#ifdef __LP64__
+  #define RZ_KEY_STRIDE   16
+  #define RZ_KEY_DTOR_OFF 8
+#else
+  #define RZ_KEY_STRIDE   8
+  #define RZ_KEY_DTOR_OFF 4
+#endif
+#define RZ_KEY_TABLE_SIZE 130
+
+struct rz_keys_scan_ctx {
+  uintptr_t marker;
+  pthread_key_t probe;
+  char *keys_base;
+};
+
+static int rz_find_pthread_keys_cb(struct dl_phdr_info *info, size_t size, void *data) {
+  (void)size;
+  struct rz_keys_scan_ctx *ctx = (struct rz_keys_scan_ctx *)data;
+  if (!info->dlpi_name || !strstr(info->dlpi_name, "libc.so")) return 0;
+
+  for (int i = 0; i < info->dlpi_phnum; i++) {
+    const ElfW(Phdr) *ph = &info->dlpi_phdr[i];
+    if (ph->p_type != PT_LOAD || !(ph->p_flags & PF_W) || ph->p_memsz < 16) continue;
+    uintptr_t start = (uintptr_t)info->dlpi_addr + ph->p_vaddr;
+    uintptr_t end = start + ph->p_memsz;
+    for (uintptr_t a = start; a + 16 <= end; a += 8) {
+      uint32_t seq;
+      memcpy(&seq, (void *)a, 4);
+      /* INFO: Only "in use" slots (odd seq) hold a live destructor. Deleted
+                 slots keep their stale destructor with an even seq, which
+                 must be excluded or the base recovery below computes a wrong
+                 array address. */
+      if (seq & 1) {
+        uintptr_t dtor = 0;
+        memcpy(&dtor, (void *)(a + RZ_KEY_DTOR_OFF), sizeof(uintptr_t));
+        if (dtor == ctx->marker) {
+          /* INFO: `probe` carries the 0x80000000 marker bit; use only the
+                     low 8 bits as the slot index (see struct notes above). */
+          size_t idx = (size_t)(ctx->probe & 0xFF);
+          char *base = (char *)(a - idx * RZ_KEY_STRIDE);
+          /* INFO: Re-read the probe slot through the recovered base as a
+                     consistency check. */
+          uint32_t s2;
+          uintptr_t d2 = 0;
+          memcpy(&s2, base + idx * RZ_KEY_STRIDE, 4);
+          memcpy(&d2, base + idx * RZ_KEY_STRIDE + RZ_KEY_DTOR_OFF, sizeof(uintptr_t));
+          if ((s2 & 1) && d2 == ctx->marker) {
+            ctx->keys_base = base;
+            return 1;
+          }
+        }
+      }
+    }
+  }
+  return 0;
+}
+
+/* INFO: Delete pthread keys whose destructor points into [lo, hi) (an unloaded
+           module) or, with also_dangling, into unbacked memory. The probe key
+           (its destructor is this very function, a unique marker) locates the
+           array base without relying on internal symbols. */
+static void rz_cleanup_tls_keys(uintptr_t lo, uintptr_t hi, bool also_dangling) {
+  if (hi <= lo) return;
+
+  pthread_key_t probe;
+  if (pthread_key_create(&probe, (void (*)(void *))(void *)rz_cleanup_tls_keys) != 0) return;
+
+  struct rz_keys_scan_ctx ctx = { (uintptr_t)&rz_cleanup_tls_keys, probe, NULL };
+  dl_iterate_phdr(rz_find_pthread_keys_cb, &ctx);
+
+  if (ctx.keys_base) {
+    long page = sysconf(_SC_PAGESIZE);
+    for (pthread_key_t k = 0; k < RZ_KEY_TABLE_SIZE; k++) {
+      if (k == (pthread_key_t)(probe & 0xFF)) continue;
+      char *slot = ctx.keys_base + (size_t)k * RZ_KEY_STRIDE;
+      uint32_t seq;
+      uintptr_t dtor = 0;
+      memcpy(&seq, slot, 4);
+      memcpy(&dtor, slot + RZ_KEY_DTOR_OFF, sizeof(uintptr_t));
+      if (!seq || !dtor) continue;
+      bool remove = (dtor >= lo && dtor < hi);
+      if (!remove && also_dangling) {
+        uintptr_t page_base = dtor & ~((uintptr_t)page - 1);
+        unsigned char vec;
+        remove = (mincore((void *)page_base, (size_t)page, &vec) != 0);
+      }
+      if (remove) pthread_key_delete(k);
+    }
+  }
+
+  pthread_key_delete(probe);
+}
+
 /* INFO: Self-unloading is not a direct task, it requires the utilization of tail
            optimization, which requires the signature to be the same as munmap, or
            else munmap will be executed and will try to reach our code, leading to
@@ -309,6 +500,10 @@ DCL_HOOK_FUNC(int, pthread_attr_setstacksize, void *target, size_t size) {
   if (gettid() != getpid()) return res;
 
   if (should_unmap_zygisk) {
+    /* INFO: Anonymize our own /data/adb mappings first, so a failed or
+               skipped munmap below leaves no path traces in maps. */
+    rz_spoof_maps("/data/adb/modules/", true);
+
     unhook_functions();
 
     csoloader_deinit();
@@ -332,6 +527,10 @@ DCL_HOOK_FUNC(int, pthread_attr_setstacksize, void *target, size_t size) {
     zygisk_modules = NULL;
 
     plti_deinit(&plti_ctx);
+
+    /* INFO: Last safety net: drop keys whose destructor points into our own
+               mapping (or into any unbacked memory) before it disappears. */
+    rz_cleanup_tls_keys((uintptr_t)start_addr, (uintptr_t)start_addr + block_size, true);
 
     LOGD("unmap libzygisk.so loaded at %p with size %zu", start_addr, block_size);
 
@@ -1013,6 +1212,14 @@ static void rz_run_modules_post(struct zygisk_context *ctx) {
     if (FLAG_GET(ctx, APP_SPECIALIZE)) rz_module_call_post_app_specialize(m, ctx->args.app);
     else if (FLAG_GET(ctx, SERVER_FORK_AND_SPECIALIZE)) rz_module_call_post_server_specialize(m, ctx->args.server);
 
+    /* INFO: Modules may have created pthread keys; once their mapping is
+               gone, a left-over destructor becomes a dangling pointer that
+               memory scanners can find. We cannot rely on modules cleaning
+               up after themselves. */
+    if (m->lib.img && m->lib.img->base)
+      rz_cleanup_tls_keys((uintptr_t)m->lib.img->base,
+                          (uintptr_t)m->lib.img->base + m->lib.linker.main_map_size, false);
+
     if (!m->unload) {
       LOGD("Abandoning module library at %p", &m->lib);
 
@@ -1029,6 +1236,10 @@ static void rz_run_modules_post(struct zygisk_context *ctx) {
 
     modules_unloaded++;
   }
+
+  /* INFO: Erase remaining module artifacts: /data/adb paths left in maps by
+             the now unloaded modules. */
+  rz_spoof_maps("/data/adb/modules/", false);
 
   if (zygisk_module_length > 0)
     LOGD("Modules unloaded: %zu/%zu", modules_unloaded, zygisk_module_length);
