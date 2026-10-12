@@ -29,9 +29,9 @@ body {
   margin: 0;
   overscroll-behavior: none;
 
-  /* INFO: WebUI X insets */
-  padding-top: var(--window-inset-top);
-  padding-bottom: var(--window-inset-bottom);
+  /* INFO: WebUI X insets, corrected by syncInsets() in preloader.js */
+  padding-top: var(--rz-inset-top, var(--window-inset-top, 0px));
+  padding-bottom: var(--rz-inset-bottom, var(--window-inset-bottom, 0px));
 }
 
 a {

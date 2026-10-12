@@ -11,7 +11,37 @@ themeList[sys_theme](true)
 
 const ConfigState = JSON.parse(localStorage.getItem('/ReZygisk/webui_config') || '{}')
 
-if (!ConfigState.disableFullscreen) fullScreen(true)
+/* INFO: The manager's --window-inset-* values describe the system bars for a
+           WebView drawn edge to edge. Some managers keep those values after
+           leaving fullscreen, while the WebView already ends above the bars,
+           which doubled the top and bottom spacing until the setting was
+           toggled. Only use the insets while the page really covers the whole
+           screen height; otherwise the bars are outside the page. */
+function syncInsets() {
+  const root = document.documentElement
+  const cs = getComputedStyle(root)
+  const edgeToEdge = window.innerHeight >= screen.height - 2
+
+  const inset = (name) => (edgeToEdge && cs.getPropertyValue(name).trim()) || '0px'
+
+  root.style.setProperty('--rz-inset-top', inset('--window-inset-top'))
+  root.style.setProperty('--rz-inset-bottom', inset('--window-inset-bottom'))
+}
+
+/* INFO: The manager may update its inset values slightly after resizing. */
+function syncInsetsSoon() {
+  syncInsets()
+  requestAnimationFrame(syncInsets)
+  setTimeout(syncInsets, 300)
+}
+
+window.addEventListener('resize', syncInsetsSoon)
+syncInsets()
+
+/* INFO: Always apply the saved choice, so that "Disable fullscreen" also
+           works on managers that open WebUIs in fullscreen by default. */
+fullScreen(!ConfigState.disableFullscreen)
+syncInsetsSoon()
 
 if (ConfigState.enableSystemFont) {
   const headTag = document.getElementsByTagName('head')[0]
