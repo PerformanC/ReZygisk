@@ -955,6 +955,8 @@ static bool load_modules_only(void) {
   for (size_t i = 0; i < ms.modules_count; i++) {
     const char *lib_path = ms.modules[i];
 
+    rezygiskd_module_run_begin(i);
+
     if (!csoloader_load(&zygisk_modules[zygisk_module_length].lib, lib_path)) {
       LOGE("Failed to load module [%s]", lib_path);
 
@@ -967,6 +969,8 @@ static bool load_modules_only(void) {
 
       continue;
     }
+
+    rezygiskd_module_run_end(i);
 
     void *entry = csoloader_get_symbol(&zygisk_modules[zygisk_module_length].lib, "zygisk_module_entry");
     if (!entry) {
@@ -996,10 +1000,14 @@ static bool load_modules_only(void) {
 
 static void rz_run_modules_pre(struct zygisk_context *ctx) {
   for (size_t i = 0; i < zygisk_module_length; i++) {
+    rezygiskd_module_run_begin(i);
+
     rz_module_call_on_load(&zygisk_modules[i], ctx->env);
 
     if (FLAG_GET(ctx, APP_SPECIALIZE)) rz_module_call_pre_app_specialize(&zygisk_modules[i], ctx->args.app);
     else if (FLAG_GET(ctx, SERVER_FORK_AND_SPECIALIZE)) rz_module_call_pre_server_specialize(&zygisk_modules[i], ctx->args.server);
+
+    rezygiskd_module_run_end(i);
   }
 }
 
@@ -1010,8 +1018,12 @@ static void rz_run_modules_post(struct zygisk_context *ctx) {
   for (size_t i = 0; i < zygisk_module_length; i++) {
     struct rezygisk_module *m = &zygisk_modules[i];
 
+    rezygiskd_module_run_begin(i);
+
     if (FLAG_GET(ctx, APP_SPECIALIZE)) rz_module_call_post_app_specialize(m, ctx->args.app);
     else if (FLAG_GET(ctx, SERVER_FORK_AND_SPECIALIZE)) rz_module_call_post_server_specialize(m, ctx->args.server);
+
+    rezygiskd_module_run_end(i);
 
     if (!m->unload) {
       LOGD("Abandoning module library at %p", &m->lib);

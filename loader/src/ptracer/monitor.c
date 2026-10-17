@@ -28,6 +28,8 @@ struct environment_information {
   char *root_impl;
   char **modules;
   uint32_t modules_len;
+  char **crashed_modules;
+  uint32_t crashed_modules_len;
 };
 
 static struct environment_information environment_information64;
@@ -171,6 +173,7 @@ struct rzd_msg_header {
 struct rzd_info_payload {
   char impl[LONGEST_ROOT_IMPL_NAME];
   uint32_t modules_count;
+  uint32_t crashed_modules_count;
   char data[0];
 } __attribute__((packed));
 
@@ -323,6 +326,17 @@ void rezygiskd_listener_callback() {
           environment_information->modules = NULL;
         }
 
+        if (environment_information->crashed_modules) {
+          LOGD("freeing old %s crashed modules", daemon_name);
+
+          for (size_t i = 0; i < environment_information->crashed_modules_len; i++) {
+            free((void *)environment_information->crashed_modules[i]);
+          }
+
+          free((void *)environment_information->crashed_modules);
+          environment_information->crashed_modules = NULL;
+        }
+
         environment_information->modules_len = info->modules_count;
         environment_information->modules = info->modules_count > 0 ? malloc(info->modules_count * sizeof(char *)) : NULL;
         if (info->modules_count > 0 && environment_information->modules == NULL) {
@@ -330,6 +344,19 @@ void rezygiskd_listener_callback() {
 
           free((void *)environment_information->root_impl);
           environment_information->root_impl = NULL;
+
+          break;
+        }
+
+        environment_information->crashed_modules_len = info->crashed_modules_count;
+        environment_information->crashed_modules = info->crashed_modules_count > 0 ? malloc(info->crashed_modules_count * sizeof(char *)) : NULL;
+        if (info->crashed_modules_count > 0 && environment_information->crashed_modules == NULL) {
+          PLOGE("malloc %s crashed modules", daemon_name);
+
+          free((void *)environment_information->root_impl);
+          environment_information->root_impl = NULL;
+          free((void *)environment_information->modules);
+          environment_information->modules = NULL;
 
           break;
         }
@@ -358,20 +385,53 @@ void rezygiskd_listener_callback() {
           raw_modules += strlen(environment_information->modules[i]) + 1;
         }
 
+        size_t j;
+        for (j = 0; j < environment_information->crashed_modules_len; j++) {
+          if (raw_modules >= end) {
+            LOGE("Found truncated %s crashed modules, expected %u, got %zu", daemon_name, environment_information->crashed_modules_len, j);
+
+            goto set_info_crashed_modules_cleanup;
+          }
+
+          environment_information->crashed_modules[j] = strndup(raw_modules, (size_t)(end - raw_modules));
+          if (environment_information->crashed_modules[j] == NULL) {
+            PLOGE("malloc %s crashed module name", daemon_name);
+
+            goto set_info_crashed_modules_cleanup;
+          }
+
+          LOGD("%s crashed module %zu: %s", daemon_name, j, environment_information->crashed_modules[j]);
+
+          raw_modules += strlen(environment_information->crashed_modules[j]) + 1;
+        }
+
         update_status(NULL);
 
         break;
+
+        set_info_crashed_modules_cleanup:
+          for (size_t k = 0; k < j; k++) {
+            free((void *)environment_information->crashed_modules[k]);
+          }
+
+          free((void *)environment_information->crashed_modules);
+          environment_information->crashed_modules = NULL;
 
         set_info_modules_cleanup:
           free((void *)environment_information->root_impl);
           environment_information->root_impl = NULL;
 
-          for (size_t j = 0; j < i; j++) {
-            free((void *)environment_information->modules[j]);
+          for (size_t k = 0; k < i; k++) {
+            free((void *)environment_information->modules[k]);
           }
 
           free((void *)environment_information->modules);
           environment_information->modules = NULL;
+
+          if (environment_information->crashed_modules) {
+            free((void *)environment_information->crashed_modules);
+            environment_information->crashed_modules = NULL;
+          }
 
           break;
       }
@@ -919,6 +979,14 @@ static bool update_status(const char *message) {
           fprintf(json, "\"%s\"", environment_information64.modules[i]);
         }
 
+        fprintf(json, "],\n");
+        fprintf(json, "      \"crashed_modules\": [");
+
+        if (environment_information64.crashed_modules) for (uint32_t i = 0; i < environment_information64.crashed_modules_len; i++) {
+          if (i > 0) fprintf(json, ", ");
+          fprintf(json, "\"%s\"", environment_information64.crashed_modules[i]);
+        }
+
         fprintf(json, "]\n");
         fprintf(json, "    }");
         if (status32.supported) fprintf(json, ",\n");
@@ -934,6 +1002,14 @@ static bool update_status(const char *message) {
         if (environment_information32.modules) for (uint32_t i = 0; i < environment_information32.modules_len; i++) {
           if (i > 0) fprintf(json, ", ");
           fprintf(json, "\"%s\"", environment_information32.modules[i]);
+        }
+
+        fprintf(json, "],\n");
+        fprintf(json, "      \"crashed_modules\": [");
+
+        if (environment_information32.crashed_modules) for (uint32_t i = 0; i < environment_information32.crashed_modules_len; i++) {
+          if (i > 0) fprintf(json, ", ");
+          fprintf(json, "\"%s\"", environment_information32.crashed_modules[i]);
         }
 
         fprintf(json, "]\n");
@@ -1046,6 +1122,12 @@ void init_monitor() {
     }
     free((void *)environment_information64.modules);
   }
+  if (environment_information64.crashed_modules) {
+    for (uint32_t i = 0; i < environment_information64.crashed_modules_len; i++) {
+      free((void *)environment_information64.crashed_modules[i]);
+    }
+    free((void *)environment_information64.crashed_modules);
+  }
 
   if (environment_information32.root_impl) free((void *)environment_information32.root_impl);
   if (environment_information32.modules) {
@@ -1053,6 +1135,12 @@ void init_monitor() {
       free((void *)environment_information32.modules[i]);
     }
     free((void *)environment_information32.modules);
+  }
+  if (environment_information32.crashed_modules) {
+    for (uint32_t i = 0; i < environment_information32.crashed_modules_len; i++) {
+      free((void *)environment_information32.crashed_modules[i]);
+    }
+    free((void *)environment_information32.crashed_modules);
   }
 
   LOGI("Terminating ReZygisk monitor");
