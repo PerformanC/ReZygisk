@@ -169,6 +169,13 @@ static void free_modules(struct Context *restrict context) {
 
 static bool send_info(const struct Context *restrict context, const struct root_impl *restrict impl) {
   size_t info_len = sizeof(struct rzd_info_payload);
+  for (size_t i = 0; i < context->len; i++) {
+    info_len += strlen(context->modules[i].name) + 1;
+  }
+  for (size_t i = 0; i < context->crashed_len; i++) {
+    info_len += strlen(context->crashed_modules[i]) + 1;
+  }
+
   struct rzd_msg_header *message = malloc(sizeof(struct rzd_msg_header) + info_len);
   if (message == NULL) {
     LOGE("Failed allocating info message: %s", strerror(errno));
@@ -183,23 +190,19 @@ static bool send_info(const struct Context *restrict context, const struct root_
   stringify_root_impl_name(*impl, info->impl);
   info->modules_count = (uint32_t)context->len;
   info->crashed_modules_count = (uint32_t)context->crashed_len;
-  for (size_t i = 0; i < context->len; i++) {
-    info_len += strlen(context->modules[i].name) + 1;
-  }
-  for (size_t i = 0; i < context->crashed_len; i++) {
-    info_len += strlen(context->crashed_modules[i]) + 1;
-  }
 
   char *raw_payload = info->data;
   for (size_t i = 0; i < context->len; i++) {
-    size_t module_name_len = strlen(context->modules[i].name);
-    memcpy(raw_payload, context->modules[i].name, module_name_len + 1);
-    raw_payload += module_name_len + 1;
+    size_t module_name_size = strlen(context->modules[i].name) + 1;
+    memcpy(raw_payload, context->modules[i].name, module_name_size);
+
+    raw_payload += module_name_size;
   }
   for (size_t i = 0; i < context->crashed_len; i++) {
-    size_t module_name_len = strlen(context->crashed_modules[i]);
-    memcpy(raw_payload, context->crashed_modules[i], module_name_len + 1);
-    raw_payload += module_name_len + 1;
+    size_t module_name_size = strlen(context->crashed_modules[i]) + 1;
+    memcpy(raw_payload, context->crashed_modules[i], module_name_size);
+
+    raw_payload += module_name_size;
   }
 
   unix_datagram_sendto(CONTROLLER_SOCKET, message, sizeof(struct rzd_msg_header) + info_len);
