@@ -242,33 +242,33 @@ void rezygiskd_get_info(struct rezygisk_info *info) {
       return;
   }
 
-read_crashed_modules:
-  safe_read(read_size_t(fd, &info->crashed_modules.modules_count), "crashed modules count", return);
-  if (info->crashed_modules.modules_count != 0) {
-    info->crashed_modules.modules = (char **)malloc(sizeof(char *) * info->crashed_modules.modules_count);
-    if (!info->crashed_modules.modules) {
-      PLOGE("allocating crashed modules name memory");
+    read_crashed_modules:
+      safe_read(read_size_t(fd, &info->crashed_modules.modules_count), "crashed modules count", return);
+      if (info->crashed_modules.modules_count != 0) {
+        info->crashed_modules.modules = (char **)malloc(sizeof(char *) * info->crashed_modules.modules_count);
+        if (!info->crashed_modules.modules) {
+          PLOGE("allocating crashed modules name memory");
 
-      info->crashed_modules.modules_count = 0;
+          info->crashed_modules.modules_count = 0;
 
-      close(fd);
+          close(fd);
 
-      return;
-    }
+          return;
+        }
 
-    for (size_t i = 0; i < info->crashed_modules.modules_count; i++) {
-      info->crashed_modules.modules[i] = read_string(fd);
-      if (info->crashed_modules.modules[i] == NULL) {
-        PLOGE("reading crashed module name");
+        for (size_t i = 0; i < info->crashed_modules.modules_count; i++) {
+          info->crashed_modules.modules[i] = read_string(fd);
+          if (info->crashed_modules.modules[i] == NULL) {
+            PLOGE("reading crashed module name");
 
-        info->crashed_modules.modules_count = i;
-        free_rezygisk_info(info);
+            info->crashed_modules.modules_count = i;
+            free_rezygisk_info(info);
 
-        close(fd);
+            close(fd);
 
-        return;
-      }
-    }
+            return;
+          }
+        }
   }
 
   close(fd);
