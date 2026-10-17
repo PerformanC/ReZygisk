@@ -42,7 +42,8 @@
     "modules": {
       "title": "模块",
       "notAvaliable": "目前没有模块使用 Zygisk",
-      "arch": "架构: "
+      "arch": "架构: ",
+      "crashed": "Crashed"
     },
     "settings": {
       "title": "设置",

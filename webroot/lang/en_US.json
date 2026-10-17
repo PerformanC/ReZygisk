@@ -42,7 +42,8 @@
     "modules": {
       "title": "Modules",
       "notAvaliable": "No modules using Zygisk here.",
-      "arch": "Architecture: "
+      "arch": "Architecture: ",
+      "crashed": "Crashed"
     },
     "settings": {
       "title": "Settings",

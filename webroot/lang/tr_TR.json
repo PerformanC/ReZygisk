@@ -42,7 +42,8 @@
     "modules": {
       "title": "Modüller",
       "notAvaliable": "Zygisk kullanan hiçbir modül yok.",
-      "arch": "Mimari: "
+      "arch": "Mimari: ",
+      "crashed": "Crashed"
     },
     "settings": {
       "title": "Ayarlar",

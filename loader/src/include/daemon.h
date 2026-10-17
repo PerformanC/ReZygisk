@@ -14,7 +14,9 @@ enum rezygiskd_actions {
   GetModuleDir,
   ZygoteRestart,
   UpdateMountNamespace,
-  RemoveModule
+  RemoveModule,
+  ModuleRunBegin,
+  ModuleRunEnd
 };
 
 struct zygisk_modules {
@@ -31,6 +33,7 @@ enum root_impl {
 
 struct rezygisk_info {
   struct zygisk_modules modules;
+  struct zygisk_modules crashed_modules;
   enum root_impl root_impl;
   pid_t pid;
   bool running;
@@ -68,5 +71,9 @@ void rezygiskd_zygote_restart();
 bool rezygiskd_update_mns(enum mount_namespace_state nms_state, char *buf, size_t buf_size);
 
 bool rezygiskd_remove_module(size_t index);
+
+void rezygiskd_module_run_begin(size_t index);
+
+void rezygiskd_module_run_end(size_t index);
 
 #endif /* DAEMON_H */

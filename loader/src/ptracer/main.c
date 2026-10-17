@@ -99,6 +99,14 @@ int main(int argc, char **argv) {
       printf("Modules: N/A\n");
     }
 
+    if (info.crashed_modules.modules_count != 0) {
+      printf("Crashed modules: %zu\n", info.crashed_modules.modules_count);
+
+      for (size_t i = 0; i < info.crashed_modules.modules_count; i++) {
+        printf(" - %s\n", info.crashed_modules.modules[i]);
+      }
+    }
+
     free_rezygisk_info(&info);
 
     return 0;

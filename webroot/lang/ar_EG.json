@@ -42,7 +42,8 @@
     "modules": {
       "title": "الوحدات",
       "notAvaliable": "لا توجد وحدات تستخدم Zygisk.",
-      "arch": "المعمارية:"
+      "arch": "المعمارية:",
+      "crashed": "Crashed"
     },
     "settings": {
       "title": "الإعدادات",

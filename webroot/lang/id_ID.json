@@ -42,7 +42,8 @@
     "modules": {
       "title": "Modul",
       "notAvaliable": "Tidak ada modul yang menggunakan Zygisk.",
-      "arch": "Arsitektur: "
+      "arch": "Arsitektur: ",
+      "crashed": "Crashed"
     },
     "settings": {
       "title": "Pengaturan",
