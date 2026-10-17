@@ -42,7 +42,8 @@
     "modules": {
       "title": "모듈",
       "notAvaliable": "Zygisk를 사용하는 모듈이 없습니다.",
-      "arch": "아키텍처: "
+      "arch": "아키텍처: ",
+      "crashed": "Crashed"
     },
     "settings": {
       "title": "설정",
