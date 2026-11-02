@@ -41,8 +41,6 @@ int parse_int(const char *str);
 
 struct kernel_version parse_kversion();
 
-struct maps_info *parse_maps_safe(const char *pid);
-
 struct maps_info *parse_maps(const char *pid);
 
 void free_maps(struct maps_info *maps);
