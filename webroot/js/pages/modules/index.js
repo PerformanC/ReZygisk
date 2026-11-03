@@ -53,7 +53,24 @@ async function _updateDynamicElement() {
           all_modules.push({
             id: module_id,
             name: null,
-            bitsUsed: [ daemon_bit ]
+            bitsUsed: [ daemon_bit ],
+            crashedBits: []
+          })
+        }
+      })
+    }
+
+    if (daemon.crashed_modules && daemon.crashed_modules.length > 0) {
+      daemon.crashed_modules.forEach((module_id) => {
+        const module = all_modules.find((mod) => mod.id === module_id)
+        if (module) {
+          module.crashedBits.push(daemon_bit)
+        } else {
+          all_modules.push({
+            id: module_id,
+            name: null,
+            bitsUsed: [],
+            crashedBits: [ daemon_bit ]
           })
         }
       })
@@ -76,10 +93,11 @@ async function _updateDynamicElement() {
       modules_list.innerHTML +=
         `<div class="dim card" style="padding: 25px 15px; cursor: pointer;">
           <div class="dimc" style="font-size: 1.1em;">${module.name}</div>
-          <div class="dimc desc" style="font-size: 0.9em; margin-top: 3px; white-space: nowrap; align-items: center; display: flex;">
+          ${module.bitsUsed.length > 0 ? `<div class="dimc desc" style="font-size: 0.9em; margin-top: 3px; white-space: nowrap; align-items: center; display: flex;">
             <div class="dimc arch_desc">${strings.arch}</div>
             <div class="dimc" style="margin-left: 5px;">${module.bitsUsed.join(' / ')}</div>
-          </div>
+          </div>` : ''}
+          ${module.crashedBits.length > 0 ? `<div class="dimc" style="font-size: 0.85em; margin-top: 10px; color: #ffb300;">${strings.crashed}: ${module.crashedBits.join(' / ')}</div>` : ''}
         </div>`
     })
   }

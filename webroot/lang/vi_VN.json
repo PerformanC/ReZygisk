@@ -42,7 +42,8 @@
     "modules": {
       "title": "Mô Đun",
       "notAvaliable": "Không có mô-đun nào sử dụng Zygisk ở đây!",
-      "arch": "Kiến trúc: "
+      "arch": "Kiến trúc: ",
+      "crashed": "Crashed"
     },
     "settings": {
       "title": "Cài đặt",

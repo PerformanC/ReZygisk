@@ -10,11 +10,13 @@ const developmentResponse = {
         "rezygiskd": {
           "64": {
             "state": 1,
-            "modules": ["immense_cool", "rezygisk_module"]
+            "modules": ["immense_cool", "rezygisk_module"],
+            "crashed_modules": ["rezygisk-quarantine-test"]
           },
           "32": {
             "state": 1,
-            "modules": ["immense_cool", "rezygisk_module"]
+            "modules": ["immense_cool", "rezygisk_module"],
+            "crashed_modules": ["rezygisk-quarantine-test"]
           }
         },
         "zygote": {
@@ -42,7 +44,7 @@ const developmentResponse = {
   },
   'module_lister': {
     errno: 0,
-    stdout: 'Really Cool Module\n\nSome ReZygisk Module',
+    stdout: 'Really Cool Module\n\nSome ReZygisk Module\n\nReZygisk Crash Quarantine Test',
     stderr: ''
   },
   '/system/bin/ls /data/adb/modules/rezygisk/webroot/lang': {

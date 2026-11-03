@@ -111,6 +111,10 @@ void rezygiskd_get_info(struct rezygisk_info *info) {
   }
 
   info->running = true;
+  info->modules.modules = NULL;
+  info->modules.modules_count = 0;
+  info->crashed_modules.modules = NULL;
+  info->crashed_modules.modules_count = 0;
 
   safe_write(write_uint8_t(fd, (uint8_t)GetInfo), "GetInfo action", return);
 
@@ -124,13 +128,39 @@ void rezygiskd_get_info(struct rezygisk_info *info) {
 
   safe_read(read_uint32_t(fd, (uint32_t *)&info->pid), "pid", return);
 
+  safe_read(read_size_t(fd, &info->crashed_modules.modules_count), "crashed modules count", return);
+  if (info->crashed_modules.modules_count != 0) {
+    info->crashed_modules.modules = (char **)malloc(sizeof(char *) * info->crashed_modules.modules_count);
+    if (!info->crashed_modules.modules) {
+      PLOGE("allocating crashed modules name memory");
+
+      info->crashed_modules.modules_count = 0;
+
+      close(fd);
+
+      return;
+    }
+
+    for (size_t i = 0; i < info->crashed_modules.modules_count; i++) {
+      info->crashed_modules.modules[i] = read_string(fd);
+      if (info->crashed_modules.modules[i] == NULL) {
+        PLOGE("reading crashed module name");
+
+        info->crashed_modules.modules_count = i;
+        free_rezygisk_info(info);
+
+        close(fd);
+
+        return;
+      }
+    }
+  }
+
   safe_read(read_size_t(fd, &info->modules.modules_count), "modules count", return);
   if (info->modules.modules_count == 0) {
     info->modules.modules = NULL;
 
-    close(fd);
-
-    return;
+    goto read_crashed_modules;
   }
 
   info->modules.modules = (char **)malloc(sizeof(char *) * info->modules.modules_count);
@@ -207,7 +237,38 @@ void rezygiskd_get_info(struct rezygisk_info *info) {
       info->modules.modules_count = i;
       free_rezygisk_info(info);
 
-      break;
+      close(fd);
+
+      return;
+  }
+
+    read_crashed_modules:
+      safe_read(read_size_t(fd, &info->crashed_modules.modules_count), "crashed modules count", return);
+      if (info->crashed_modules.modules_count != 0) {
+        info->crashed_modules.modules = (char **)malloc(sizeof(char *) * info->crashed_modules.modules_count);
+        if (!info->crashed_modules.modules) {
+          PLOGE("allocating crashed modules name memory");
+
+          info->crashed_modules.modules_count = 0;
+
+          close(fd);
+
+          return;
+        }
+
+        for (size_t i = 0; i < info->crashed_modules.modules_count; i++) {
+          info->crashed_modules.modules[i] = read_string(fd);
+          if (info->crashed_modules.modules[i] == NULL) {
+            PLOGE("reading crashed module name");
+
+            info->crashed_modules.modules_count = i;
+            free_rezygisk_info(info);
+
+            close(fd);
+
+            return;
+          }
+        }
   }
 
   close(fd);
@@ -221,6 +282,14 @@ void free_rezygisk_info(struct rezygisk_info *info) {
   free(info->modules.modules);
   info->modules.modules = NULL;
   info->modules.modules_count = 0;
+
+  for (size_t i = 0; i < info->crashed_modules.modules_count; i++) {
+    free(info->crashed_modules.modules[i]);
+  }
+
+  free(info->crashed_modules.modules);
+  info->crashed_modules.modules = NULL;
+  info->crashed_modules.modules_count = 0;
 }
 
 bool rezygiskd_read_modules(struct zygisk_modules *modules) {
@@ -356,6 +425,26 @@ bool rezygiskd_remove_module(size_t index) {
   close(fd);
 
   return res == 1;
+}
+
+void rezygiskd_module_run_begin(size_t index) {
+  int fd = rezygiskd_connect(1);
+  if (fd == -1) return;
+
+  safe_write(write_uint8_t(fd, (uint8_t)ModuleRunBegin), "ModuleRunBegin action", return);
+  safe_write(write_size_t(fd, index), "module index", return);
+
+  close(fd);
+}
+
+void rezygiskd_module_run_end(size_t index) {
+  int fd = rezygiskd_connect(1);
+  if (fd == -1) return;
+
+  safe_write(write_uint8_t(fd, (uint8_t)ModuleRunEnd), "ModuleRunEnd action", return);
+  safe_write(write_size_t(fd, index), "module index", return);
+
+  close(fd);
 }
 
 #undef safe_read

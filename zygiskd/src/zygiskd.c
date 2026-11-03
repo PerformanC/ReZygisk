@@ -19,11 +19,14 @@ struct Module {
   char *name;
   int lib_fd;
   int companion;
+  bool running;
 };
 
 struct Context {
   struct Module *modules;
   size_t len;
+  char **crashed_modules;
+  size_t crashed_len;
 };
 
 struct rzd_msg_header {
@@ -35,6 +38,7 @@ struct rzd_msg_header {
 struct rzd_info_payload {
   char impl[LONGEST_ROOT_IMPL_NAME];
   uint32_t modules_count;
+  uint32_t crashed_modules_count;
   char data[0];
 } __attribute__((packed));
 
@@ -140,6 +144,7 @@ static void load_modules(struct Context *restrict context) {
 
     context->modules[context->len].lib_fd = lib_fd;
     context->modules[context->len].companion = -1;
+    context->modules[context->len].running = false;
     context->len++;
   }
 
@@ -154,6 +159,58 @@ static void free_modules(struct Context *restrict context) {
   }
 
   free(context->modules);
+
+  for (size_t i = 0; i < context->crashed_len; i++) {
+    free(context->crashed_modules[i]);
+  }
+
+  free(context->crashed_modules);
+}
+
+static bool send_info(const struct Context *restrict context, const struct root_impl *restrict impl) {
+  size_t info_len = sizeof(struct rzd_info_payload);
+  for (size_t i = 0; i < context->len; i++) {
+    info_len += strlen(context->modules[i].name) + 1;
+  }
+  for (size_t i = 0; i < context->crashed_len; i++) {
+    info_len += strlen(context->crashed_modules[i]) + 1;
+  }
+
+  struct rzd_msg_header *message = malloc(sizeof(struct rzd_msg_header) + info_len);
+  if (message == NULL) {
+    LOGE("Failed allocating info message: %s", strerror(errno));
+
+    return false;
+  }
+
+  message->cmd = DAEMON_SET_INFO;
+  message->len = (uint32_t)info_len;
+
+  struct rzd_info_payload *info = (void *)message->data;
+  stringify_root_impl_name(*impl, info->impl);
+  info->modules_count = (uint32_t)context->len;
+  info->crashed_modules_count = (uint32_t)context->crashed_len;
+
+  char *raw_payload = info->data;
+  for (size_t i = 0; i < context->len; i++) {
+    size_t module_name_size = strlen(context->modules[i].name) + 1;
+    memcpy(raw_payload, context->modules[i].name, module_name_size);
+
+    raw_payload += module_name_size;
+  }
+  for (size_t i = 0; i < context->crashed_len; i++) {
+    size_t module_name_size = strlen(context->crashed_modules[i]) + 1;
+    memcpy(raw_payload, context->crashed_modules[i], module_name_size);
+
+    raw_payload += module_name_size;
+  }
+
+  unix_datagram_sendto(CONTROLLER_SOCKET, message, sizeof(struct rzd_msg_header) + info_len);
+  free(message);
+
+  LOGI("Sent root implementation and modules information to controller socket");
+
+  return true;
 }
 
 static int create_daemon_socket(void) {
@@ -317,39 +374,12 @@ void zygiskd_start(char *restrict argv[]) {
   } else {
     load_modules(&context);
 
-    size_t info_len = sizeof(struct rzd_info_payload);
-    for (size_t i = 0; i < context.len; i++) {
-      info_len += strlen(context.modules[i].name) + 1;
-    }
-
-    struct rzd_msg_header *message = malloc(sizeof(struct rzd_msg_header) + info_len);
-    if (message == NULL) {
-      LOGE("Failed allocating info message: %s", strerror(errno));
-
+    if (!send_info(&context, &impl)) {
       free_modules(&context);
       root_impl_cleanup();
 
       return;
     }
-
-    message->cmd = DAEMON_SET_INFO;
-    message->len = (uint32_t)info_len;
-
-    struct rzd_info_payload *info = (void *)message->data;
-    stringify_root_impl_name(impl, info->impl);
-    info->modules_count = (uint32_t)context.len;
-
-    char *raw_payload = info->data;
-    for (size_t i = 0; i < context.len; i++) {
-      size_t module_name_len = strlen(context.modules[i].name);
-      memcpy(raw_payload, context.modules[i].name, module_name_len + 1);
-      raw_payload += module_name_len + 1;
-    }
-
-    unix_datagram_sendto(CONTROLLER_SOCKET, message, sizeof(struct rzd_msg_header) + info_len);
-    free(message);
-
-    LOGI("Sent root implementation and modules information to controller socket");
   }
 
   int socket_fd = create_daemon_socket();
@@ -404,12 +434,42 @@ void zygiskd_start(char *restrict argv[]) {
         break;
       }
       case ZygoteRestart: {
+        /* INFO: A module still flagged as running means Zygote crashed while running one of its callbacks */
+        for (size_t i = 0; i < context.len; ) {
+          struct Module *module = &context.modules[i];
+          if (!module->running) {
+            i++;
+
+            continue;
+          }
+
+          LOGE("Module \"%s\" didn't finish running before Zygote restarted, marking as crashed", module->name);
+
+          char **crashed_modules = realloc(context.crashed_modules, (context.crashed_len + 1) * sizeof(char *));
+          if (crashed_modules == NULL) {
+            LOGE("Failed reallocating memory for crashed modules.");
+
+            free(module->name);
+          } else {
+            context.crashed_modules = crashed_modules;
+            context.crashed_modules[context.crashed_len++] = module->name;
+          }
+
+          if (module->companion >= 0) close(module->companion);
+          if (module->lib_fd >= 0) close(module->lib_fd);
+
+          memmove(module, module + 1, (context.len - i - 1) * sizeof(struct Module));
+          context.len--;
+        }
+
         for (size_t i = 0; i < context.len; i++) {
           if (context.modules[i].companion <= -1) continue;
 
           close(context.modules[i].companion);
           context.modules[i].companion = -1;
         }
+
+        send_info(&context, &impl);
 
         break;
       }
@@ -509,6 +569,19 @@ void zygiskd_start(char *restrict argv[]) {
           ret = write_string(client_fd, context.modules[i].name);
           if (ret == -1) {
             LOGE("Failed writing module name.");
+
+            break;
+          }
+        }
+
+        size_t crashed_len = context.crashed_len;
+        ret = write_size_t(client_fd, crashed_len);
+        ASSURE_SIZE_WRITE("GetInfo", "crashed_len", ret, sizeof(crashed_len), break);
+
+        for (size_t i = 0; i < crashed_len; i++) {
+          ret = write_string(client_fd, context.crashed_modules[i]);
+          if (ret == -1) {
+            LOGE("Failed writing crashed module name.");
 
             break;
           }
@@ -697,6 +770,22 @@ void zygiskd_start(char *restrict argv[]) {
 
         ret = write_uint8_t(client_fd, 1);
         ASSURE_SIZE_WRITE("RemoveModule", "response", ret, sizeof(uint8_t), break);
+
+        break;
+      }
+      case ModuleRunBegin:
+      case ModuleRunEnd: {
+        size_t index = 0;
+        ssize_t ret = read_size_t(client_fd, &index);
+        ASSURE_SIZE_READ("ModuleRunEnd", "index", ret, sizeof(index), break);
+
+        if (index >= context.len) {
+          LOGE("Invalid module index: %zu", index);
+
+          break;
+        }
+
+        context.modules[index].running = action == ModuleRunBegin;
 
         break;
       }

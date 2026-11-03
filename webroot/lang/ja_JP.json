@@ -42,7 +42,8 @@
     "modules": {
       "title": "モジュール",
       "notAvaliable": "Zygisk を使用するモジュールはありません。",
-      "arch": "アーキテクチャ: "
+      "arch": "アーキテクチャ: ",
+      "crashed": "Crashed"
     },
     "settings": {
       "title": "設定",
