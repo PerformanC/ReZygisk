@@ -2,6 +2,8 @@
 #include "logging.h"
 #include "misc.h"
 
+#include <sys/stat.h>
+
 #include "hook.h"
 #include "ptrace_clear.h"
 
@@ -11,6 +13,16 @@ void entry(void *addr, size_t size, int tango_flag) {
 
   start_addr = addr;
   block_size = size;
+
+  struct stat self_stat;
+  if (stat("/data/adb/modules/rezygisk/lib" LP_SELECT("", "64") "/libzygisk.so", &self_stat) != 0) {
+    PLOGE("Failed to stat self library");
+
+    return;
+  }
+
+  self_dev = self_stat.st_dev;
+  self_ino = self_stat.st_ino;
 
   LOGD("start plt hooking");
   hook_functions();

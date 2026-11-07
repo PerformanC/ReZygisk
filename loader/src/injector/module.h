@@ -3,6 +3,8 @@
 
 #include <string.h>
 
+#include <sys/types.h>
+
 #include <jni.h>
 
 #include <csoloader.h>
@@ -153,6 +155,9 @@ struct rezygisk_module {
   struct rezygisk_api api;
 
   struct csoloader lib;
+
+  dev_t dev;
+  ino_t ino;
   void (*zygisk_module_entry)(void *, void *);
 
   bool unload;
