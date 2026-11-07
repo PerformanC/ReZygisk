@@ -49,6 +49,9 @@
   background-color: var(--dim);
   left: 0; right: 0; bottom: 0;
   padding: 20px 25px;
+  /* INFO: Keep the navbar above the system navigation bar when the WebUI is
+             drawn edge to edge (fixed elements ignore the body padding). */
+  padding-bottom: calc(20px + var(--rz-inset-bottom, var(--window-inset-bottom, 0px)));
   font-size: 20px;
 }
 
