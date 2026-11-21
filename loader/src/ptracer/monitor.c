@@ -820,27 +820,30 @@ void sigchld_listener_stop() {
   sigchld_process_count = 0;
 }
 
+/* INFO: These hold the whole module.prop, split around the description. They are
+           appended to with strlcat, so a module.prop bigger than them truncates
+           the status instead of overflowing. */
 static char pre_section[1024];
 static char post_section[1024];
 
-#define WRITE_STATUS_ABI(suffix)                                                     \
-  if (status ## suffix.supported) {                                                  \
-    strcat(status_text, ", ReZygisk " # suffix "-bit: ");                            \
-                                                                                     \
-    if (tracing_state != TRACING) strcat(status_text, "❌");                         \
-    else if (status ## suffix.zygote_injected && status ## suffix.daemon_running)    \
-      strcat(status_text, "✅");                                                     \
-    else strcat(status_text, "⚠️");                                                  \
-                                                                                     \
-    if (!status ## suffix.daemon_running) {                                          \
-      if (status ## suffix.daemon_error_info) {                                      \
-        strcat(status_text, "(ReZygiskd: ");                                         \
-        strcat(status_text, status ## suffix.daemon_error_info);                     \
-        strcat(status_text, ")");                                                    \
-      } else {                                                                       \
-        strcat(status_text, "(ReZygiskd: not running)");                             \
-      }                                                                              \
-    }                                                                                \
+#define WRITE_STATUS_ABI(suffix)                                                       \
+  if (status ## suffix.supported) {                                                    \
+    strlcat(status_text, ", ReZygisk " # suffix "-bit: ", sizeof(status_text));        \
+                                                                                       \
+    if (tracing_state != TRACING) strlcat(status_text, "❌", sizeof(status_text));     \
+    else if (status ## suffix.zygote_injected && status ## suffix.daemon_running)      \
+      strlcat(status_text, "✅", sizeof(status_text));                                 \
+    else strlcat(status_text, "⚠️", sizeof(status_text));                               \
+                                                                                       \
+    if (!status ## suffix.daemon_running) {                                            \
+      if (status ## suffix.daemon_error_info) {                                        \
+        strlcat(status_text, "(ReZygiskd: ", sizeof(status_text));                     \
+        strlcat(status_text, status ## suffix.daemon_error_info, sizeof(status_text)); \
+        strlcat(status_text, ")", sizeof(status_text));                                \
+      } else {                                                                         \
+        strlcat(status_text, "(ReZygiskd: not running)", sizeof(status_text));         \
+      }                                                                                \
+    }                                                                                  \
   }
 
 static bool update_status(const char *message) {
@@ -861,18 +864,18 @@ static bool update_status(const char *message) {
   char status_text[256] = "Monitor: ";
   switch (tracing_state) {
     case TRACING: {
-      strcat(status_text, "✅");
+      strlcat(status_text, "✅", sizeof(status_text));
 
       break;
     }
     case STOPPING: [[fallthrough]];
     case STOPPED: {
-      strcat(status_text, "⛔");
+      strlcat(status_text, "⛔", sizeof(status_text));
 
       break;
     }
     case EXITING: {
-      strcat(status_text, "❌");
+      strlcat(status_text, "❌", sizeof(status_text));
 
       break;
     }
@@ -981,15 +984,15 @@ static bool prepare_environment() {
   char line[1024];
   while (fgets(line, sizeof(line), orig_prop) != NULL) {
     if (strncmp(line, "description=", strlen("description=")) == 0) {
-      strcat(pre_section, "description=");
-      strcat(post_section, line + strlen("description="));
+      strlcat(pre_section, "description=", sizeof(pre_section));
+      strlcat(post_section, line + strlen("description="), sizeof(post_section));
       after_description = true;
 
       continue;
     }
 
-    if (after_description) strcat(post_section, line);
-    else strcat(pre_section, line);
+    if (after_description) strlcat(post_section, line, sizeof(post_section));
+    else strlcat(pre_section, line, sizeof(pre_section));
   }
 
   fclose(orig_prop);
