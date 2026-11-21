@@ -28,7 +28,7 @@ COMMON_LDFLAGS = -static-libstdc++ -Wl,--build-id=sha1 -Wl,--no-rosegment       
 
 COMMON_SRCS = src/common/daemon.c src/common/elf_util.c   \
 			  src/common/misc.c src/common/socket_utils.c
-INJECTOR_SRCS = src/injector/cpp_strings.c src/injector/entry.c \
+INJECTOR_SRCS = src/injector/alloc.c src/injector/cpp_strings.c src/injector/entry.c \
 				src/injector/hook.c src/injector/ptrace_clear.c
 PTRACER_SRCS = src/ptracer/main.c src/ptracer/monitor.c src/ptracer/ptracer.c \
 			   src/ptracer/remote_csoloader.c src/ptracer/utils.c
@@ -102,9 +102,9 @@ $(LIBCOMMON): $(COMMON_OBJS)
 
 $(LIBZYGISK): $(INJECTOR_OBJS) $(LIBCOMMON) $(PLTI_LIB) $(CSOLOADER_LIB)
 	@mkdir -p $(dir $@)
-	$(CC_ARCH) -fPIC -shared -Wl,-soname,libzygisk.so              \
-		$(COMMON_LDFLAGS) $(TYPE_LDFLAGS) -nostartfiles            \
-		$(INJECTOR_OBJS) $(LIBCOMMON) $(PLTI_LIB) $(CSOLOADER_LIB) \
+	$(CC_ARCH) -fPIC -shared -Wl,-soname,libzygisk.so                            \
+		$(COMMON_LDFLAGS) $(TYPE_LDFLAGS) -Wl,--wrap=free -Wl,--wrap=realloc     \
+		-nostartfiles $(INJECTOR_OBJS) $(LIBCOMMON) $(PLTI_LIB) $(CSOLOADER_LIB) \
 		-llog -lm -o $@
 
 $(LIBPTRACE): $(PTRACER_OBJS) $(LIBCOMMON)
